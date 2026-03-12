@@ -1,0 +1,12 @@
+parameters:
+    images_directory: '%kernel.project_dir%/public/uploads/images'
+    app.timezone: 'Asia/Manila'
+
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
