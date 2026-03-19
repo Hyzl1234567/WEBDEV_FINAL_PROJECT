@@ -10,8 +10,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks] 
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', columns: ['USERNAME'])]
 #[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
+#[UniqueEntity(fields: ['email'], message: 'Email already in use')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -22,15 +22,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $username = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
@@ -38,7 +32,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $email = null;
+    private ?string $verificationToken = null;
+
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $email = null; // ✅ FIX: make nullable consistent with getter
 
     #[ORM\Column(length: 255)]
     private ?string $fullName = null;
@@ -48,6 +45,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 20)]
     private ?string $status = null;
+
+    // ✅ AUTO SET createdAt
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
+    }
 
     public function getId(): ?int
     {
@@ -62,45 +68,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->username;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->password;
@@ -109,26 +97,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
     public function __serialize(): array
     {
         $data = (array) $this;
         $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
         return $data;
     }
 
     #[\Deprecated]
-    public function eraseCredentials(): void
-    {
-        // @deprecated, to be removed when upgrading to Symfony 8
-    }
+    public function eraseCredentials(): void {}
 
     public function isVerified(): bool
     {
@@ -138,7 +118,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+        return $this;
+    }
 
+    public function getVerificationToken(): ?string
+    {
+        return $this->verificationToken;
+    }
+
+    public function setVerificationToken(?string $verificationToken): static
+    {
+        $this->verificationToken = $verificationToken;
         return $this;
     }
 
@@ -150,7 +140,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(?string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -162,7 +151,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFullName(string $fullName): static
     {
         $this->fullName = $fullName;
-
         return $this;
     }
 
@@ -174,7 +162,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -186,7 +173,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 }

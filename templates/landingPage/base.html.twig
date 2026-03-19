@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}EcoBrew Café – Sip Sustainably{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F0F7EC;
+  --forest: #1D4A23;
+  --darkforest: #142E17;
+  --midforest: #2A6132;
+  --lime: #99CC67;
+  --limelight: #B8DC8E;
+  --limeshadow: #7AAD4C;
+  --paper: #F5FAF2;
+  --leaf: #C8E8AD;
+  --gold: #C9A84C;
+  --amber: #D4863A;
+  --error: #c0392b;
+  --success: #27ae60;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--forest);
+  overflow-x: hidden;
+}
+
+/* ===== NAV ===== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(240,247,236,0.93);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(29,74,35,0.12);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem;
+  height: 70px;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  cursor: pointer;
+}
+.nav-logo-icon {
+  width: 36px; height: 36px;
+  background: var(--forest);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+@font-face {
+    font-family: 'Mollani';
+    src: url('/fonts/mollani.ttf') format('truetype');
+}
+
+.nav-logo-text {
+    font-family: 'Mollani', serif;
+    font-size: 1.8rem;
+    color: var(--forest);
+}
+
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a {
+  text-decoration: none; color: var(--midforest);
+  font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; transition: color 0.2s;
+  letter-spacing: 0.3px;
+}
+.nav-links a:hover { color: var(--lime); }
+.nav-btn {
+  background: var(--forest); color: white !important;
+  padding: 8px 20px; border-radius: 50px;
+  transition: background 0.2s, transform 0.15s !important;
+}
+.nav-btn:hover { background: var(--lime) !important; color: var(--forest) !important; transform: translateY(-1px); }
+
+/* ===== FORM SHARED STYLES ===== */
+.form-group { margin-bottom: 1.25rem; }
+.form-group label {
+  display: block; font-size: 0.82rem; font-weight: 600;
+  color: var(--forest); margin-bottom: 0.45rem; letter-spacing: 0.3px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(29,74,35,0.2);
+  border-radius: 10px;
+  background: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--forest);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px rgba(153,204,103,0.15);
+}
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  background: var(--forest); color: var(--cream);
+  border: none; cursor: pointer;
+  padding: 14px 32px; border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem; font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(29,74,35,0.25);
+}
+.btn-primary:hover {
+  background: var(--lime); color: var(--forest);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(153,204,103,0.35);
+}
+.btn-outline {
+  background: transparent; color: var(--forest);
+  border: 1.5px solid var(--forest); cursor: pointer;
+  padding: 13px 28px; border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem; font-weight: 500;
+  transition: all 0.2s;
+}
+.btn-outline:hover { background: var(--forest); color: var(--cream); }
+.btn-full {
+  width: 100%;
+  background: var(--forest); color: white;
+  border: none; cursor: pointer;
+  padding: 14px; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem; font-weight: 600;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 18px rgba(29,74,35,0.25);
+}
+.btn-full:hover { background: var(--lime); color: var(--forest); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(153,204,103,0.3); }
+.btn-sm {
+  padding: 8px 18px; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.15s;
+}
+.btn-green { background: var(--forest); color: white; }
+.btn-green:hover { background: var(--lime); color: var(--forest); }
+.btn-ghost { background: white; color: var(--forest); border: 1.5px solid rgba(29,74,35,0.2); }
+.btn-ghost:hover { border-color: var(--lime); color: var(--midforest); }
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--forest); color: var(--cream);
+  padding: 3rem 5rem;
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 3rem;
+}
+.footer-brand h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 900; margin-bottom: 0.75rem;
+}
+.footer-brand p { font-size: 0.88rem; opacity: 0.6; line-height: 1.7; }
+footer h4 {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; opacity: 0.45; margin-bottom: 1rem;
+}
+footer ul { list-style: none; }
+footer ul li { margin-bottom: 0.5rem; }
+footer ul li a {
+  color: rgba(240,247,236,0.65); text-decoration: none;
+  font-size: 0.9rem; cursor: pointer; transition: color 0.2s;
+}
+footer ul li a:hover { color: var(--lime); }
+.footer-bottom {
+  background: rgba(0,0,0,0.2);
+  text-align: center; padding: 1rem 5rem;
+  font-size: 0.82rem; color: rgba(240,247,236,0.4);
+}
+
+/* ===== ALERT BAR ===== */
+.alert-bar {
+  position: fixed; top: 80px; right: 20px; z-index: 300;
+  background: var(--success); color: white;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 0.88rem; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(39,174,96,0.3);
+  transform: translateX(calc(100% + 20px)); transition: transform 0.3s ease;
+}
+.alert-bar.show { transform: translateX(0); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(29,74,35,0.45);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 20px;
+  padding: 2rem; max-width: 460px; width: 90%;
+  box-shadow: 0 24px 60px rgba(29,74,35,0.2);
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem;
+}
+.modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--forest); }
+.modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--midforest); opacity: 0.6; }
+.modal-close:hover { opacity: 1; }
+.modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  nav { padding: 0 1.5rem; }
+  footer { grid-template-columns: 1fr 1fr; }
+}
+
+{% block extra_styles %}{% endblock %}
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="{{ path('home') }}">
+    <div class="nav-logo-icon">☕</div>
+    <div class="nav-logo-text">EcoBrew</div>  
+  </a>
+  <div class="nav-links">
+    <a href="{{ path('home') }}" {% if app.request.attributes.get('_route') == 'home' %}style="color:var(--lime)"{% endif %}>Home</a>
+    <a href="{{ path('about') }}" {% if app.request.attributes.get('_route') == 'about' %}style="color:var(--lime)"{% endif %}>About Us</a>
+    <a href="{{ path('contact') }}" {% if app.request.attributes.get('_route') == 'contact' %}style="color:var(--lime)"{% endif %}>Contact</a>
+    {% if is_granted('ROLE_ADMIN') %}
+      <a href="{{ path('admin') }}" {% if app.request.attributes.get('_route') starts with 'admin' %}style="color:var(--lime)"{% endif %}>Admin</a>
+    {% endif %}
+    {% if app.user %}
+      <a href="{{ path('logout') }}" class="nav-btn">Logout</a>
+    {% else %}
+      <a href="{{ path('login') }}" class="nav-btn">Login</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- ALERT BAR -->
+{% for message in app.flashes('success') %}
+  <div class="alert-bar show" id="alertBar">✓ {{ message }}</div>
+{% endfor %}
+<div class="alert-bar" id="alertBarJs"></div>
+
+<!-- PAGE CONTENT -->
+{% block body %}{% endblock %}
+
+{% block modal %}{% endblock %}
+
+<script>
+function showAlert(msg) {
+  const bar = document.getElementById('alertBarJs');
+  bar.textContent = msg;
+  bar.classList.add('show');
+  setTimeout(() => bar.classList.remove('show'), 3000);
+}
+{% block extra_js %}{% endblock %}
+</script>
+</body>
+</html>

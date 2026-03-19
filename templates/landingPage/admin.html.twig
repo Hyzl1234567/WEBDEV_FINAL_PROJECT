@@ -1,0 +1,602 @@
+{% extends 'landingPage/base.html.twig' %}
+
+{% block title %}Admin{% endblock %}
+
+{% block body %}
+
+{% block title %}Admin – EcoBrew Café{% endblock %}
+
+{% block extra_styles %}
+/* ===== ADMIN LAYOUT ===== */
+.admin-wrap {
+  display: grid; grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 70px);
+  margin-top: 70px;
+}
+
+/* ===== SIDEBAR ===== */
+.admin-sidebar {
+  background: var(--forest);
+  padding: 2rem 0;
+  position: sticky; top: 70px; height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(240,247,236,0.08);
+  margin-bottom: 0.5rem;
+}
+.sidebar-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900; color: var(--lime); font-size: 1.1rem;
+}
+.sidebar-brand-sub {
+  font-size: 0.78rem; color: rgba(240,247,236,0.4); margin-top: 3px;
+}
+.sidebar-label {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(240,247,236,0.35);
+  padding: 1rem 1.5rem 0.5rem;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 1.5rem;
+  color: rgba(240,247,236,0.7);
+  font-size: 0.9rem; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+}
+.sidebar-item:hover { color: var(--cream); background: rgba(240,247,236,0.06); }
+.sidebar-item.active {
+  color: var(--lime);
+  background: rgba(153,204,103,0.1);
+  border-left-color: var(--lime);
+}
+.sidebar-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+/* ===== ADMIN MAIN ===== */
+.admin-main { background: var(--paper); padding: 2.5rem; }
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.admin-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 2rem;
+}
+.admin-topbar h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem; font-weight: 800; color: var(--forest);
+}
+.admin-topbar p { font-size: 0.88rem; color: var(--midforest); opacity: 0.7; margin-top: 2px; }
+.admin-actions { display: flex; gap: 0.75rem; }
+
+/* ===== KPI CARDS ===== */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem; margin-bottom: 2rem;
+}
+.kpi-card {
+  background: white; border-radius: 16px; padding: 1.5rem;
+  border: 1px solid rgba(29,74,35,0.07);
+  transition: box-shadow 0.2s;
+}
+.kpi-card:hover { box-shadow: 0 8px 28px rgba(29,74,35,0.08); }
+.kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.kpi-label {
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--midforest); opacity: 0.7;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.kpi-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+}
+.kpi-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 900;
+  color: var(--forest); margin-bottom: 0.25rem;
+}
+.kpi-change { font-size: 0.78rem; font-weight: 600; }
+.kpi-up { color: var(--success); }
+.kpi-down { color: var(--error); }
+
+/* ===== PANELS ===== */
+.admin-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.panel {
+  background: white; border-radius: 16px; padding: 1.75rem;
+  border: 1px solid rgba(29,74,35,0.07);
+}
+.panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem;
+}
+.panel-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem; font-weight: 700; color: var(--forest);
+}
+
+/* ===== BAR CHART ===== */
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; }
+.bar-group { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.bar {
+  width: 100%; border-radius: 6px 6px 0 0;
+  transition: opacity 0.2s; cursor: pointer; min-height: 4px;
+}
+.bar:hover { opacity: 0.8; }
+.bar-label { font-size: 0.7rem; color: var(--midforest); opacity: 0.6; font-family: 'DM Mono', monospace; }
+.bar-val { font-size: 0.68rem; color: var(--midforest); opacity: 0.5; }
+
+/* ===== ORDERS TABLE ===== */
+.orders-table { width: 100%; border-collapse: collapse; }
+.orders-table th {
+  text-align: left; font-size: 0.72rem; font-weight: 700;
+  color: var(--midforest); opacity: 0.6; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 0 0.75rem 0.75rem;
+  border-bottom: 1px solid rgba(29,74,35,0.1);
+}
+.orders-table td {
+  padding: 0.75rem;
+  font-size: 0.88rem; color: var(--forest);
+  border-bottom: 1px solid rgba(29,74,35,0.05);
+  vertical-align: middle;
+}
+.orders-table tr:last-child td { border-bottom: none; }
+.orders-table tr:hover td { background: rgba(153,204,103,0.04); }
+
+.status-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 50px;
+  font-size: 0.72rem; font-weight: 600;
+}
+.status-done { background: rgba(39,174,96,0.1); color: var(--success); }
+.status-pending { background: rgba(212,134,58,0.1); color: var(--amber); }
+.status-new { background: rgba(153,204,103,0.12); color: var(--limeshadow); }
+
+/* ===== TOP ITEMS ===== */
+.top-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(29,74,35,0.06);
+}
+.top-item:last-child { border-bottom: none; }
+.top-item-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--cream);
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.top-item-info { flex: 1; }
+.top-item-name { font-size: 0.88rem; font-weight: 600; color: var(--forest); margin-bottom: 2px; }
+.top-item-count { font-size: 0.78rem; color: var(--midforest); opacity: 0.7; }
+.top-item-bar { height: 4px; border-radius: 2px; background: var(--leaf); margin-top: 4px; }
+.top-item-rev { font-size: 0.85rem; font-weight: 700; color: var(--limeshadow); font-family: 'DM Mono', monospace; }
+
+/* ===== MANAGEMENT TABLES ===== */
+.mgmt-actions { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
+.search-input {
+  flex: 1; padding: 10px 16px;
+  border: 1.5px solid rgba(29,74,35,0.15);
+  border-radius: 10px; outline: none;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  background: white; color: var(--forest);
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--lime); }
+
+.items-table { width: 100%; border-collapse: collapse; }
+.items-table th {
+  text-align: left; font-size: 0.72rem; font-weight: 700;
+  color: var(--midforest); opacity: 0.6; letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 0.75rem 1rem;
+  background: var(--cream); border-bottom: 1px solid rgba(29,74,35,0.1);
+}
+.items-table th:first-child { border-radius: 8px 0 0 8px; }
+.items-table th:last-child { border-radius: 0 8px 8px 0; }
+.items-table td {
+  padding: 0.85rem 1rem;
+  font-size: 0.88rem; color: var(--forest);
+  border-bottom: 1px solid rgba(29,74,35,0.06);
+  vertical-align: middle;
+}
+.items-table tr:hover td { background: rgba(153,204,103,0.03); }
+.item-emoji-cell { font-size: 1.5rem; }
+.action-btns { display: flex; gap: 6px; }
+.action-btn {
+  padding: 5px 12px; border-radius: 7px;
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  border: none; transition: all 0.15s;
+}
+.edit-btn { background: rgba(153,204,103,0.12); color: var(--midforest); }
+.edit-btn:hover { background: var(--lime); color: var(--forest); }
+.del-btn { background: rgba(192,57,43,0.1); color: var(--error); }
+.del-btn:hover { background: var(--error); color: white; }
+
+@media (max-width: 900px) {
+  .admin-wrap { grid-template-columns: 1fr; }
+  .admin-sidebar { display: none; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+}
+{% endblock %}
+
+{% block body %}
+<div class="admin-wrap">
+
+  {# SIDEBAR #}
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">☕ EcoBrew Admin</div>
+      <div class="sidebar-brand-sub">Management Panel</div>
+    </div>
+
+    <div class="sidebar-label">Overview</div>
+    <div class="sidebar-item active" onclick="switchAdmin('dashboard', this)">
+      <span class="sidebar-icon">📊</span> Dashboard
+    </div>
+
+    <div class="sidebar-label">Manage</div>
+    <div class="sidebar-item" onclick="switchAdmin('orders', this)">
+      <span class="sidebar-icon">🛒</span> Orders
+    </div>
+    <div class="sidebar-item" onclick="switchAdmin('menu', this)">
+      <span class="sidebar-icon">☕</span> Menu Items
+    </div>
+    <div class="sidebar-item" onclick="switchAdmin('customers', this)">
+      <span class="sidebar-icon">👥</span> Customers
+    </div>
+    <div class="sidebar-item" onclick="switchAdmin('inventory', this)">
+      <span class="sidebar-icon">📦</span> Inventory
+    </div>
+
+    <div class="sidebar-label">Reports</div>
+    <div class="sidebar-item" onclick="switchAdmin('analytics', this)">
+      <span class="sidebar-icon">📈</span> Analytics
+    </div>
+    <div class="sidebar-item" onclick="switchAdmin('ecoimpact', this)">
+      <span class="sidebar-icon">🌿</span> Eco Impact
+    </div>
+
+    <div class="sidebar-label">System</div>
+    <div class="sidebar-item" onclick="switchAdmin('settings', this)">
+      <span class="sidebar-icon">⚙️</span> Settings
+    </div>
+    <a class="sidebar-item" href="{{ path('app_logout') }}">
+      <span class="sidebar-icon">🚪</span> Sign Out
+    </a>
+  </aside>
+
+  {# MAIN CONTENT #}
+  <main class="admin-main">
+
+    {# ── DASHBOARD ── #}
+    <div class="admin-panel active" id="admin-dashboard">
+      <div class="admin-topbar">
+        <div>
+          <h1>Dashboard</h1>
+          <p>{{ "now"|date("l, F j, Y") }} — Good morning, {{ app.user ? app.user.firstName : 'Admin' }}! ☀️</p>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-sm btn-ghost" onclick="showAlert('Report exported! 📊')">Export Report</button>
+          <button class="btn-sm btn-green" onclick="openModal()">+ New Order</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header"><span class="kpi-label">Today's Revenue</span><div class="kpi-icon" style="background:rgba(153,204,103,0.12);">💰</div></div>
+          <div class="kpi-value">₱8,420</div>
+          <div class="kpi-change kpi-up">↑ 12% vs yesterday</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><span class="kpi-label">Orders Today</span><div class="kpi-icon" style="background:rgba(29,74,35,0.08);">🛒</div></div>
+          <div class="kpi-value">47</div>
+          <div class="kpi-change kpi-up">↑ 5 more than avg</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><span class="kpi-label">Active Customers</span><div class="kpi-icon" style="background:rgba(184,220,142,0.2);">👥</div></div>
+          <div class="kpi-value">1,284</div>
+          <div class="kpi-change kpi-up">↑ 8% this month</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><span class="kpi-label">Eco Score</span><div class="kpi-icon" style="background:rgba(153,204,103,0.15);">🌿</div></div>
+          <div class="kpi-value">98%</div>
+          <div class="kpi-change kpi-up">↑ 1% this week</div>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Recent Orders</h3>
+            <button class="btn-sm btn-ghost" onclick="switchAdmin('orders', document.querySelector('[onclick*=orders]'))">View All</button>
+          </div>
+          <table class="orders-table">
+            <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>#1089</td><td>Maria S.</td><td>Oat Latte × 2</td><td>₱290</td><td><span class="status-badge status-done">Done</span></td></tr>
+              <tr><td>#1088</td><td>Juan D.</td><td>Cold Brew, Banana Loaf</td><td>₱230</td><td><span class="status-badge status-pending">Preparing</span></td></tr>
+              <tr><td>#1087</td><td>Ana V.</td><td>Matcha Latte</td><td>₱155</td><td><span class="status-badge status-done">Done</span></td></tr>
+              <tr><td>#1086</td><td>Carlo R.</td><td>Espresso × 3, Croissant</td><td>₱350</td><td><span class="status-badge status-new">New</span></td></tr>
+              <tr><td>#1085</td><td>Rosa M.</td><td>Cacao Brew</td><td>₱130</td><td><span class="status-badge status-done">Done</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h3>Top Items Today</h3></div>
+          <div class="top-item">
+            <div class="top-item-icon">☕</div>
+            <div class="top-item-info">
+              <div class="top-item-name">Oat Latte</div>
+              <div class="top-item-count">18 sold</div>
+              <div class="top-item-bar" style="width:90%"></div>
+            </div>
+            <div class="top-item-rev">₱2,610</div>
+          </div>
+          <div class="top-item">
+            <div class="top-item-icon">🍵</div>
+            <div class="top-item-info">
+              <div class="top-item-name">Matcha Latte</div>
+              <div class="top-item-count">12 sold</div>
+              <div class="top-item-bar" style="width:65%"></div>
+            </div>
+            <div class="top-item-rev">₱1,860</div>
+          </div>
+          <div class="top-item">
+            <div class="top-item-icon">🫖</div>
+            <div class="top-item-info">
+              <div class="top-item-name">Cold Brew</div>
+              <div class="top-item-count">9 sold</div>
+              <div class="top-item-bar" style="width:48%"></div>
+            </div>
+            <div class="top-item-rev">₱1,080</div>
+          </div>
+          <div class="top-item">
+            <div class="top-item-icon">🥐</div>
+            <div class="top-item-info">
+              <div class="top-item-name">Vegan Croissant</div>
+              <div class="top-item-count">8 sold</div>
+              <div class="top-item-bar" style="width:42%"></div>
+            </div>
+            <div class="top-item-rev">₱760</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h3>Weekly Revenue</h3></div>
+        <div class="bar-chart" style="height:180px;">
+          <div class="bar-group"><div class="bar" style="height:55%;background:var(--leaf)"></div><span class="bar-val">₱5.1k</span><span class="bar-label">Mon</span></div>
+          <div class="bar-group"><div class="bar" style="height:68%;background:var(--leaf)"></div><span class="bar-val">₱6.3k</span><span class="bar-label">Tue</span></div>
+          <div class="bar-group"><div class="bar" style="height:72%;background:var(--limelight)"></div><span class="bar-val">₱6.7k</span><span class="bar-label">Wed</span></div>
+          <div class="bar-group"><div class="bar" style="height:80%;background:var(--limelight)"></div><span class="bar-val">₱7.4k</span><span class="bar-label">Thu</span></div>
+          <div class="bar-group"><div class="bar" style="height:90%;background:var(--lime)"></div><span class="bar-val">₱8.3k</span><span class="bar-label">Fri</span></div>
+          <div class="bar-group"><div class="bar" style="height:100%;background:var(--limeshadow)"></div><span class="bar-val">₱9.2k</span><span class="bar-label">Sat</span></div>
+          <div class="bar-group"><div class="bar" style="height:60%;background:var(--forest)"></div><span class="bar-val">₱5.5k</span><span class="bar-label">Sun</span></div>
+        </div>
+      </div>
+    </div>
+
+    {# ── ORDERS ── #}
+    <div class="admin-panel" id="admin-orders">
+      <div class="admin-topbar">
+        <div><h1>Orders</h1><p>Manage and track all customer orders</p></div>
+        <div class="admin-actions">
+          <button class="btn-sm btn-ghost" onclick="showAlert('Exported! 📊')">Export CSV</button>
+          <button class="btn-sm btn-green" onclick="openModal()">+ New Order</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="mgmt-actions">
+          <input type="text" class="search-input" placeholder="Search orders…">
+          <select style="padding:10px 14px;border:1.5px solid rgba(29,74,35,0.15);border-radius:10px;background:white;font-family:'DM Sans',sans-serif;color:var(--forest);outline:none;">
+            <option>All Statuses</option><option>New</option><option>Preparing</option><option>Done</option>
+          </select>
+        </div>
+        <table class="orders-table">
+          <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Time</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>#1089</td><td>Maria S.</td><td>Oat Latte × 2</td><td>₱290</td><td>9:41 AM</td><td><span class="status-badge status-done">Done</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Order updated!')">Edit</button><button class="action-btn del-btn" onclick="showAlert('Order deleted!')">Delete</button></div></td></tr>
+            <tr><td>#1088</td><td>Juan D.</td><td>Cold Brew, Banana Loaf</td><td>₱230</td><td>9:38 AM</td><td><span class="status-badge status-pending">Preparing</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Order updated!')">Edit</button><button class="action-btn del-btn" onclick="showAlert('Order deleted!')">Delete</button></div></td></tr>
+            <tr><td>#1087</td><td>Ana V.</td><td>Matcha Latte</td><td>₱155</td><td>9:30 AM</td><td><span class="status-badge status-done">Done</span></td><td><div class="action-btns"><button class="action-btn edit-btn">Edit</button><button class="action-btn del-btn">Delete</button></div></td></tr>
+            <tr><td>#1086</td><td>Carlo R.</td><td>Espresso × 3, Croissant</td><td>₱350</td><td>9:22 AM</td><td><span class="status-badge status-new">New</span></td><td><div class="action-btns"><button class="action-btn edit-btn">Edit</button><button class="action-btn del-btn">Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# ── MENU ITEMS ── #}
+    <div class="admin-panel" id="admin-menu">
+      <div class="admin-topbar">
+        <div><h1>Menu Items</h1><p>Manage your café's offerings</p></div>
+        <div class="admin-actions">
+          <button class="btn-sm btn-green" onclick="openModal()">+ Add Item</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="mgmt-actions">
+          <input type="text" class="search-input" placeholder="Search menu items…">
+          <select style="padding:10px 14px;border:1.5px solid rgba(29,74,35,0.15);border-radius:10px;background:white;font-family:'DM Sans',sans-serif;color:var(--forest);outline:none;">
+            <option>All Categories</option><option>Hot Drinks</option><option>Cold Drinks</option><option>Food</option>
+          </select>
+        </div>
+        <table class="items-table">
+          <thead><tr><th></th><th>Item Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td class="item-emoji-cell">☕</td><td>Espresso</td><td>Hot Drinks</td><td>₱85</td><td><span class="status-badge status-done">Active</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="openModal()">Edit</button><button class="action-btn del-btn" onclick="showAlert('Item deleted!')">Delete</button></div></td></tr>
+            <tr><td class="item-emoji-cell">🥛</td><td>Oat Latte</td><td>Hot Drinks</td><td>₱145</td><td><span class="status-badge status-done">Active</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="openModal()">Edit</button><button class="action-btn del-btn">Delete</button></div></td></tr>
+            <tr><td class="item-emoji-cell">🫖</td><td>Cold Brew</td><td>Cold Drinks</td><td>₱120</td><td><span class="status-badge status-done">Active</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="openModal()">Edit</button><button class="action-btn del-btn">Delete</button></div></td></tr>
+            <tr><td class="item-emoji-cell">🍵</td><td>Matcha Latte</td><td>Hot Drinks</td><td>₱155</td><td><span class="status-badge status-done">Active</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="openModal()">Edit</button><button class="action-btn del-btn">Delete</button></div></td></tr>
+            <tr><td class="item-emoji-cell">🥐</td><td>Vegan Croissant</td><td>Food</td><td>₱95</td><td><span class="status-badge status-pending">Seasonal</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="openModal()">Edit</button><button class="action-btn del-btn">Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# ── CUSTOMERS ── #}
+    <div class="admin-panel" id="admin-customers">
+      <div class="admin-topbar">
+        <div><h1>Customers</h1><p>View and manage your customer base</p></div>
+        <div class="admin-actions">
+          <button class="btn-sm btn-ghost" onclick="showAlert('Exported! 📊')">Export List</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="mgmt-actions">
+          <input type="text" class="search-input" placeholder="Search customers…">
+        </div>
+        <table class="items-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Member Since</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>Maria Santos</td><td>maria@email.com</td><td>48</td><td>₱6,840</td><td>Jan 2024</td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Profile viewed!')">View</button></div></td></tr>
+            <tr><td>Juan dela Cruz</td><td>juan@email.com</td><td>31</td><td>₱4,215</td><td>Mar 2024</td><td><div class="action-btns"><button class="action-btn edit-btn">View</button></div></td></tr>
+            <tr><td>Ana Villanueva</td><td>ana@email.com</td><td>27</td><td>₱3,780</td><td>Jun 2024</td><td><div class="action-btns"><button class="action-btn edit-btn">View</button></div></td></tr>
+            <tr><td>Carlo Reyes</td><td>carlo@email.com</td><td>22</td><td>₱3,040</td><td>Aug 2024</td><td><div class="action-btns"><button class="action-btn edit-btn">View</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# ── INVENTORY ── #}
+    <div class="admin-panel" id="admin-inventory">
+      <div class="admin-topbar">
+        <div><h1>Inventory</h1><p>Track supplies and stock levels</p></div>
+        <div class="admin-actions">
+          <button class="btn-sm btn-green" onclick="showAlert('Reorder request sent! 📦')">Reorder Low Stock</button>
+        </div>
+      </div>
+      <div class="panel">
+        <table class="items-table">
+          <thead><tr><th>Ingredient</th><th>Unit</th><th>In Stock</th><th>Min Level</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>☕ Espresso Beans (Benguet)</td><td>kg</td><td>18.5</td><td>5</td><td><span class="status-badge status-done">Good</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Updated!')">Update</button></div></td></tr>
+            <tr><td>🥛 Oat Milk</td><td>L</td><td>12.0</td><td>10</td><td><span class="status-badge status-pending">Low</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Updated!')">Update</button></div></td></tr>
+            <tr><td>🍵 Matcha Powder</td><td>g</td><td>840</td><td>200</td><td><span class="status-badge status-done">Good</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Updated!')">Update</button></div></td></tr>
+            <tr><td>🍫 Tablea Cacao</td><td>pcs</td><td>45</td><td>20</td><td><span class="status-badge status-done">Good</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Updated!')">Update</button></div></td></tr>
+            <tr><td>🧈 Vegan Butter</td><td>kg</td><td>1.2</td><td>2</td><td><span class="status-badge" style="background:rgba(192,57,43,0.1);color:var(--error);">Critical</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Reorder placed!')">Reorder</button></div></td></tr>
+            <tr><td>🍌 Organic Bananas</td><td>kg</td><td>5.0</td><td>3</td><td><span class="status-badge status-done">Good</span></td><td><div class="action-btns"><button class="action-btn edit-btn" onclick="showAlert('Updated!')">Update</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {# ── ANALYTICS ── #}
+    <div class="admin-panel" id="admin-analytics">
+      <div class="admin-topbar"><div><h1>Analytics</h1><p>Sales trends and performance insights</p></div></div>
+      <div class="kpi-grid" style="margin-bottom:1.5rem;">
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">This Month</span><div class="kpi-icon" style="background:rgba(153,204,103,0.12);">📅</div></div><div class="kpi-value">₱192k</div><div class="kpi-change kpi-up">↑ 18% vs last month</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Avg Order Value</span><div class="kpi-icon" style="background:rgba(29,74,35,0.08);">💳</div></div><div class="kpi-value">₱215</div><div class="kpi-change kpi-up">↑ ₱12 vs last month</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Total Orders</span><div class="kpi-icon" style="background:rgba(184,220,142,0.2);">📋</div></div><div class="kpi-value">893</div><div class="kpi-change kpi-up">↑ 14% this month</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Repeat Customers</span><div class="kpi-icon" style="background:rgba(153,204,103,0.15);">🔄</div></div><div class="kpi-value">74%</div><div class="kpi-change kpi-up">↑ 3% retention</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h3>Monthly Revenue Trend</h3></div>
+        <div class="bar-chart" style="height:200px;">
+          <div class="bar-group"><div class="bar" style="height:50%;background:var(--leaf)"></div><span class="bar-val">₱98k</span><span class="bar-label">Sep</span></div>
+          <div class="bar-group"><div class="bar" style="height:62%;background:var(--leaf)"></div><span class="bar-val">₱121k</span><span class="bar-label">Oct</span></div>
+          <div class="bar-group"><div class="bar" style="height:72%;background:var(--limelight)"></div><span class="bar-val">₱141k</span><span class="bar-label">Nov</span></div>
+          <div class="bar-group"><div class="bar" style="height:85%;background:var(--limelight)"></div><span class="bar-val">₱166k</span><span class="bar-label">Dec</span></div>
+          <div class="bar-group"><div class="bar" style="height:78%;background:var(--lime)"></div><span class="bar-val">₱152k</span><span class="bar-label">Jan</span></div>
+          <div class="bar-group"><div class="bar" style="height:83%;background:var(--lime)"></div><span class="bar-val">₱162k</span><span class="bar-label">Feb</span></div>
+          <div class="bar-group"><div class="bar" style="height:100%;background:var(--limeshadow)"></div><span class="bar-val">₱192k</span><span class="bar-label">Mar</span></div>
+        </div>
+      </div>
+    </div>
+
+    {# ── ECO IMPACT ── #}
+    <div class="admin-panel" id="admin-ecoimpact">
+      <div class="admin-topbar"><div><h1>🌿 Eco Impact</h1><p>Environmental performance metrics</p></div></div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">CO₂ Offset</span><div class="kpi-icon" style="background:rgba(153,204,103,0.12);">🌍</div></div><div class="kpi-value">6.2T</div><div class="kpi-change kpi-up">↑ 0.4T this quarter</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Waste Diverted</span><div class="kpi-icon" style="background:rgba(184,220,142,0.2);">♻️</div></div><div class="kpi-value">98%</div><div class="kpi-change kpi-up">↑ 1% this month</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Trees Planted</span><div class="kpi-icon" style="background:rgba(29,74,35,0.1);">🌳</div></div><div class="kpi-value">124</div><div class="kpi-change kpi-up">↑ 12 this quarter</div></div>
+        <div class="kpi-card"><div class="kpi-header"><span class="kpi-label">Compost Output</span><div class="kpi-icon" style="background:rgba(153,204,103,0.15);">🌱</div></div><div class="kpi-value">340kg</div><div class="kpi-change kpi-up">↑ Monthly avg</div></div>
+      </div>
+      <div class="panel" style="margin-top:1.5rem;">
+        <div class="panel-header"><h3>Environmental Milestones</h3></div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div style="display:flex;gap:1rem;align-items:center;padding:1rem;background:rgba(153,204,103,0.08);border-radius:12px;">
+            <span style="font-size:1.5rem;">🏆</span>
+            <div><div style="font-weight:600;font-size:0.9rem;color:var(--forest)">Carbon Neutral Certification Renewed</div><div style="font-size:0.82rem;color:var(--midforest);opacity:0.7;">January 2026 — 3rd consecutive year</div></div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:center;padding:1rem;background:rgba(184,220,142,0.12);border-radius:12px;">
+            <span style="font-size:1.5rem;">🌊</span>
+            <div><div style="font-weight:600;font-size:0.9rem;color:var(--forest)">Zero Single-Use Plastic Achieved</div><div style="font-size:0.82rem;color:var(--midforest);opacity:0.7;">October 2025 — all packaging now compostable</div></div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:center;padding:1rem;background:rgba(29,74,35,0.05);border-radius:12px;">
+            <span style="font-size:1.5rem;">☀️</span>
+            <div><div style="font-weight:600;font-size:0.9rem;color:var(--forest)">Solar Panel Installation Complete</div><div style="font-size:0.82rem;color:var(--midforest);opacity:0.7;">August 2025 — 60% of energy now solar-powered</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ── SETTINGS ── #}
+    <div class="admin-panel" id="admin-settings">
+      <div class="admin-topbar"><div><h1>Settings</h1><p>Configure your café system</p></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="panel">
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--forest);margin-bottom:1.5rem;">Café Details</h3>
+          <div class="form-group"><label>Café Name</label><input type="text" value="EcoBrew Café"></div>
+          <div class="form-group"><label>Address</label><input type="text" value="123 Rizal Blvd, Dumaguete City"></div>
+          <div class="form-group"><label>Phone</label><input type="text" value="(035) 422-1234"></div>
+          <div class="form-group"><label>Email</label><input type="email" value="hello@ecobrewcafe.ph"></div>
+          <button class="btn-sm btn-green" onclick="showAlert('Settings saved! ✓')">Save Changes</button>
+        </div>
+        <div class="panel">
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--forest);margin-bottom:1.5rem;">Admin Account</h3>
+          <div class="form-group"><label>Admin Name</label><input type="text" value="{{ app.user ? app.user.firstName ~ ' ' ~ app.user.lastName : 'Maria Santos' }}"></div>
+          <div class="form-group"><label>Email</label><input type="email" value="{{ app.user ? app.user.email : 'admin@ecobrewcafe.ph' }}"></div>
+          <div class="form-group"><label>New Password</label><input type="password" placeholder="Leave blank to keep current"></div>
+          <div class="form-group"><label>Confirm Password</label><input type="password" placeholder="Repeat new password"></div>
+          <button class="btn-sm btn-green" onclick="showAlert('Account updated! ✓')">Update Account</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+{% endblock %}
+
+{% block modal %}
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalIfBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Menu Item</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group"><label>Item Name</label><input type="text" placeholder="e.g. Oat Latte"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Category</label><select><option>Hot Drinks</option><option>Cold Drinks</option><option>Food</option></select></div>
+      <div class="form-group"><label>Price (₱)</label><input type="number" placeholder="145"></div>
+    </div>
+    <div class="form-group"><label>Description</label><textarea placeholder="Brief item description…" style="min-height:70px;"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-sm btn-green" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+function switchAdmin(name, el) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('admin-' + name).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+function closeModalIfBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+function saveItem() {
+  closeModal();
+  showAlert('Item saved! ✓');
+}
+{% endblock %}

@@ -1,0 +1,249 @@
+{% extends 'landingPage/base.html.twig' %}
+
+
+{% block title %}About Us – EcoBrew Café{% endblock %}
+
+{% block extra_styles %}
+/* ===== ABOUT HERO ===== */
+.about-hero {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--darkforest) 100%);
+  color: white;
+  padding: 6rem 5rem 5rem;
+  position: relative; overflow: hidden;
+  text-align: center;
+  margin-top: 70px;
+}
+.about-hero::before {
+  content: '🌿';
+  position: absolute; font-size: 20rem; opacity: 0.04;
+  top: -50px; right: -50px; line-height: 1;
+}
+.about-hero::after {
+  content: '';
+  position: absolute; bottom: -60px; left: -60px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(153,204,103,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.about-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem; font-weight: 900;
+  line-height: 1.1; margin-bottom: 1.25rem;
+  position: relative; z-index: 1;
+}
+.about-hero h1 em { font-style: italic; color: var(--lime); }
+.about-hero p {
+  font-size: 1.1rem; opacity: 0.8; max-width: 600px;
+  margin: 0 auto; line-height: 1.75;
+  position: relative; z-index: 1;
+}
+
+/* ===== STORY ===== */
+.about-story {
+  padding: 5rem;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4rem; align-items: center;
+}
+.story-text h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 800;
+  color: var(--forest); margin-bottom: 1rem;
+}
+.story-text p { color: var(--midforest); opacity: 0.85; line-height: 1.75; margin-bottom: 1rem; }
+
+.story-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.story-block {
+  border-radius: 18px; padding: 1.75rem;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;
+}
+.story-block:nth-child(1) { background: var(--forest); color: white; grid-column: 1 / -1; }
+.story-block:nth-child(2) { background: var(--leaf); color: var(--forest); }
+.story-block:nth-child(3) { background: var(--lime); color: var(--darkforest); }
+.story-block .sb-icon { font-size: 2rem; }
+.story-block h4 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; }
+.story-block p { font-size: 0.85rem; opacity: 0.8; }
+
+/* ===== VALUES ===== */
+.values { padding: 5rem; background: var(--paper); }
+.values h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem; text-align: center;
+  color: var(--forest); margin-bottom: 3rem;
+}
+.values-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.value-card {
+  text-align: center; padding: 2.5rem 2rem;
+  background: white; border-radius: 20px;
+  border: 1px solid rgba(29,74,35,0.07);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.value-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(29,74,35,0.08); }
+.value-emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+.value-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; font-weight: 700; color: var(--forest); margin-bottom: 0.5rem;
+}
+.value-card p { font-size: 0.9rem; color: var(--midforest); opacity: 0.8; line-height: 1.65; }
+
+/* ===== TEAM ===== */
+.team { padding: 5rem; }
+.team h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem; text-align: center;
+  color: var(--forest); margin-bottom: 3rem;
+}
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.team-card {
+  text-align: center; padding: 2rem;
+  border-radius: 20px; background: white;
+  border: 1px solid rgba(29,74,35,0.08);
+  transition: transform 0.2s;
+}
+.team-card:hover { transform: translateY(-4px); }
+.team-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; margin: 0 auto 1rem;
+}
+.team-card h4 { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--forest); margin-bottom: 0.25rem; }
+.team-card .role { font-size: 0.82rem; color: var(--limeshadow); font-weight: 600; margin-bottom: 0.5rem; }
+.team-card p { font-size: 0.85rem; color: var(--midforest); opacity: 0.75; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .about-hero, .about-story, .values, .team { padding: 3rem 1.5rem; }
+  .about-hero h1 { font-size: 2.5rem; }
+  .about-story { grid-template-columns: 1fr; }
+  .values-grid, .team-grid { grid-template-columns: 1fr 1fr; }
+}
+{% endblock %}
+
+{% block body %}
+{# HERO #}
+<div class="about-hero">
+  <h1>Brewing a Better<br>World, One Cup<br>at a <em>Time</em></h1>
+  <p>EcoBrew was born from a simple belief: great coffee and environmental responsibility aren't at odds — they're inseparable.</p>
+</div>
+
+{# STORY #}
+<section class="about-story">
+  <div class="story-text">
+    <h2>Our Story</h2>
+    <p>Founded in 2019 in the heart of Dumaguete City, EcoBrew Café started as a small stall at the weekend market with a single espresso machine, two farmers' agreements, and a dream to prove that sustainable business is also brilliant business.</p>
+    <p>Today we serve over 2,400 customers monthly, partner with 12 farming cooperatives across Mindanao and Visayas, and have diverted 98% of our waste from landfill. But we're just getting started.</p>
+    <p>Our founder, Hyzl-Ann Estrabela, spent 10 years working in coffee export before realizing the industry's environmental blind spots. EcoBrew is her answer — and yours — to doing things differently.</p>
+    <a href="{{ path('contact') }}" class="btn-primary" style="display:inline-block;margin-top:1rem;text-decoration:none;">Get in Touch →</a>
+  </div>
+  <div class="story-visual">
+    <div class="story-block">
+      <span class="sb-icon">🫘</span>
+      <h4>Founded in Dumaguete</h4>
+      <p>Started at a weekend market, now a city landmark</p>
+    </div>
+    <div class="story-block">
+      <span class="sb-icon">🌱</span>
+      <h4>12 Farm Partners</h4>
+      <p>Direct relationships with smallholder growers</p>
+    </div>
+    <div class="story-block">
+      <span class="sb-icon">♻️</span>
+      <h4>Zero Waste Mission</h4>
+      <p>98% waste diverted from landfill every month</p>
+    </div>
+  </div>
+</section>
+
+{# VALUES #}
+<section class="values">
+  <h2>Our Values</h2>
+  <div class="values-grid">
+    <div class="value-card">
+      <span class="value-emoji">🌍</span>
+      <h3>Planet First</h3>
+      <p>Every decision we make — from sourcing to packaging — is filtered through one question: is this good for the earth?</p>
+    </div>
+    <div class="value-card">
+      <span class="value-emoji">🤝</span>
+      <h3>People Powered</h3>
+      <p>Fair wages, safe conditions, and long-term partnerships with every farmer and staff member in our supply chain.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-emoji">☕</span>
+      <h3>Craft Excellence</h3>
+      <p>Sustainability never compromises quality. Our baristas train for months to deliver a perfect cup, every single time.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-emoji">📖</span>
+      <h3>Radical Transparency</h3>
+      <p>We publish our environmental impact reports quarterly. No greenwashing — just honest numbers and continuous improvement.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-emoji">🏘️</span>
+      <h3>Community Roots</h3>
+      <p>Deeply embedded in Dumaguete life — from hosting local artist pop-ups to sponsoring the city's composting program.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-emoji">🚀</span>
+      <h3>Constant Growth</h3>
+      <p>We never stop learning, improving, and innovating. What's today's best practice becomes tomorrow's jumping-off point.</p>
+    </div>
+  </div>
+</section>
+
+{# TEAM #}
+<section class="team">
+  <h2>Meet the Team</h2>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(153,204,103,0.15);">👩</div>
+      <h4>Hyzl-Ann Estrabela</h4>
+      <p class="role">Founder & CEO</p>
+      <p>10 years in coffee export. Passionate about fair trade, Filipino farmers, and really good pour-overs.</p>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(29,74,35,0.1);">👩</div>
+      <h4>Hyzl-Ann Estrabela</h4>
+      <p class="role">Back-end & Front-end</p>
+      <p>SCAA-certified and 3x Visayas regional champion. Makes your latte art look easy when it absolutely isn't.</p>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:rgba(184,220,142,0.3);">👩</div>
+      <h4>Hyzl-Ann Estrabela</h4>
+      <p class="role">Sustainability Director</p>
+      <p>Environmental science grad who keeps us honest on our zero-waste goals and supply chain integrity.</p>
+    </div>
+  </div>
+</section>
+
+{# FOOTER #}
+<footer>
+  <div class="footer-brand">
+    <h3>☕ EcoBrew Café</h3>
+    <p>Sustainably sourced coffee for a better tomorrow.</p>
+  </div>
+  <div>
+    <h4>Navigate</h4>
+    <ul>
+      <li><a href="{{ path('home') }}">Home</a></li>
+      <li><a href="{{ path('about') }}">About Us</a></li>
+      <li><a href="{{ path('contact') }}">Contact</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Menu</h4>
+    <ul>
+      <li><a href="#">Hot Drinks</a></li>
+      <li><a href="#">Cold Brews</a></li>
+      <li><a href="#">Food Items</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Follow</h4>
+    <ul>
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Facebook</a></li>
+      <li><a href="#">Newsletter</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="footer-bottom">© 2025 EcoBrew Café. Built with love & Symfony.</div>
+{% endblock %}

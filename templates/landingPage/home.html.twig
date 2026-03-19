@@ -1,0 +1,347 @@
+{% extends 'landingPage/base.html.twig' %}
+
+{% block title %}EcoBrew Café – Sip Sustainably{% endblock %}
+
+{% block extra_styles %}
+/* ===== HERO ===== */
+.hero {
+  min-height: calc(100vh - 70px);
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 4rem 5rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(153,204,103,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-tag {
+  display: inline-block;
+  background: rgba(153,204,103,0.15);
+  color: var(--midforest);
+  font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 50px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(153,204,103,0.3);
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 5vw, 5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--forest);
+  margin-bottom: 1.5rem;
+}
+.hero h1 em { font-style: italic; color: var(--lime); }
+.hero p {
+  font-size: 1.05rem; line-height: 1.75;
+  color: var(--midforest); opacity: 0.85;
+  max-width: 440px;
+  margin-bottom: 2.5rem;
+}
+.hero-cta { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.hero-visual {
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+}
+.coffee-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 60px rgba(29,74,35,0.1), 0 4px 16px rgba(29,74,35,0.06);
+  max-width: 320px; width: 100%;
+  position: relative;
+}
+.coffee-card::before {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, var(--lime), var(--limelight), var(--leaf));
+  z-index: -1;
+  opacity: 0.4;
+}
+.coffee-emoji { font-size: 4rem; display: block; margin-bottom: 1rem; }
+.coffee-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--forest); margin-bottom: 0.5rem;
+}
+.coffee-card p { font-size: 0.9rem; color: var(--midforest); opacity: 0.8; line-height: 1.6; }
+.coffee-tag {
+  display: inline-block; margin-top: 1rem;
+  background: var(--leaf); color: var(--forest);
+  padding: 4px 12px; border-radius: 50px;
+  font-size: 0.75rem; font-weight: 600;
+}
+.floating-badge {
+  position: absolute;
+  background: var(--lime); color: var(--forest);
+  padding: 8px 14px; border-radius: 12px;
+  font-size: 0.8rem; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(153,204,103,0.4);
+  animation: float 3s ease-in-out infinite;
+}
+.badge-1 { top: 20px; right: -20px; }
+.badge-2 { bottom: 30px; left: -30px; animation-delay: 1.5s; background: var(--forest); color: var(--lime); }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ===== FEATURES ===== */
+.features { padding: 5rem; background: var(--paper); }
+.features-header { text-align: center; margin-bottom: 3rem; }
+.features-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem; font-weight: 700; color: var(--forest);
+}
+.features-header p { color: var(--midforest); margin-top: 0.75rem; opacity: 0.8; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.feature-card {
+  background: white; border-radius: 20px; padding: 2rem;
+  border: 1px solid rgba(29,74,35,0.08);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(29,74,35,0.1); }
+.feature-icon {
+  font-size: 2rem; margin-bottom: 1rem;
+  width: 56px; height: 56px;
+  background: rgba(153,204,103,0.12);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.feature-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem; font-weight: 700;
+  margin-bottom: 0.5rem; color: var(--forest);
+}
+.feature-card p { font-size: 0.9rem; color: var(--midforest); opacity: 0.8; line-height: 1.65; }
+
+/* ===== MENU ===== */
+.menu-section { padding: 5rem; }
+.menu-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem; text-align: center; margin-bottom: 0.5rem; color: var(--forest);
+}
+.menu-subtitle { text-align: center; color: var(--midforest); opacity: 0.8; margin-bottom: 3rem; }
+.menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+.menu-item {
+  background: white; border-radius: 18px; overflow: hidden;
+  border: 1px solid rgba(29,74,35,0.07);
+  transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+}
+.menu-item:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(29,74,35,0.1); }
+.menu-img {
+  height: 140px; display: flex; align-items: center; justify-content: center;
+  font-size: 3.5rem;
+  background: linear-gradient(135deg, var(--cream), var(--paper));
+}
+.menu-info { padding: 1.25rem; }
+.menu-info h4 { font-family: 'Playfair Display', serif; font-weight: 700; margin-bottom: 0.3rem; color: var(--forest); }
+.menu-info p { font-size: 0.82rem; color: var(--midforest); opacity: 0.75; }
+.menu-price { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; }
+.price { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--limeshadow); font-size: 1rem; }
+.eco-badge {
+  font-size: 0.7rem; background: var(--leaf); color: var(--forest);
+  padding: 2px 8px; border-radius: 50px; font-weight: 600;
+}
+
+/* ===== STATS ===== */
+.stats {
+  background: var(--forest); color: var(--cream);
+  padding: 4rem 5rem;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2rem; text-align: center;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem; font-weight: 900; color: var(--lime);
+}
+.stat-label { font-size: 0.9rem; opacity: 0.7; margin-top: 0.4rem; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding: 3rem 2rem; }
+  .hero-visual { display: none; }
+  .features-grid, .menu-grid { grid-template-columns: 1fr 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .features, .menu-section { padding: 3rem 1.5rem; }
+}
+{% endblock %}
+
+{% block body %}
+<div style="padding-top: 70px;">
+
+  {# HERO #}
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-tag">🌿 Sustainable Coffee</span>
+      <h1>Nature<br><em>in every </em>Cup</h1>
+      <p>EcoBrew Café brings you ethically sourced, eco-conscious coffee crafted to fuel your day — and protect the planet we love.</p>
+      <div class="hero-cta">
+        <a href="{{ path('about') }}" class="btn-primary">Our Story →</a>
+        <button class="btn-outline" onclick="document.querySelector('.menu-section').scrollIntoView({behavior:'smooth'})">View Menu</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="coffee-card">
+        <span class="coffee-emoji">☕</span>
+        <h3>Signature Pour Over</h3>
+        <p>Single-origin Ethiopian beans, slow-dripped to reveal fruity, floral complexity.</p>
+        <span class="coffee-tag">✓ Carbon-Neutral Roast</span>
+      </div>
+      <div class="floating-badge badge-1">🌱 Eco Certified</div>
+      <div class="floating-badge badge-2">★ 4.9 Rating</div>
+    </div>
+  </section>
+
+  {# FEATURES #}
+  <section class="features">
+    <div class="features-header">
+      <h2>Why EcoBrew?</h2>
+      <p>Rooted in responsibility. Brewed with intention.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>Carbon Neutral</h3>
+        <p>Every cup you enjoy offsets its own carbon footprint through our certified reforestation partners across Southeast Asia.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🫘</div>
+        <h3>Direct Trade Beans</h3>
+        <p>We work directly with smallholder farmers to ensure fair wages, sustainable farming practices, and premium quality beans.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">♻️</div>
+        <h3>Zero Waste Cafe</h3>
+        <p>Compostable packaging, reusable cups, and our spent grounds upcycled into garden fertilizer — waste-free from start to finish.</p>
+      </div>
+    </div>
+  </section>
+
+  {# MENU #}
+  <section class="menu-section">
+    <h2>Our Menu</h2>
+    <p class="menu-subtitle">Every item crafted with care — and a little planet love.</p>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-img">☕</div>
+        <div class="menu-info">
+          <h4>Espresso</h4>
+          <p>Bold single-origin shot, short & strong</p>
+          <div class="menu-price"><span class="price">₱85</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🥛</div>
+        <div class="menu-info">
+          <h4>Oat Latte</h4>
+          <p>Creamy oat milk with house espresso blend</p>
+          <div class="menu-price"><span class="price">₱145</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🫖</div>
+        <div class="menu-info">
+          <h4>Cold Brew</h4>
+          <p>Steeped 18 hrs, smooth & refreshing</p>
+          <div class="menu-price"><span class="price">₱120</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🍵</div>
+        <div class="menu-info">
+          <h4>Matcha Latte</h4>
+          <p>Ceremonial-grade matcha, oat or almond milk</p>
+          <div class="menu-price"><span class="price">₱155</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🥐</div>
+        <div class="menu-info">
+          <h4>Vegan Croissant</h4>
+          <p>Buttery, flaky — 100% plant-based</p>
+          <div class="menu-price"><span class="price">₱95</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🍰</div>
+        <div class="menu-info">
+          <h4>Banana Loaf</h4>
+          <p>Moist organic banana bread, slice or whole</p>
+          <div class="menu-price"><span class="price">₱110</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🧊</div>
+        <div class="menu-info">
+          <h4>Iced Americano</h4>
+          <p>Double shot over glacier ice, crisp & clean</p>
+          <div class="menu-price"><span class="price">₱105</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        <div class="menu-img">🍫</div>
+        <div class="menu-info">
+          <h4>Cacao Brew</h4>
+          <p>Filipino tablea hot chocolate, rich & earthy</p>
+          <div class="menu-price"><span class="price">₱130</span><span class="eco-badge">🌿 Eco</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# STATS #}
+  <div class="stats">
+    <div><div class="stat-num">2,400+</div><div class="stat-label">Happy Customers</div></div>
+    <div><div class="stat-num">12</div><div class="stat-label">Farm Partners</div></div>
+    <div><div class="stat-num">98%</div><div class="stat-label">Waste Diverted</div></div>
+    <div><div class="stat-num">6 Tons</div><div class="stat-label">CO₂ Offset This Year</div></div>
+  </div>
+
+  {# FOOTER #}
+  <footer>
+    <div class="footer-brand">
+      <h3>☕ EcoBrew Café</h3>
+      <p>Sustainably sourced coffee for a better tomorrow. Sip by sip, we're making a difference.</p>
+    </div>
+    <div>
+      <h4>Navigate</h4>
+      <ul>
+        <li><a href="{{ path('home') }}">Home</a></li>
+        <li><a href="{{ path('about') }}">About Us</a></li>
+        <li><a href="{{ path('contact') }}">Contact</a></li>
+        <li><a href="{{ path('login') }}">Login</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Menu</h4>
+      <ul>
+        <li><a href="#">Hot Drinks</a></li>
+        <li><a href="#">Cold Brews</a></li>
+        <li><a href="#">Food Items</a></li>
+        <li><a href="#">Seasonal</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Facebook</a></li>
+        <li><a href="#">TikTok</a></li>
+        <li><a href="#">Newsletter</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bottom">© 2025 EcoBrew Café. Built with love & Symfony.</div>
+
+</div>
+{% endblock %}
+
+
+

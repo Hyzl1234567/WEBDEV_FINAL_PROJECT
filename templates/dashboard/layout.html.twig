@@ -458,6 +458,17 @@ body {
     color: white;
 }
 
+@font-face {
+    font-family: 'Mollani';
+    src: url('/fonts/mollani.ttf') format('truetype');
+}
+
+.logo-text {
+    font-family: 'Mollani', serif;
+    font-size: 1.8rem;
+    color: #1D4A23;
+}
+
 </style>
 
 
@@ -522,8 +533,8 @@ body {
         <header class="header">
 
             <div class="logo">
-    <img src="{{ asset('image/logo.png') }}" alt="EcoBrew Logo" class="logo-img">
-</div>
+ <div class="logo-text">EcoBrew</div>
+ </div>
 
 <div class="system-banner">
     <h2>☕ Nature in Every Cup 🌿</h2>

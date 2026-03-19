@@ -1,0 +1,219 @@
+{% extends 'landingPage/base.html.twig' %}
+
+{% block title %}Contact – EcoBrew Café{% endblock %}
+
+{% block extra_styles %}
+.contact-hero {
+  background: var(--paper);
+  padding: 4rem 5rem 3rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(29,74,35,0.1);
+  margin-top: 70px;
+}
+.contact-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem; font-weight: 900;
+  color: var(--forest); margin-bottom: 0.75rem;
+}
+.contact-hero p { color: var(--midforest); font-size: 1.05rem; opacity: 0.8; }
+
+.contact-body {
+  padding: 4rem 5rem;
+  display: grid; grid-template-columns: 1fr 1.4fr;
+  gap: 4rem;
+}
+
+.contact-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--forest); margin-bottom: 1.5rem;
+}
+.info-item {
+  display: flex; gap: 1rem; align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+.info-icon {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 12px;
+  background: rgba(153,204,103,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.info-item h4 {
+  font-size: 0.82rem; font-weight: 600; color: var(--limeshadow);
+  margin-bottom: 0.25rem; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.info-item p { font-size: 0.9rem; color: var(--midforest); opacity: 0.85; line-height: 1.5; }
+
+.hours-grid {
+  background: white; border-radius: 16px; padding: 1.5rem;
+  border: 1px solid rgba(29,74,35,0.08);
+  margin-top: 1.5rem;
+}
+.hours-grid h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; margin-bottom: 1rem; color: var(--forest);
+}
+.hour-row {
+  display: flex; justify-content: space-between;
+  font-size: 0.88rem; color: var(--midforest); padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(29,74,35,0.06);
+}
+.hour-row:last-child { border-bottom: none; }
+.hour-row .day { font-weight: 500; }
+.hour-row .time { opacity: 0.75; font-family: 'DM Mono', monospace; font-size: 0.82rem; }
+
+.contact-form-wrap {
+  background: white; border-radius: 24px; padding: 2.5rem;
+  border: 1px solid rgba(29,74,35,0.08);
+  box-shadow: 0 8px 32px rgba(29,74,35,0.06);
+}
+.contact-form-wrap h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--forest); margin-bottom: 1.75rem;
+}
+.success-msg {
+  display: none;
+  background: rgba(39,174,96,0.1); color: var(--success);
+  border: 1px solid rgba(39,174,96,0.3);
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 0.9rem; font-weight: 500; margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .contact-hero, .contact-body { padding: 3rem 1.5rem; }
+  .contact-body { grid-template-columns: 1fr; }
+}
+{% endblock %}
+
+{% block body %}
+{# HERO #}
+<div class="contact-hero">
+  <h1>Let's Talk Coffee</h1>
+  <p>Have a question, a collaboration idea, or just want to say hello? We'd love to hear from you.</p>
+</div>
+
+{# BODY #}
+<div class="contact-body">
+  {# Contact Info #}
+  <div class="contact-info">
+    <h3>Find Us</h3>
+    <div class="info-item">
+      <div class="info-icon">📍</div>
+      <div>
+        <h4>Address</h4>
+        <p>123 Rizal Boulevard, Dumaguete City<br>Negros Oriental, Philippines 6200</p>
+      </div>
+    </div>
+    <div class="info-item">
+      <div class="info-icon">📞</div>
+      <div>
+        <h4>Phone</h4>
+        <p>(035) 422-1234<br>+63 917 123 4567</p>
+      </div>
+    </div>
+    <div class="info-item">
+      <div class="info-icon">✉️</div>
+      <div>
+        <h4>Email</h4>
+        <p>hello@ecobrewcafe.ph<br>orders@ecobrewcafe.ph</p>
+      </div>
+    </div>
+    <div class="info-item">
+      <div class="info-icon">🌐</div>
+      <div>
+        <h4>Social</h4>
+        <p>@ecobrewcafe on Instagram & Facebook</p>
+      </div>
+    </div>
+
+    <div class="hours-grid">
+      <h4>🕐 Opening Hours</h4>
+      <div class="hour-row"><span class="day">Monday – Friday</span><span class="time">7:00 AM – 8:00 PM</span></div>
+      <div class="hour-row"><span class="day">Saturday</span><span class="time">8:00 AM – 9:00 PM</span></div>
+      <div class="hour-row"><span class="day">Sunday</span><span class="time">9:00 AM – 6:00 PM</span></div>
+      <div class="hour-row"><span class="day">Holidays</span><span class="time">10:00 AM – 5:00 PM</span></div>
+    </div>
+  </div>
+
+  {# Contact Form #}
+  <div class="contact-form-wrap">
+    <h3>Send Us a Message</h3>
+
+    {% if contactSuccess is defined and contactSuccess %}
+      <div class="success-msg" style="display:block;">
+        ✅ Message sent! We'll get back to you within 24 hours.
+      </div>
+    {% endif %}
+
+    <form method="post" action="{{ path('contact') }}">
+      <input type="hidden" name="_token" value="{{ csrf_token('contact') }}">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" placeholder="Juan" required>
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" placeholder="dela Cruz" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="juan@email.com" required>
+      </div>
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <select id="subject" name="subject">
+          <option>General Inquiry</option>
+          <option>Order Support</option>
+          <option>Wholesale / Partnership</option>
+          <option>Feedback</option>
+          <option>Events & Bookings</option>
+          <option>Press / Media</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Tell us what's on your mind…" required></textarea>
+      </div>
+      <button type="submit" class="btn-full">Send Message →</button>
+      <div class="success-msg" id="contactSuccess"></div>
+    </form>
+  </div>
+</div>
+
+{# FOOTER #}
+<footer>
+  <div class="footer-brand">
+    <h3>☕ EcoBrew Café</h3>
+    <p>Sustainably sourced coffee for a better tomorrow.</p>
+  </div>
+  <div>
+    <h4>Navigate</h4>
+    <ul>
+      <li><a href="{{ path('home') }}">Home</a></li>
+      <li><a href="{{ path('about') }}">About Us</a></li>
+      <li><a href="{{ path('contact') }}">Contact</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Menu</h4>
+    <ul>
+      <li><a href="#">Hot Drinks</a></li>
+      <li><a href="#">Cold Brews</a></li>
+      <li><a href="#">Food Items</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Follow</h4>
+    <ul>
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Facebook</a></li>
+      <li><a href="#">Newsletter</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="footer-bottom">© 2025 EcoBrew Café. Built with love & Symfony.</div>
+{% endblock %}
