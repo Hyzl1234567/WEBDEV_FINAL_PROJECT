@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class AuthController extends AbstractController
 {
@@ -20,70 +20,62 @@ final class AuthController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher,
-        EmailVerificationService $emailService
+        EmailVerificationService $emailService,
+        UrlGeneratorInterface $urlGenerator
     ): JsonResponse {
 
         $data = json_decode($request->getContent(), true);
 
-        // ✅ Validate input
         if (
             !$data ||
             !isset($data['username']) ||
             !isset($data['password']) ||
-            !isset($data['email'])
+            !isset($data['email']) ||
+            !isset($data['full_name'])
         ) {
-            return new JsonResponse([
-                'message' => 'Invalid request data'
-            ], 400);
+            return new JsonResponse(['message' => 'Invalid request data'], 400);
         }
 
-        // ✅ Check duplicate username
         $existingUser = $entityManager->getRepository(User::class)
             ->findOneBy(['username' => $data['username']]);
-
         if ($existingUser) {
-            return new JsonResponse([
-                'message' => 'Username already exists'
-            ], 409);
+            return new JsonResponse(['message' => 'Username already exists'], 409);
         }
 
-        // ✅ Check duplicate email
         $existingEmail = $entityManager->getRepository(User::class)
             ->findOneBy(['email' => $data['email']]);
-
         if ($existingEmail) {
-            return new JsonResponse([
-                'message' => 'Email already in use'
-            ], 409);
+            return new JsonResponse(['message' => 'Email already in use'], 409);
         }
 
         $user = new User();
         $user->setUsername($data['username']);
         $user->setEmail($data['email']);
+        $user->setFullName($data['full_name']);  // ✅ use actual full_name from request
         $user->setIsVerified(false);
-        $user->setFullName('Default Name');
         $user->setStatus('active');
-        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setRoles(['ROLE_USER']);
 
-        // ✅ Hash password
-        $hashedPassword = $passwordHasher->hashPassword(
-            $user,
-            $data['password']
-        );
-        $user->setPassword($hashedPassword);
+        $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
 
-        // ✅ Generate verification token
-        $token = $emailService->generateToken();
+        // ✅ Correct method name
+        $token = $emailService->generateVerificationToken();
         $user->setVerificationToken($token);
 
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // ✅ Send email
-        $emailService->sendEmail($user->getEmail(), $token);
+        // ✅ Build verification URL and use correct method name
+        $verificationUrl = $urlGenerator->generate(
+            'verify_email',
+            ['token' => $token],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+
+        $emailService->sendVerificationEmail($user, $verificationUrl);
 
         return new JsonResponse([
-            'message' => 'Registration successful. Please check your email.'
+            'message' => 'Registration successful. Please check your email to verify your account.'
         ], 201);
     }
 
@@ -106,13 +98,11 @@ final class AuthController extends AbstractController
             return new Response("Invalid or expired token");
         }
 
-        // ✅ Verify user
         $user->setIsVerified(true);
         $user->setVerificationToken(null);
-
         $entityManager->flush();
 
-        return new Response("Email verified successfully! You can now login.");
+        return new Response("✔ Email verified! You can now log in.");
     }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
@@ -125,39 +115,27 @@ final class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !isset($data['username']) || !isset($data['password'])) {
-            return new JsonResponse([
-                'message' => 'Invalid request data'
-            ], 400);
+            return new JsonResponse(['message' => 'Invalid request data'], 400);
         }
 
-        $user = $entityManager
-            ->getRepository(User::class)
+        $user = $entityManager->getRepository(User::class)
             ->findOneBy(['username' => $data['username']]);
 
         if (!$user) {
-            return new JsonResponse([
-                'message' => 'User not found'
-            ], 401);
+            return new JsonResponse(['message' => 'User not found'], 401);
         }
 
-        // ✅ BLOCK LOGIN if not verified
         if (!$user->isVerified()) {
-            return new JsonResponse([
-                'message' => 'Please verify your email first'
-            ], 403);
+            return new JsonResponse(['message' => 'Please verify your email first'], 403);
         }
 
-        // ✅ Password check
         if (!$passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new JsonResponse([
-                'message' => 'Invalid password'
-            ], 401);
+            return new JsonResponse(['message' => 'Invalid password'], 401);
         }
 
         return new JsonResponse([
-            'message' => 'Login successful',
+            'message'  => 'Login successful',
             'username' => $user->getUsername()
         ]);
     }
-    
 }

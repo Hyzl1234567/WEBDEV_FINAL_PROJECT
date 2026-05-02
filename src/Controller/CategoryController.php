@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/category')]
-#[IsGranted('ROLE_USER')] // Staff and Admin can access
+#[IsGranted('ROLE_USER')]
 final class CategoryController extends AbstractController
 {
     private ActivityLogger $activityLogger;
@@ -40,18 +40,22 @@ final class CategoryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Set who created this category
             $category->setCreatedBy($this->getUser());
-            
+
             $entityManager->persist($category);
             $entityManager->flush();
 
-            // Log the activity
+            $snapshot = [
+                'name'       => $category->getName(),
+                'created_by' => $category->getCreatedBy()?->getUsername(),
+            ];
+
             $this->activityLogger->logCreate(
                 $this->getUser(),
                 'Category',
                 $category->getId(),
-                sprintf('#%d - %s', $category->getId(), $category->getName())
+                sprintf('Category: %s (ID: %d)', $category->getName(), $category->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Category created successfully!');
@@ -75,7 +79,6 @@ final class CategoryController extends AbstractController
     #[Route('/{id}/edit', name: 'app_category_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Category $category, EntityManagerInterface $entityManager): Response
     {
-        // Both ADMIN and STAFF have full access to edit any category
         if (!$this->canEditOrDelete($category)) {
             $this->addFlash('error', 'You do not have permission to edit this category. You need staff or admin privileges.');
             return $this->redirectToRoute('app_category_index', [], Response::HTTP_SEE_OTHER);
@@ -85,14 +88,19 @@ final class CategoryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Snapshot BEFORE flush to capture old name
+            $snapshot = [
+                'name' => $category->getName(),
+            ];
+
             $entityManager->flush();
 
-            // Log the activity
             $this->activityLogger->logUpdate(
                 $this->getUser(),
                 'Category',
                 $category->getId(),
-                sprintf('#%d - %s', $category->getId(), $category->getName())
+                sprintf('Category: %s (ID: %d)', $category->getName(), $category->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Category updated successfully!');
@@ -108,7 +116,6 @@ final class CategoryController extends AbstractController
     #[Route('/{id}', name: 'app_category_delete', methods: ['POST'])]
     public function delete(Request $request, Category $category, EntityManagerInterface $entityManager): Response
     {
-        // Both ADMIN and STAFF have full access to delete any category
         if (!$this->canEditOrDelete($category)) {
             $this->addFlash('error', 'You do not have permission to delete this category. You need staff or admin privileges.');
             return $this->redirectToRoute('app_category_index', [], Response::HTTP_SEE_OTHER);
@@ -116,14 +123,20 @@ final class CategoryController extends AbstractController
 
         if ($this->isCsrfTokenValid('delete'.$category->getId(), $request->getPayload()->getString('_token'))) {
             $categoryName = $category->getName();
-            $categoryId = $category->getId();
+            $categoryId   = $category->getId();
 
-            // Log before deletion
+            $snapshot = [
+                'name'       => $category->getName(),
+                'created_by' => $category->getCreatedBy()?->getUsername(),
+                'deleted_at' => (new \DateTimeImmutable())->format('c'),
+            ];
+
             $this->activityLogger->logDelete(
                 $this->getUser(),
                 'Category',
                 $categoryId,
-                sprintf('#%d - %s', $categoryId, $categoryName)
+                sprintf('Category: %s (ID: %d)', $categoryName, $categoryId),
+                $snapshot
             );
 
             $entityManager->remove($category);
@@ -135,21 +148,15 @@ final class CategoryController extends AbstractController
         return $this->redirectToRoute('app_category_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    /**
-     * Check if current user can edit or delete a category
-     * Both ADMIN and STAFF have full access to all categories
-     */
     private function canEditOrDelete(Category $category): bool
     {
         $currentUser = $this->getUser();
-        
-        // Allow if user is ADMIN or STAFF
-        if (in_array('ROLE_ADMIN', $currentUser->getRoles()) || 
+
+        if (in_array('ROLE_ADMIN', $currentUser->getRoles()) ||
             in_array('ROLE_STAFF', $currentUser->getRoles())) {
             return true;
         }
 
-        // Regular users cannot edit/delete
         return false;
     }
 }

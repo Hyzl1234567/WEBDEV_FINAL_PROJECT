@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/customer')]
-#[IsGranted('ROLE_USER')] // Only Staff and Admin can access
+#[IsGranted('ROLE_USER')]
 final class CustomerController extends AbstractController
 {
     private ActivityLogger $activityLogger;
@@ -41,24 +41,26 @@ final class CustomerController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $customer->setCreatedBy($this->getUser());
-            
+
             $entityManager->persist($customer);
             $entityManager->flush();
+
+            $snapshot = [
+                'name'       => $customer->getName(),
+                'email'      => $customer->getEmail() ?? 'N/A',
+                'phone'      => $customer->getPhone() ?? 'N/A',
+                'created_by' => $customer->getCreatedBy()?->getUsername(),
+            ];
 
             $this->activityLogger->logCreate(
                 $this->getUser(),
                 'Customer',
                 $customer->getId(),
-                sprintf(
-                    '%s - Email: %s, Phone: %s',
-                    $customer->getName(),
-                    $customer->getEmail() ?? 'N/A',
-                    $customer->getPhone() ?? 'N/A'
-                )
+                sprintf('Customer: %s (ID: %d)', $customer->getName(), $customer->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Customer created successfully!');
-
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -79,7 +81,6 @@ final class CustomerController extends AbstractController
     #[Route('/{id}/edit', name: 'app_customer_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Customer $customer, EntityManagerInterface $entityManager): Response
     {
-        // Both ADMIN and STAFF have full access to edit any customer
         if (!$this->canEditOrDelete($customer)) {
             $this->addFlash('error', 'You do not have permission to edit this customer. You need staff or admin privileges.');
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
@@ -89,17 +90,24 @@ final class CustomerController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Snapshot BEFORE flush to capture old values
+            $snapshot = [
+                'name'  => $customer->getName(),
+                'email' => $customer->getEmail() ?? 'N/A',
+                'phone' => $customer->getPhone() ?? 'N/A',
+            ];
+
             $entityManager->flush();
 
             $this->activityLogger->logUpdate(
                 $this->getUser(),
                 'Customer',
                 $customer->getId(),
-                sprintf('%s', $customer->getName())
+                sprintf('Customer: %s (ID: %d)', $customer->getName(), $customer->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Customer updated successfully!');
-
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -112,14 +120,12 @@ final class CustomerController extends AbstractController
     #[Route('/{id}', name: 'app_customer_delete', methods: ['POST'])]
     public function delete(Request $request, Customer $customer, EntityManagerInterface $entityManager): Response
     {
-        // Both ADMIN and STAFF have full access to delete any customer
         if (!$this->canEditOrDelete($customer)) {
             $this->addFlash('error', 'You do not have permission to delete this customer. You need staff or admin privileges.');
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
 
         if ($this->isCsrfTokenValid('delete'.$customer->getId(), $request->getPayload()->getString('_token'))) {
-            // Check if customer has orders
             if ($customer->getOrders()->count() > 0) {
                 $this->addFlash('error', sprintf(
                     'Cannot delete customer "%s" because they have %d order(s). Please delete or reassign their orders first.',
@@ -129,18 +135,27 @@ final class CustomerController extends AbstractController
                 return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
             }
 
-            $customerId = $customer->getId();
+            $customerId   = $customer->getId();
             $customerName = $customer->getName();
 
-            $entityManager->remove($customer);
-            $entityManager->flush();
+            $snapshot = [
+                'name'       => $customer->getName(),
+                'email'      => $customer->getEmail() ?? 'N/A',
+                'phone'      => $customer->getPhone() ?? 'N/A',
+                'created_by' => $customer->getCreatedBy()?->getUsername(),
+                'deleted_at' => (new \DateTimeImmutable())->format('c'),
+            ];
 
             $this->activityLogger->logDelete(
                 $this->getUser(),
                 'Customer',
                 $customerId,
-                sprintf('Customer: %s', $customerName)
+                sprintf('Customer: %s (ID: %d)', $customerName, $customerId),
+                $snapshot
             );
+
+            $entityManager->remove($customer);
+            $entityManager->flush();
 
             $this->addFlash('success', 'Customer deleted successfully!');
         }
@@ -148,21 +163,15 @@ final class CustomerController extends AbstractController
         return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    /**
-     * Check if current user can edit or delete a customer
-     * Both ADMIN and STAFF have full access to all customers
-     */
     private function canEditOrDelete(Customer $customer): bool
     {
         $currentUser = $this->getUser();
-        
-        // Allow if user is ADMIN or STAFF
-        if (in_array('ROLE_ADMIN', $currentUser->getRoles()) || 
+
+        if (in_array('ROLE_ADMIN', $currentUser->getRoles()) ||
             in_array('ROLE_STAFF', $currentUser->getRoles())) {
             return true;
         }
 
-        // Regular users cannot edit/delete
         return false;
     }
 }

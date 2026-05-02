@@ -4,360 +4,491 @@
 
 {% block body %}
 <style>
-    body {
-        background-color: #fff;
-        font-family: Arial, sans-serif;
-    }
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --darkforest: #142E17;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --limelight: #B8DC8E;
+    --paper: #F5FAF2;
+  }
 
-    .customer-container {
-        width: 90%;
-        max-width: 1400px;
-        margin: 40px auto;
-        padding: 25px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
+  .page-wrapper {
+    min-height: 100vh;
+    background: var(--cream);
+    padding: 100px 2rem 3rem;
+  }
 
-    .customer-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-    }
+  .page-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-    .customer-header-left h2 {
-        color: #1D4A23;
-        margin: 0 0 10px 0;
-        font-size: 26px;
-        font-weight: bold;
-    }
+  /* ── Page Header ── */
+   .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1.5px solid rgba(29,74,35,0.12);
+  }
 
-    .customer-header-left p {
-        color: #555;
-        margin: 0;
-        font-size: 15px;
-    }
+  .page-header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 0.2rem;
+  }
 
-    .btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
+  .page-header-left p {
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+  }
 
-    .btn-primary {
-        background-color: #1D4A23;
-        color: white;
-    }
+  /* ── Add button ── */
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  background: var(--forest);
+  color: white;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
 
-    .btn-primary:hover {
-        background-color: #2d6b34;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(29, 74, 35, 0.3);
-    }
+.btn-add:hover {
+  background: var(--lime);
+  color: var(--forest);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(153,204,103,0.35);
+}
+  /* ── Alerts ── */
+  .alert {
+    padding: 11px 16px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 13px;
-        margin: 0 3px;
-    }
+  .alert-success {
+    background: rgba(153,204,103,0.18);
+    color: var(--forest);
+    border: 1px solid rgba(153,204,103,0.45);
+  }
 
-    .btn-info {
-        background-color: #3498db;
-        color: white;
-    }
+  .alert-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
 
-    .btn-info:hover {
-        background-color: #2980b9;
-    }
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.15px;
+  }
 
-    .btn-warning {
-        background-color: #FFD700;
-        color: #333;
-    }
+  .btn-primary {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+  }
 
-    .btn-warning:hover {
-        background-color: #e6c200;
-    }
+  .btn-primary:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(153,204,103,0.35);
+  }
 
-    .btn-danger {
-        background-color: #E74C3C;
-        color: white;
-    }
+  .btn-sm {
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
 
-    .btn-danger:hover {
-        background-color: #c0392b;
-    }
+  .btn-info {
+    background: rgba(52,152,219,0.1);
+    color: #1a6fa8;
+    border: 1.5px solid rgba(52,152,219,0.25);
+  }
 
-    .btn-locked {
-        background-color: #bdc3c7;
-        color: #666;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+  .btn-info:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+  }
 
-    /* DataTable wrapper styling */
-    .dataTables_wrapper {
-        padding: 20px 0;
-    }
+  .btn-warning {
+    background: rgba(212,163,58,0.12);
+    color: #7a5c00;
+    border: 1.5px solid rgba(212,163,58,0.3);
+  }
 
-    /* DataTable search box */
-    .dataTables_filter input {
-        border: 2px solid #1D4A23;
-        border-radius: 6px;
-        padding: 6px 12px;
-        margin-left: 8px;
-    }
+  .btn-warning:hover {
+    background: #C9A84C;
+    color: white;
+    border-color: #C9A84C;
+  }
 
-    /* DataTable length selector */
-    .dataTables_length select {
-        border: 2px solid #1D4A23;
-        border-radius: 6px;
-        padding: 4px 8px;
-        margin: 0 8px;
-    }
+  .btn-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1.5px solid rgba(192,57,43,0.25);
+  }
 
-    /* DataTable pagination */
-    .dataTables_paginate .paginate_button {
-        padding: 6px 12px;
-        margin: 0 2px;
-        border-radius: 6px;
-        border: 1px solid #1D4A23;
-        background: white;
-        color: #1D4A23 !important;
-    }
+  .btn-danger:hover {
+    background: #c0392b;
+    color: white;
+    border-color: #c0392b;
+  }
 
-    .dataTables_paginate .paginate_button:hover {
-        background: #1D4A23 !important;
-        color: white !important;
-        border: 1px solid #1D4A23;
-    }
+  .btn-locked {
+    background: rgba(189,195,199,0.2);
+    color: #aab;
+    border: 1.5px solid rgba(189,195,199,0.4);
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
 
-    .dataTables_paginate .paginate_button.current {
-        background: #1D4A23 !important;
-        color: white !important;
-        border: 1px solid #1D4A23;
-    }
+  /* ── Table Card ── */
+  .table-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(29,74,35,0.08);
+    overflow: hidden;
+  }
 
-    .dataTables_paginate .paginate_button.disabled {
-        color: #ccc !important;
-    }
+  /* ── DataTable Controls ── */
+  .dataTables_wrapper { padding: 1.5rem; }
 
-    /* DataTable info text */
-    .dataTables_info {
-        color: #666;
-        font-size: 14px;
-    }
+  .dataTables_filter label,
+  .dataTables_length label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--midforest);
+    font-weight: 500;
+  }
 
-    table {
-        width: 100% !important;
-        border-collapse: collapse;
-        border-radius: 10px;
-        overflow: hidden;
-    }
+  .dataTables_filter input {
+    border: 1.5px solid rgba(29,74,35,0.2) !important;
+    border-radius: 8px !important;
+    padding: 7px 13px !important;
+    margin-left: 8px !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
 
-    thead {
-        background-color: #1D4A23;
-        color: white;
-    }
+  .dataTables_filter input:focus {
+    border-color: var(--lime) !important;
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.15) !important;
+  }
 
-    th, td {
-        padding: 12px 15px;
-        text-align: center;
-        font-size: 15px;
-        border-bottom: 1px solid #ddd;
-    }
+  .dataTables_length select {
+    border: 1.5px solid rgba(29,74,35,0.2) !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    margin: 0 6px !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+  }
 
-    tbody tr:hover {
-        background-color: #f4f9ef;
-        transition: 0.2s ease-in-out;
-    }
+  /* ── Table ── */
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+  }
 
-    .creator-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        color: white;
-    }
+  thead { background: var(--forest); }
 
-    .creator-admin {
-        background-color: #9b59b6;
-    }
+  thead th {
+    padding: 14px 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(240,247,236,0.85);
+    border: none;
+    text-align: center;
+  }
 
-    .creator-staff {
-        background-color: #3498db;
-    }
+  tbody tr {
+    border-bottom: 1px solid rgba(29,74,35,0.07);
+    transition: background 0.15s;
+  }
 
-    .actions-cell {
-        white-space: nowrap;
-    }
+  tbody tr:hover { background: var(--paper); }
+  tbody tr:last-child { border-bottom: none; }
 
-    .delete-form {
-        display: inline;
-    }
+  td {
+    padding: 12px 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+  }
 
-    .alert {
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        font-size: 14px;
-    }
+  /* ── Orders Count Badge ── */
+  .orders-count {
+    display: inline-block;
+    background: rgba(153,204,103,0.15);
+    color: var(--midforest);
+    border: 1px solid rgba(153,204,103,0.35);
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
+  /* ── Creator Badge ── */
+  .creator-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
 
-    .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
+  .creator-admin {
+    background: rgba(155,89,182,0.12);
+    color: #7d3c98;
+    border: 1px solid rgba(155,89,182,0.25);
+  }
 
-    .orders-count {
-        display: inline-block;
-        background-color: #e8f5e9;
-        color: #1D4A23;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 13px;
-    }
+  .creator-staff {
+    background: rgba(52,152,219,0.1);
+    color: #1a6fa8;
+    border: 1px solid rgba(52,152,219,0.25);
+  }
 
-    .badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: bold;
-    }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
 
-    .bg-secondary {
-        background-color: #bdc3c7;
-        color: white;
-    }
+  .bg-secondary {
+    background: rgba(149,165,166,0.15);
+    color: #666;
+    border: 1px solid rgba(149,165,166,0.3);
+  }
 
-    /* Center no records message */
-    td.dataTables_empty {
-        text-align: center;
-        color: #777;
-        font-style: italic;
-        padding: 30px !important;
-    }
+  /* ── Actions Cell ── */
+  .actions-cell {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
 
-    .no-customers {
-        text-align: center;
-        color: #555;
-        padding: 40px 20px;
-        font-size: 15px;
-    }
+  .delete-form { display: inline; margin: 0; }
+
+  /* ── Pagination ── */
+  .dataTables_paginate { margin-top: 1rem; }
+
+  .dataTables_paginate .paginate_button {
+    padding: 6px 13px !important;
+    margin: 0 2px !important;
+    border-radius: 8px !important;
+    border: 1.5px solid rgba(29,74,35,0.18) !important;
+    background: white !important;
+    color: var(--forest) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    transition: all 0.15s !important;
+    cursor: pointer;
+  }
+
+  .dataTables_paginate .paginate_button:hover {
+    background: var(--forest) !important;
+    color: white !important;
+    border-color: var(--forest) !important;
+  }
+
+  .dataTables_paginate .paginate_button.current {
+    background: var(--forest) !important;
+    color: white !important;
+    border-color: var(--forest) !important;
+  }
+
+  .dataTables_paginate .paginate_button.disabled {
+    color: rgba(29,74,35,0.3) !important;
+    border-color: rgba(29,74,35,0.1) !important;
+    cursor: default !important;
+  }
+
+  .dataTables_info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.83rem;
+    color: rgba(29,74,35,0.55);
+    margin-top: 1rem;
+  }
+
+  td.dataTables_empty {
+    text-align: center;
+    color: rgba(29,74,35,0.4);
+    font-style: italic;
+    padding: 3rem !important;
+    font-size: 0.9rem;
+  }
+
+  .no-customers {
+    text-align: center;
+    color: rgba(29,74,35,0.5);
+    padding: 3rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+  }
 </style>
 
-<div class="customer-container">
+<div class="page-wrapper">
+  <div class="page-inner">
+
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
+      <div class="alert alert-success">✓ {{ message }}</div>
     {% endfor %}
-    
     {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">{{ message }}</div>
+      <div class="alert alert-danger">⚠ {{ message }}</div>
     {% endfor %}
 
-    <div class="customer-header">
-        <div class="customer-header-left">
-            <h2>👥 Customers</h2>
-            <p>Manage customer information here.</p>
-        </div>
-        <div class="customer-header-right">
-            <a href="{{ path('app_customer_new') }}" class="btn btn-primary">+ Add New Customer</a>
-        </div>
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Customer List</h1>
+        <p>Manage your café's customer information here.</p>
+      </div>
+      <a class="btn-add" href="{{ path('app_customer_new') }}">
+        + Add New Customer
+      </a>
     </div>
 
-    <div class="table-responsive">
+
+    
+
+    <div class="table-card">
+      <div class="table-responsive">
         <table id="customersTable">
-            <thead>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Orders</th>
+              <th>Created Date</th>
+              <th>Created By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if customers is defined and customers|length > 0 %}
+              {% for customer in customers %}
                 <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Orders</th>
-                    <th>Created Date</th>
-                    <th>Created By</th>
-                    <th>Actions</th>
+                  <td style="opacity:0.5; font-size:0.8rem;">#{{ customer.id }}</td>
+                  <td><strong>{{ customer.name }}</strong></td>
+                  <td style="color:rgba(29,74,35,0.65);">{{ customer.email ?? '—' }}</td>
+                  <td style="color:rgba(29,74,35,0.65);">{{ customer.phone ?? '—' }}</td>
+                  <td>
+                    <span class="orders-count">{{ customer.orders|length }} {{ customer.orders|length == 1 ? 'order' : 'orders' }}</span>
+                  </td>
+                  <td style="font-size:0.83rem; color:rgba(29,74,35,0.6);">
+                    {{ customer.createdAt ? customer.createdAt|date('Y-m-d H:i') : '—' }}
+                  </td>
+                  <td>
+                    {% if customer.createdBy %}
+                      <span class="creator-badge {{ 'ROLE_ADMIN' in customer.createdBy.roles ? 'creator-admin' : 'creator-staff' }}">
+                        {{ 'ROLE_ADMIN' in customer.createdBy.roles ? '👑' : '👤' }} {{ customer.createdBy.username }}
+                      </span>
+                    {% else %}
+                      <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td class="actions-cell">
+                    <a href="{{ path('app_customer_show', {'id': customer.id}) }}" class="btn btn-sm btn-info" title="View">👁️ View</a>
+
+                    {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+
+                    {% if canEdit %}
+                      <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-sm btn-warning" title="Edit">✏️ Edit</a>
+                      <form method="post" action="{{ path('app_customer_delete', {'id': customer.id}) }}" class="delete-form" id="deleteForm{{ customer.id }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ customer.id) }}">
+                        <button type="button" class="btn btn-sm btn-danger deleteBtn"
+                                data-id="{{ customer.id }}"
+                                data-name="{{ customer.name|escape('html_attr') }}"
+                                data-orders="{{ customer.orders|length }}"
+                                title="Delete">🗑️ Delete</button>
+                      </form>
+                    {% else %}
+                      <span class="btn btn-sm btn-locked" title="You need staff or admin privileges">🔒 Locked</span>
+                    {% endif %}
+                  </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% if customers is defined and customers|length > 0 %}
-                    {% for customer in customers %}
-                        <tr>
-                            <td>{{ customer.id }}</td>
-                            <td><strong>{{ customer.name }}</strong></td>
-                            <td>{{ customer.email ?? '—' }}</td>
-                            <td>{{ customer.phone ?? '—' }}</td>
-                            <td>
-                                <span class="orders-count">{{ customer.orders|length }} {{ customer.orders|length == 1 ? 'order' : 'orders' }}</span>
-                            </td>
-                            <td>{{ customer.createdAt ? customer.createdAt|date('Y-m-d H:i') : '—' }}</td>
-                            <td>
-                                {% if customer.createdBy %}
-                                    <span class="creator-badge {{ 'ROLE_ADMIN' in customer.createdBy.roles ? 'creator-admin' : 'creator-staff' }}">
-                                        {{ 'ROLE_ADMIN' in customer.createdBy.roles ? '👑' : '👤' }} {{ customer.createdBy.username }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Unknown</span>
-                                {% endif %}
-                            </td>
-                            <td class="actions-cell">
-                                <a href="{{ path('app_customer_show', {'id': customer.id}) }}" class="btn btn-sm btn-info" title="View">👁️ View</a>
-                                
-                                {# Give full access to both ADMIN and STAFF #}
-                                {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-                                
-                                {% if canEdit %}
-                                    <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-sm btn-warning" title="Edit">✏️ Edit</a>
-                                    <form method="post" action="{{ path('app_customer_delete', {'id': customer.id}) }}" class="delete-form" id="deleteForm{{ customer.id }}">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ customer.id) }}">
-                                        <button type="button" class="btn btn-sm btn-danger deleteBtn" 
-                                                data-id="{{ customer.id }}" 
-                                                data-name="{{ customer.name|escape('html_attr') }}" 
-                                                data-orders="{{ customer.orders|length }}" 
-                                                title="Delete">🗑️ Delete</button>
-                                    </form>
-                                {% else %}
-                                    <span class="btn btn-sm btn-locked" title="You need staff or admin privileges">🔒 Locked</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="8" class="no-customers">
-                            <p>No customers found.</p>
-                            <a href="{{ path('app_customer_new') }}" class="btn btn-primary" style="margin-top: 15px;">Add Your First Customer</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="8" class="no-customers">
+                  <p>No customers found.</p>
+                  <a href="{{ path('app_customer_new') }}" class="btn btn-primary" style="margin-top: 15px;">Add Your First Customer</a>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
         </table>
+      </div>
     </div>
+
+  </div>
 </div>
 {% endblock %}
 
 {% block javascripts %}
 <script>
 $(document).ready(function() {
-    // Initialize DataTable
     $('#customersTable').DataTable({
-        "order": [[0, "desc"]], // Sort by Customer ID descending (newest first)
+        "order": [[0, "desc"]],
         "pageLength": 10,
         "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         "language": {
@@ -376,14 +507,8 @@ $(document).ready(function() {
             }
         },
         "columnDefs": [
-            { 
-                "orderable": false, 
-                "targets": [7] // Disable sorting on Actions column
-            },
-            {
-                "type": "num",
-                "targets": [0, 4] // ID and Orders columns - for proper numeric sorting
-            }
+            { "orderable": false, "targets": [7] },
+            { "type": "num", "targets": [0, 4] }
         ]
     });
 
@@ -392,17 +517,17 @@ $(document).ready(function() {
         const customerId = $(this).data('id');
         const customerName = $(this).data('name');
         const ordersCount = $(this).data('orders');
-        
+
         let message = `⚠️ WARNING: DELETE CONFIRMATION\n\nAre you sure you want to delete this customer?\n\nCustomer: ${customerName}`;
-        
+
         if (ordersCount > 0) {
             message += `\n\n⚠️ This customer has ${ordersCount} order(s)!\nYou cannot delete a customer with existing orders.`;
             alert(message);
             return;
         }
-        
+
         message += '\n\n⚠️ THIS ACTION CANNOT BE UNDONE!\n\nClick OK to DELETE, or Cancel to keep the customer.';
-        
+
         if (confirm(message)) {
             $(`#deleteForm${customerId}`).submit();
         }

@@ -1,157 +1,215 @@
-{% extends 'dashboard/layout.html.twig' %}
+ {% extends 'dashboard/layout.html.twig' %}
 
 {% block title %}Add New Customer{% endblock %}
 
 {% block body %}
 <style>
-    .form-container {
-        width: 90%;
-        max-width: 700px;
-        margin: 40px auto;
-        padding: 30px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --darkforest: #142E17;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --limelight: #B8DC8E;
+    --paper: #F5FAF2;
+  }
 
-    .form-header {
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid #1D4A23;
-    }
+  .form-page {
+    min-height: 100vh;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 1.5rem 3rem;
+  }
 
-    .form-header h1 {
-        color: #1D4A23;
-        margin: 0 0 10px 0;
-        font-size: 28px;
-        font-weight: bold;
-    }
+  .form-card {
+    width: 100%;
+    max-width: 700px;
+    background: white;
+    border-radius: 22px;
+    box-shadow: 0 8px 48px rgba(29,74,35,0.12);
+    overflow: hidden;
+  }
 
-    .form-header p {
-        color: #666;
-        margin: 0;
-        font-size: 15px;
-    }
+  /* ── Card Header ── */
+  .form-card-header {
+    background: var(--forest);
+    padding: 2rem 2.5rem 1.75rem;
+  }
 
-    .form-group {
-        margin-bottom: 25px;
-    }
+  .form-card-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
 
-    label {
-        display: block;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 8px;
-        font-size: 15px;
-    }
+  .form-card-header p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(240,247,236,0.6);
+  }
 
-    .form-control {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 15px;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-    }
+  /* ── Card Body ── */
+  .form-card-body {
+    padding: 2rem 2.5rem;
+  }
 
-    .form-control:focus {
-        outline: none;
-        border-color: #1D4A23;
-        box-shadow: 0 0 0 3px rgba(29, 74, 35, 0.1);
-    }
+  /* ── Form Groups ── */
+  .form-group {
+    margin-bottom: 1.35rem;
+  }
 
-    .form-actions {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #ddd;
-    }
+  label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.3px;
+  }
 
-    .btn {
-        padding: 12px 30px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 15px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
+  /* ── Inputs ── */
+  .form-control,
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(29,74,35,0.2);
+    border-radius: 10px;
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--forest);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
 
-    .btn-primary {
-        background-color: #1D4A23;
-        color: white;
-    }
+  .form-control:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.18);
+    background: white;
+  }
 
-    .btn-primary:hover {
-        background-color: #2d6b34;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(29, 74, 35, 0.3);
-    }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-    }
+  /* ── Help text ── */
+  .help-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(29,74,35,0.45);
+    margin-top: 0.3rem;
+    font-style: italic;
+  }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        transform: translateY(-2px);
-    }
+  /* ── Form Actions ── */
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1.5px solid rgba(29,74,35,0.08);
+  }
 
-    .help-text {
-        font-size: 13px;
-        color: #666;
-        margin-top: 5px;
-        font-style: italic;
-    }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 11px 24px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.15px;
+  }
+
+  .btn-primary {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+  }
+
+  .btn-primary:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(153,204,103,0.35);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--midforest);
+    border: 1.5px solid rgba(29,74,35,0.25);
+  }
+
+  .btn-secondary:hover {
+    background: var(--forest);
+    color: white;
+    border-color: var(--forest);
+  }
 </style>
 
-<div class="form-container">
-    <div class="form-header">
-        <h1>👥 Add New Customer</h1>
-        <p>Fill in the customer details below.</p>
+<div class="form-page">
+  <div class="form-card">
+
+    <div class="form-card-header">
+      <h1>👥 Add New Customer</h1>
+      <p>Fill in the customer details below.</p>
     </div>
 
-    {{ form_start(form) }}
+    <div class="form-card-body">
 
-    <div class="form-group">
-        {{ form_label(form.name) }}
-        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.name) }}
-        <div class="help-text">Required field</div>
+      {{ form_start(form) }}
+
+        <div class="form-group">
+          {{ form_label(form.name) }}
+          {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.name) }}
+          <div class="help-text">Required field</div>
+        </div>
+
+        <div class="form-group">
+          {{ form_label(form.email) }}
+          {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.email) }}
+          <div class="help-text">Optional</div>
+        </div>
+
+        <div class="form-group">
+          {{ form_label(form.phone) }}
+          {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.phone) }}
+          <div class="help-text">Optional</div>
+        </div>
+
+        <div class="form-group">
+          {{ form_label(form.address) }}
+          {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.address) }}
+          <div class="help-text">Optional</div>
+        </div>
+
+        <div class="form-actions">
+          <a href="{{ path('app_customer_index') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">💾 Save Customer</button>
+        </div>
+
+      {{ form_end(form) }}
+
     </div>
-
-    <div class="form-group">
-        {{ form_label(form.email) }}
-        {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.email) }}
-        <div class="help-text">Optional</div>
-    </div>
-
-    <div class="form-group">
-        {{ form_label(form.phone) }}
-        {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.phone) }}
-        <div class="help-text">Optional</div>
-    </div>
-
-    <div class="form-group">
-        {{ form_label(form.address) }}
-        {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.address) }}
-        <div class="help-text">Optional</div>
-    </div>
-
-    <div class="form-actions">
-        <a href="{{ path('app_customer_index') }}" class="btn btn-secondary">Cancel</a>
-        <button type="submit" class="btn btn-primary">💾 Save Customer</button>
-    </div>
-
-    {{ form_end(form) }}
+  </div>
 </div>
 {% endblock %}

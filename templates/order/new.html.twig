@@ -4,192 +4,265 @@
 
 {% block body %}
 <style>
-    .form-container {
-        width: 90%;
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 30px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --darkforest: #142E17;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --limelight: #B8DC8E;
+    --paper: #F5FAF2;
+  }
 
-    .form-header {
-        border-bottom: 3px solid #1D4A23;
-        padding-bottom: 15px;
-        margin-bottom: 30px;
-    }
+  .form-page {
+    min-height: 100vh;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 1.5rem 3rem;
+  }
 
-    .form-header h1 {
-        color: #1D4A23;
-        font-size: 28px;
-        font-weight: bold;
-        margin: 0;
-    }
+  .form-card {
+    width: 100%;
+    max-width: 800px;
+    background: white;
+    border-radius: 22px;
+    box-shadow: 0 8px 48px rgba(29,74,35,0.12);
+    overflow: hidden;
+  }
 
-    .form-header p {
-        color: #666;
-        font-size: 14px;
-        margin: 8px 0 0 0;
-    }
+  /* ── Card Header ── */
+  .form-card-header {
+    background: var(--forest);
+    padding: 2rem 2.5rem 1.75rem;
+  }
 
-    .form-group {
-        margin-bottom: 20px;
-    }
+  .form-card-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
 
-    .form-group label {
-        display: block;
-        color: #1D4A23;
-        font-weight: bold;
-        margin-bottom: 8px;
-        font-size: 15px;
-    }
+  .form-card-header p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(240,247,236,0.6);
+  }
 
-    .form-control,
-    select.form-control {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-size: 15px;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-        background-color: white;
-    }
+  /* ── Card Body ── */
+  .form-card-body {
+    padding: 2rem 2.5rem;
+  }
 
-    .form-control:focus,
-    select.form-control:focus {
-        outline: none;
-        border-color: #1D4A23;
-        box-shadow: 0 0 0 3px rgba(29, 74, 35, 0.1);
-    }
+  /* ── Alerts ── */
+  .alert {
+    padding: 11px 16px;
+    border-radius: 10px;
+    margin-bottom: 1.1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .form-control:hover,
-    select.form-control:hover {
-        border-color: #99CC67;
-    }
+  .alert-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
 
-    select.form-control {
-        cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231D4A23' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        padding-right: 40px;
-    }
+  /* ── Form Groups ── */
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
 
-    .form-actions {
-        display: flex;
-        gap: 15px;
-        justify-content: flex-end;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-    }
+  .form-group label,
+  label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 0.45rem;
+    letter-spacing: 0.3px;
+  }
 
-    .btn {
-        padding: 12px 25px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 15px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
+  label.required::after {
+    content: " *";
+    color: #c0392b;
+  }
 
-    .btn-primary {
-        background-color: #1D4A23;
-        color: white;
-    }
+  /* ── Inputs ── */
+  .form-control,
+  select.form-control,
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(29,74,35,0.2);
+    border-radius: 10px;
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--forest);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
 
-    .btn-primary:hover {
-        background-color: #2d6b34;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(29, 74, 35, 0.3);
-    }
+  .form-control:focus,
+  select.form-control:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.18);
+    background: white;
+  }
 
-    .btn-secondary {
-        background-color: #bdc3c7;
-        color: #333;
-    }
+  .form-control:hover,
+  select.form-control:hover {
+    border-color: rgba(29,74,35,0.35);
+  }
 
-    .btn-secondary:hover {
-        background-color: #95a5a6;
-        transform: translateY(-2px);
-    }
+  select.form-control,
+  select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231D4A23' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-color: var(--paper);
+    padding-right: 40px;
+  }
 
-    .form-error {
-        color: #E74C3C;
-        font-size: 13px;
-        margin-top: 5px;
-    }
+  select.form-control::-ms-expand,
+  select::-ms-expand { display: none; }
 
-    .alert {
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
+  /* Read-only total price field */
+  input[readonly] {
+    background: rgba(29,74,35,0.05);
+    color: var(--forest);
+    cursor: default;
+    font-weight: 600;
+  }
 
-    .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
+  /* ── Form Errors ── */
+  .form-error {
+    font-family: 'DM Sans', sans-serif;
+    color: #c0392b;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
 
-    /* Hide default select arrow in IE */
-    select.form-control::-ms-expand {
-        display: none;
-    }
+  /* ── Form Actions ── */
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1.5px solid rgba(29,74,35,0.08);
+  }
 
-    /* Required field indicator */
-    .form-group label.required::after {
-        content: " *";
-        color: #E74C3C;
-    }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 11px 24px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.15px;
+  }
+
+  .btn-primary {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+  }
+
+  .btn-primary:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(153,204,103,0.35);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--midforest);
+    border: 1.5px solid rgba(29,74,35,0.25);
+  }
+
+  .btn-secondary:hover {
+    background: var(--forest);
+    color: white;
+    border-color: var(--forest);
+  }
 </style>
 
-<div class="form-container">
-    <div class="form-header">
-        <h1>📝 Create New Order</h1>
-        <p>Fill in the details below to create a new order</p>
+<div class="form-page">
+  <div class="form-card">
+
+    <div class="form-card-header">
+      <h1>📝 Create New Order</h1>
+      <p>Fill in the details below to create a new order</p>
     </div>
 
-    {{ form_start(form) }}
+    <div class="form-card-body">
+
+      {{ form_start(form) }}
+
         <div class="form-group">
-            {{ form_label(form.customer, 'Customer Name', {'label_attr': {'class': 'required'}}) }}
-            {{ form_widget(form.customer, {'attr': {'class': 'form-control', 'placeholder': 'Enter customer name'}}) }}
-            {{ form_errors(form.customer) }}
+          {{ form_label(form.customer, 'Customer Name', {'label_attr': {'class': 'required'}}) }}
+          {{ form_widget(form.customer, {'attr': {'class': 'form-control', 'placeholder': 'Enter customer name'}}) }}
+          {{ form_errors(form.customer) }}
         </div>
 
         <div class="form-group">
-            {{ form_label(form.product, 'Product', {'label_attr': {'class': 'required'}}) }}
-            {{ form_widget(form.product, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.product) }}
+          {{ form_label(form.product, 'Product', {'label_attr': {'class': 'required'}}) }}
+          {{ form_widget(form.product, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.product) }}
         </div>
 
         <div class="form-group">
-            <label class="required">Total Price (₱)</label>
-            <input type="text" id="order_totalPrice_display" class="form-control" placeholder="0.00" readonly value="{{ order.totalPrice ? order.totalPrice|number_format(2, '.', ',') : '0.00' }}">
+          <label class="required">Total Price (₱)</label>
+          <input type="text" id="order_totalPrice_display" class="form-control" placeholder="0.00" readonly
+                 value="{{ order.totalPrice ? order.totalPrice|number_format(2, '.', ',') : '0.00' }}">
         </div>
 
         <div class="form-group">
-            {{ form_label(form.status, 'Order Status', {'label_attr': {'class': 'required'}}) }}
-            {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
-            {{ form_errors(form.status) }}
+          {{ form_label(form.status, 'Order Status', {'label_attr': {'class': 'required'}}) }}
+          {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
+          {{ form_errors(form.status) }}
         </div>
 
         {{ form_rest(form) }}
 
         <div class="form-actions">
-            <a href="{{ path('app_order_index') }}" class="btn btn-secondary">← Cancel</a>
-            <button type="submit" class="btn btn-primary">💾 Create Order</button>
+          <a href="{{ path('app_order_index') }}" class="btn btn-secondary">← Cancel</a>
+          <button type="submit" class="btn btn-primary">💾 Create Order</button>
         </div>
-    {{ form_end(form) }}
-</div>
 
+      {{ form_end(form) }}
+
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block javascripts %}
@@ -203,7 +276,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var price = parseFloat(productSelect.selectedOptions[0].dataset.price || 0) || 0;
         var qty = parseInt(quantityInput.value, 10) || 0;
         var total = price * qty;
-        // Format to 2 decimal places and use locale grouping
         totalDisplay.value = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 

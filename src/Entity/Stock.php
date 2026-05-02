@@ -26,10 +26,12 @@ class Stock
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $createdAt = null;
 
-    // Track who created this stock record
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $createdBy = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isHistoryEntry = false;
 
     public function __construct()
     {
@@ -99,6 +101,18 @@ class Stock
     public function setCreatedBy(?User $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function isHistoryEntry(): bool
+    {
+        return $this->isHistoryEntry;
+    }
+
+    public function setIsHistoryEntry(bool $isHistoryEntry): static
+    {
+        $this->isHistoryEntry = $isHistoryEntry;
 
         return $this;
     }

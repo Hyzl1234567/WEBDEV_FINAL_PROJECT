@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response; 
 
 class LandingPageController extends AbstractController
 {
@@ -36,10 +37,9 @@ class LandingPageController extends AbstractController
     {
         return $this->render('landingPage/admin.html.twig');
     }
-
-     #[Route('/register', name: 'register')]
-    public function register()
-    {
-        return $this->render('registration/register.html.twig');
-    }
+ #[Route('/register', name: 'register')]
+public function registerPage(): Response
+{
+    return $this->render('registration/register.html.twig');
+}
 }

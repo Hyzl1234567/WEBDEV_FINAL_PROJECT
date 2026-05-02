@@ -15,11 +15,16 @@ class ActivityLogger
     public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
         $this->entityManager = $entityManager;
-        $this->requestStack = $requestStack;
+        $this->requestStack  = $requestStack;
     }
 
-    public function log(?User $user, string $action, ?string $entity = null, ?int $entityId = null, ?string $description = null): void
-    {
+    public function log(
+        ?User   $user,
+        string  $action,
+        ?string $entity      = null,
+        ?int    $entityId    = null,
+        ?string $description = null
+    ): void {
         $log = new ActivityLog();
         $log->setUser($user);
         $log->setAction($action);
@@ -28,7 +33,11 @@ class ActivityLogger
         $log->setDescription($description);
         $log->setCreatedAt(new \DateTimeImmutable());
 
-        // Get IP address from request
+        if ($user) {
+            $log->setUsername($user->getUsername());
+            $log->setRole($this->getUserRole($user));
+        }
+
         $request = $this->requestStack->getCurrentRequest();
         if ($request) {
             $log->setIpAddress($request->getClientIp());
@@ -38,14 +47,22 @@ class ActivityLogger
         $this->entityManager->flush();
     }
 
+    // ─────────────────────────────────────────────
+    // AUTH
+    // ─────────────────────────────────────────────
+
     public function logLogin(User $user): void
     {
         $this->log(
             $user,
-            'login',
+            'LOGIN',
             'User',
             $user->getId(),
-            sprintf('User %s logged in', $user->getUsername())
+            sprintf(
+                '%s "%s" logged in successfully.',
+                $this->getUserRoleLabel($user),
+                $user->getUsername()
+            )
         );
     }
 
@@ -53,59 +70,154 @@ class ActivityLogger
     {
         $this->log(
             $user,
-            'logout',
+            'LOGOUT',
             'User',
             $user->getId(),
-            sprintf('User %s logged out', $user->getUsername())
+            sprintf(
+                '%s "%s" logged out.',
+                $this->getUserRoleLabel($user),
+                $user->getUsername()
+            )
         );
     }
 
-    // Helper methods for common operations
-    public function logCreate(User $user, string $entity, int $entityId, string $entityName): void
+    // ─────────────────────────────────────────────
+    // CRUD — accept optional $snapshot (ignored in
+    // description but keeps controller calls valid)
+    // ─────────────────────────────────────────────
+
+    public function logCreate(User $user, string $entity, int $entityId, string $entityName, array $snapshot = []): void
     {
-        $role = $this->getUserRole($user);
         $this->log(
             $user,
-            'create',
+            'CREATE',
             $entity,
             $entityId,
-            sprintf('%s created %s: %s', $role, $entity, $entityName)
+            sprintf(
+                '%s "%s" created a new %s: "%s" (ID: %d).',
+                $this->getUserRoleLabel($user),
+                $user->getUsername(),
+                $entity,
+                $this->extractName($entityName),
+                $entityId
+            )
         );
     }
 
-    public function logUpdate(User $user, string $entity, int $entityId, string $entityName): void
+    public function logUpdate(User $user, string $entity, int $entityId, string $entityName, array $snapshot = []): void
     {
-        $role = $this->getUserRole($user);
+        // Build a context-aware description using snapshot data if available
+        $description = $this->buildUpdateDescription($user, $entity, $entityId, $entityName, $snapshot);
+
         $this->log(
             $user,
-            'update',
+            'UPDATE',
             $entity,
             $entityId,
-            sprintf('%s updated %s: %s', $role, $entity, $entityName)
+            $description
         );
     }
 
-    public function logDelete(User $user, string $entity, int $entityId, string $entityName): void
+    public function logDelete(User $user, string $entity, int $entityId, string $entityName, array $snapshot = []): void
     {
-        $role = $this->getUserRole($user);
         $this->log(
             $user,
-            'delete',
+            'DELETE',
             $entity,
             $entityId,
-            sprintf('%s deleted %s: %s', $role, $entity, $entityName)
+            sprintf(
+                '%s "%s" permanently deleted %s: "%s" (ID: %d).',
+                $this->getUserRoleLabel($user),
+                $user->getUsername(),
+                $entity,
+                $this->extractName($entityName),
+                $entityId
+            )
         );
+    }
+
+    // ─────────────────────────────────────────────
+    // PRIVATE HELPERS
+    // ─────────────────────────────────────────────
+
+    /**
+     * Builds a smart description for UPDATE actions by inspecting
+     * the snapshot to understand what specifically changed.
+     */
+    private function buildUpdateDescription(User $user, string $entity, int $entityId, string $entityName, array $snapshot): string
+    {
+        $actor = sprintf('%s "%s"', $this->getUserRoleLabel($user), $user->getUsername());
+        $target = $this->extractName($entityName);
+
+        // Password reset
+        if (isset($snapshot['note']) && $snapshot['note'] === 'password reset by admin') {
+            return sprintf(
+                '%s reset the password for %s "%s" (ID: %d).',
+                $actor,
+                $entity,
+                $snapshot['username'] ?? $target,
+                $entityId
+            );
+        }
+
+        // Status toggle / archive
+        if (isset($snapshot['old_status'], $snapshot['new_status'])) {
+            return sprintf(
+                '%s changed status of %s "%s" (ID: %d) from "%s" to "%s".',
+                $actor,
+                $entity,
+                $snapshot['username'] ?? $target,
+                $entityId,
+                $snapshot['old_status'],
+                $snapshot['new_status']
+            );
+        }
+
+        // Role change detected
+        if (isset($snapshot['role'])) {
+            return sprintf(
+                '%s updated %s "%s" (ID: %d). Previous role was "%s".',
+                $actor,
+                $entity,
+                $snapshot['username'] ?? $target,
+                $entityId,
+                $snapshot['role']
+            );
+        }
+
+        // Generic update fallback
+        return sprintf(
+            '%s updated %s "%s" (ID: %d).',
+            $actor,
+            $entity,
+            $target,
+            $entityId
+        );
+    }
+
+    /**
+     * Strips the "User: " prefix from entityName strings like
+     * "User: staff05 (ID: 9)" to get just "staff05 (ID: 9)".
+     */
+    private function extractName(string $entityName): string
+    {
+        // Strip common prefixes like "User: ", "Product: ", etc.
+        return preg_replace('/^[A-Za-z]+:\s*/', '', $entityName);
     }
 
     private function getUserRole(User $user): string
     {
         $roles = $user->getRoles();
-        if (in_array('ROLE_ADMIN', $roles)) {
-            return 'Admin';
-        }
-        if (in_array('ROLE_STAFF', $roles)) {
-            return 'Staff';
-        }
+        if (in_array('ROLE_ADMIN', $roles)) return 'ROLE_ADMIN';
+        if (in_array('ROLE_STAFF', $roles)) return 'ROLE_STAFF';
+        return 'ROLE_USER';
+    }
+
+    private function getUserRoleLabel(User $user): string
+    {
+        $roles = $user->getRoles();
+        if (in_array('ROLE_ADMIN', $roles)) return 'Admin';
+        if (in_array('ROLE_STAFF', $roles)) return 'Staff';
         return 'User';
     }
 }

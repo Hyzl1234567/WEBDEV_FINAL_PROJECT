@@ -16,7 +16,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/product')]
-#[IsGranted('ROLE_STAFF')] // Only Staff and Admin can access
+#[IsGranted('ROLE_STAFF')]
 final class ProductController extends AbstractController
 {
     private ActivityLogger $activityLogger;
@@ -54,7 +54,7 @@ final class ProductController extends AbstractController
                         $this->getParameter('images_directory'),
                         $newFilename
                     );
-                    
+
                     $product->setImage($newFilename);
                 } catch (FileException $e) {
                     $this->addFlash('error', 'Failed to upload image: ' . $e->getMessage());
@@ -71,23 +71,24 @@ final class ProductController extends AbstractController
                 }
             }
 
-            // Set who created this product
             $product->setCreatedBy($this->getUser());
 
             $entityManager->persist($product);
             $entityManager->flush();
 
-            // Log the activity
-            $this->activityLogger->log(
+            $snapshot = [
+                'name'       => $product->getName(),
+                'price'      => $product->getPrice(),
+                'image'      => $product->getImage(),
+                'created_by' => $product->getCreatedBy()?->getUsername(),
+            ];
+
+            $this->activityLogger->logCreate(
                 $this->getUser(),
-                'create',
                 'Product',
                 $product->getId(),
-                sprintf('%s created product: %s (Price: ₱%.2f)', 
-                    in_array('ROLE_ADMIN', $this->getUser()->getRoles()) ? 'Admin' : 'Staff',
-                    $product->getName(),
-                    $product->getPrice()
-                )
+                sprintf('Product: %s (ID: %d)', $product->getName(), $product->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Product created successfully!');
@@ -111,18 +112,24 @@ final class ProductController extends AbstractController
     #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        // Check if user can edit this product
         if (!$this->canEditOrDelete($product)) {
             $this->addFlash('error', 'You do not have permission to edit this product. You can only edit your own records.');
             return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
         }
 
         $oldImage = $product->getImage();
-        
+
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Snapshot captured BEFORE flush to record old values
+            $snapshot = [
+                'name'  => $product->getName(),
+                'price' => $product->getPrice(),
+                'image' => $product->getImage(),
+            ];
+
             $imageFile = $form->get('imageFile')->getData();
 
             if ($imageFile) {
@@ -135,10 +142,9 @@ final class ProductController extends AbstractController
                         $this->getParameter('images_directory'),
                         $newFilename
                     );
-                    
+
                     $product->setImage($newFilename);
-                    
-                    // Delete old image if exists and it's different from the new one
+
                     if ($oldImage && $oldImage !== $newFilename) {
                         $oldImagePath = $this->getParameter('images_directory').'/'.$oldImage;
                         if (file_exists($oldImagePath)) {
@@ -162,17 +168,12 @@ final class ProductController extends AbstractController
 
             $entityManager->flush();
 
-            // Log the activity
-            $this->activityLogger->log(
+            $this->activityLogger->logUpdate(
                 $this->getUser(),
-                'update',
                 'Product',
                 $product->getId(),
-                sprintf('%s updated product: %s (Price: ₱%.2f)', 
-                    in_array('ROLE_ADMIN', $this->getUser()->getRoles()) ? 'Admin' : 'Staff',
-                    $product->getName(),
-                    $product->getPrice()
-                )
+                sprintf('Product: %s (ID: %d)', $product->getName(), $product->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Product updated successfully!');
@@ -188,15 +189,13 @@ final class ProductController extends AbstractController
     #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
     {
-        // Check if user can delete this product
         if (!$this->canEditOrDelete($product)) {
             $this->addFlash('error', 'You do not have permission to delete this product. You can only delete your own records.');
             return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
         }
 
         if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->getPayload()->getString('_token'))) {
-            
-            // Check if product has orders
+
             if (method_exists($product, 'getOrders') && $product->getOrders()->count() > 0) {
                 $this->addFlash('error', sprintf(
                     '❌ Cannot delete product "%s" because it has %d order(s) associated with it.',
@@ -205,8 +204,7 @@ final class ProductController extends AbstractController
                 ));
                 return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
             }
-            
-            // Check if product has sales
+
             if (method_exists($product, 'getSales') && $product->getSales()->count() > 0) {
                 $this->addFlash('error', sprintf(
                     '❌ Cannot delete product "%s" because it has %d sales record(s).',
@@ -216,7 +214,6 @@ final class ProductController extends AbstractController
                 return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
             }
 
-            // Check if product has stocks
             if (method_exists($product, 'getStocks') && $product->getStocks()->count() > 0) {
                 $this->addFlash('error', sprintf(
                     '❌ Cannot delete product "%s" because it has %d stock record(s). Please delete the stock entries first.',
@@ -227,23 +224,24 @@ final class ProductController extends AbstractController
             }
 
             $productName = $product->getName();
-            $productId = $product->getId();
-            $productPrice = $product->getPrice();
+            $productId   = $product->getId();
 
-            // Log before deletion
-            $this->activityLogger->log(
+            $snapshot = [
+                'name'       => $product->getName(),
+                'price'      => $product->getPrice(),
+                'image'      => $product->getImage(),
+                'created_by' => $product->getCreatedBy()?->getUsername(),
+                'deleted_at' => (new \DateTimeImmutable())->format('c'),
+            ];
+
+            $this->activityLogger->logDelete(
                 $this->getUser(),
-                'delete',
                 'Product',
                 $productId,
-                sprintf('%s deleted product: %s (Price: ₱%.2f)', 
-                    in_array('ROLE_ADMIN', $this->getUser()->getRoles()) ? 'Admin' : 'Staff',
-                    $productName,
-                    $productPrice
-                )
+                sprintf('Product: %s (ID: %d)', $productName, $productId),
+                $snapshot
             );
 
-            // Delete image file if exists
             if ($product->getImage()) {
                 $imagePath = $this->getParameter('images_directory').'/'.$product->getImage();
                 if (file_exists($imagePath)) {
@@ -260,26 +258,18 @@ final class ProductController extends AbstractController
         return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    /**
-     * Check if the current user can edit or delete the product
-     * Admin: can edit/delete everything
-     * Staff: can only edit/delete their own records
-     */
     private function canEditOrDelete(Product $product): bool
     {
         $currentUser = $this->getUser();
-        
-        // Admin can access everything
+
         if (in_array('ROLE_ADMIN', $currentUser->getRoles())) {
             return true;
         }
 
-        // If no creator is set, allow staff access (for legacy records)
         if (!$product->getCreatedBy()) {
             return true;
         }
 
-        // Staff can only access their own records
         if (in_array('ROLE_STAFF', $currentUser->getRoles())) {
             return $product->getCreatedBy()->getId() === $currentUser->getId();
         }

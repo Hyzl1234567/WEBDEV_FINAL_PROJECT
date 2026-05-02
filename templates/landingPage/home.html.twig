@@ -1,9 +1,19 @@
-{% extends 'landingPage/base.html.twig' %}
+ {% extends 'landingPage/base.html.twig' %}
 
 {% block title %}EcoBrew Café – Sip Sustainably{% endblock %}
 
 {% block extra_styles %}
 /* ===== HERO ===== */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(29,74,35,0.92) 0%,
+    rgba(29,74,35,0.50) 45%,
+    rgba(16,44,20,0.20) 100%
+  );
+}
 .hero {
   min-height: calc(100vh - 70px);
   display: grid; grid-template-columns: 1fr 1fr;
@@ -11,13 +21,19 @@
   padding: 4rem 5rem;
   position: relative;
   overflow: hidden;
+  background-image: url("{{ asset('image/hero-bg.jpg') }}");
+  background-size: cover;
+  background-position: center;
 }
 .hero::before {
   content: '';
-  position: absolute; top: -100px; right: -100px;
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(153,204,103,0.1) 0%, transparent 70%);
-  border-radius: 50%;
+  position: absolute; inset: 0;
+  z-index: 0;
+}
+.hero-content,
+.hero-visual {
+  position: relative;
+  z-index: 1;
 }
 .hero-tag {
   display: inline-block;
@@ -31,7 +47,7 @@
 }
 .hero h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3rem, 5vw, 5rem);
+  font-size: clamp(2.5rem, 5vw, 5rem);
   font-weight: 900;
   line-height: 1.05;
   color: var(--forest);
@@ -78,6 +94,7 @@
   padding: 4px 12px; border-radius: 50px;
   font-size: 0.75rem; font-weight: 600;
 }
+.footer-brand-name { font-family: 'Mollani-Regular', serif; }
 .floating-badge {
   position: absolute;
   background: var(--lime); color: var(--forest);
@@ -98,7 +115,7 @@
 .features-header { text-align: center; margin-bottom: 3rem; }
 .features-header h2 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem; font-weight: 700; color: var(--forest);
+  font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 700; color: var(--forest);
 }
 .features-header p { color: var(--midforest); margin-top: 0.75rem; opacity: 0.8; }
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
@@ -126,7 +143,7 @@
 .menu-section { padding: 5rem; }
 .menu-section h2 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem; text-align: center; margin-bottom: 0.5rem; color: var(--forest);
+  font-size: clamp(1.8rem, 3vw, 2.5rem); text-align: center; margin-bottom: 0.5rem; color: var(--forest);
 }
 .menu-subtitle { text-align: center; color: var(--midforest); opacity: 0.8; margin-bottom: 3rem; }
 .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
@@ -134,12 +151,23 @@
   background: white; border-radius: 18px; overflow: hidden;
   border: 1px solid rgba(29,74,35,0.07);
   transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+  position: relative;
 }
 .menu-item:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(29,74,35,0.1); }
-.menu-img {
-  height: 140px; display: flex; align-items: center; justify-content: center;
-  font-size: 3.5rem;
-  background: linear-gradient(135deg, var(--cream), var(--paper));
+.menu-img { height: 160px; overflow: hidden; position: relative; }
+.menu-img img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.4s ease;
+}
+.menu-item:hover .menu-img img { transform: scale(1.06); }
+.menu-item:hover::after {
+  content: 'Order Now!';
+  position: absolute;
+  bottom: 10px; left: 50%; transform: translateX(-50%);
+  background: var(--forest); color: white;
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 0.75rem; white-space: nowrap;
+  pointer-events: none;
 }
 .menu-info { padding: 1.25rem; }
 .menu-info h4 { font-family: 'Playfair Display', serif; font-weight: 700; margin-bottom: 0.3rem; color: var(--forest); }
@@ -160,16 +188,243 @@
 }
 .stat-num {
   font-family: 'Playfair Display', serif;
-  font-size: 3rem; font-weight: 900; color: var(--lime);
+  font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: var(--lime);
 }
 .stat-label { font-size: 0.9rem; opacity: 0.7; margin-top: 0.4rem; }
+
+/* ===== SUSTAINABILITY PLEDGE ===== */
+.pledge-section {
+  padding: 5rem;
+  background: var(--cream);
+  position: relative;
+  overflow: hidden;
+}
+.pledge-section::before {
+  content: '🌍';
+  position: absolute;
+  font-size: 18rem;
+  opacity: 0.04;
+  top: 50%; right: -2rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.pledge-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.pledge-text h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 900;
+  color: var(--forest);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+.pledge-text h2 em { font-style: italic; color: var(--lime); }
+.pledge-text p {
+  color: var(--midforest);
+  opacity: 0.85;
+  line-height: 1.8;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+.pledge-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.pledge-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: var(--midforest);
+  line-height: 1.5;
+}
+.pledge-list li span.check {
+  background: rgba(153,204,103,0.2);
+  border: 1px solid rgba(153,204,103,0.4);
+  color: var(--midforest);
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.pledge-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.pledge-card {
+  background: white;
+  border-radius: 18px;
+  padding: 1.75rem;
+  border: 1px solid rgba(29,74,35,0.08);
+  box-shadow: 0 4px 20px rgba(29,74,35,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+}
+.pledge-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(29,74,35,0.1);
+}
+.pledge-card .p-icon { font-size: 2.2rem; margin-bottom: 0.75rem; display: block; }
+.pledge-card h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700;
+  color: var(--forest); margin-bottom: 0.4rem;
+}
+.pledge-card p {
+  font-size: 0.82rem;
+  color: var(--midforest);
+  opacity: 0.75;
+  line-height: 1.55;
+}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials-section {
+  padding: 5rem;
+  background: var(--forest);
+  position: relative;
+  overflow: hidden;
+}
+.testimonials-section::before {
+  content: '"';
+  position: absolute;
+  font-family: 'Playfair Display', serif;
+  font-size: 30rem;
+  color: rgba(153,204,103,0.05);
+  top: -4rem; left: 2rem;
+  line-height: 1;
+  pointer-events: none;
+}
+.testimonials-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.testimonials-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+}
+.testimonials-header p {
+  color: rgba(240,247,236,0.55);
+  font-size: 0.95rem;
+}
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.testimonial-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(153,204,103,0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  transition: background 0.2s, transform 0.2s;
+  position: relative;
+}
+.testimonial-card:hover {
+  background: rgba(255,255,255,0.09);
+  transform: translateY(-3px);
+}
+.testimonial-card::before {
+  content: '"';
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  color: var(--lime);
+  opacity: 0.4;
+  position: absolute;
+  top: 0.75rem; left: 1.25rem;
+  line-height: 1;
+}
+.testimonial-text {
+  font-size: 0.95rem;
+  color: rgba(240,247,236,0.8);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+  padding-top: 1.5rem;
+}
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.author-avatar {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(153,204,103,0.2);
+  border: 2px solid rgba(153,204,103,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.author-info .name {
+  font-weight: 600;
+  color: var(--cream);
+  font-size: 0.9rem;
+}
+.author-info .role {
+  font-size: 0.78rem;
+  color: rgba(240,247,236,0.45);
+  margin-top: 1px;
+}
+.stars {
+  color: var(--lime);
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1100px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+  .pledge-inner { gap: 2.5rem; }
+}
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding: 3rem 2rem; }
   .hero-visual { display: none; }
-  .features-grid, .menu-grid { grid-template-columns: 1fr 1fr; }
-  .stats { grid-template-columns: 1fr 1fr; }
-  .features, .menu-section { padding: 3rem 1.5rem; }
+  .features { padding: 3rem 1.5rem; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .menu-section { padding: 3rem 1.5rem; }
+  .menu-grid { grid-template-columns: 1fr 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; padding: 3rem 2rem; }
+  .pledge-section { padding: 3rem 1.5rem; }
+  .pledge-inner { grid-template-columns: 1fr; gap: 2rem; }
+  .testimonials-section { padding: 3rem 1.5rem; }
+  .testimonials-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 2.5rem 1.25rem; }
+  .hero h1 { font-size: 2.2rem; }
+  .hero p { font-size: 0.95rem; }
+  .hero-cta { flex-direction: column; align-items: flex-start; }
+  .hero-cta .btn-primary,
+  .hero-cta .btn-outline { width: 100%; text-align: center; }
+  .features-grid { grid-template-columns: 1fr; }
+  .menu-grid { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; padding: 2rem 1.25rem; gap: 1.25rem; }
+  .stat-num { font-size: 1.8rem; }
+  .pledge-cards { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .testimonials-section::before { font-size: 15rem; }
+  .pledge-section::before { font-size: 10rem; }
+  footer { grid-template-columns: 1fr 1fr; padding: 2.5rem 1.5rem; gap: 2rem; }
+  .footer-bottom { padding: 1rem 1.5rem; }
 }
 {% endblock %}
 
@@ -183,20 +438,11 @@
       <h1>Nature<br><em>in every </em>Cup</h1>
       <p>EcoBrew Café brings you ethically sourced, eco-conscious coffee crafted to fuel your day — and protect the planet we love.</p>
       <div class="hero-cta">
-        <a href="{{ path('about') }}" class="btn-primary">Our Story →</a>
+        <a href="{{ path('about') }}" class="btn-primary">Our Story</a>
         <button class="btn-outline" onclick="document.querySelector('.menu-section').scrollIntoView({behavior:'smooth'})">View Menu</button>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="coffee-card">
-        <span class="coffee-emoji">☕</span>
-        <h3>Signature Pour Over</h3>
-        <p>Single-origin Ethiopian beans, slow-dripped to reveal fruity, floral complexity.</p>
-        <span class="coffee-tag">✓ Carbon-Neutral Roast</span>
-      </div>
-      <div class="floating-badge badge-1">🌱 Eco Certified</div>
-      <div class="floating-badge badge-2">★ 4.9 Rating</div>
-    </div>
+    <div class="hero-visual"></div>
   </section>
 
   {# FEATURES #}
@@ -207,19 +453,19 @@
     </div>
     <div class="features-grid">
       <div class="feature-card">
-        <div class="feature-icon">🌍</div>
-        <h3>Carbon Neutral</h3>
-        <p>Every cup you enjoy offsets its own carbon footprint through our certified reforestation partners across Southeast Asia.</p>
+        <div class="feature-icon">🌿</div>
+        <h3>Naturally Better</h3>
+        <p>Enjoy drinks made from real, nature-based ingredients you can feel good about</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🫘</div>
-        <h3>Direct Trade Beans</h3>
-        <p>We work directly with smallholder farmers to ensure fair wages, sustainable farming practices, and premium quality beans.</p>
+        <div class="feature-icon">💚</div>
+        <h3>Healthy Alternative</h3>
+        <p>A refreshing choice for those who want something lighter and better for their body.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">♻️</div>
-        <h3>Zero Waste Cafe</h3>
-        <p>Compostable packaging, reusable cups, and our spent grounds upcycled into garden fertilizer — waste-free from start to finish.</p>
+        <div class="feature-icon">😊</div>
+        <h3>Feel-Good Experience</h3>
+        <p>From the first sip to the last, it's all about comfort, balance, and good vibes</p>
       </div>
     </div>
   </section>
@@ -229,64 +475,64 @@
     <h2>Our Menu</h2>
     <p class="menu-subtitle">Every item crafted with care — and a little planet love.</p>
     <div class="menu-grid">
-      <div class="menu-item">
-        <div class="menu-img">☕</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="{{ asset('image/menu/expresso.jpg') }}" alt="Espresso" loading="lazy"></div>
         <div class="menu-info">
           <h4>Espresso</h4>
           <p>Bold single-origin shot, short & strong</p>
           <div class="menu-price"><span class="price">₱85</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🥛</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="{{ asset('image/menu/oatlatte.jpg') }}" alt="Oat Latte" loading="lazy"></div>
         <div class="menu-info">
           <h4>Oat Latte</h4>
           <p>Creamy oat milk with house espresso blend</p>
           <div class="menu-price"><span class="price">₱145</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🫖</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="{{ asset('image/menu/coldbrew.jpg') }}" alt="Cold Brew" loading="lazy"></div>
         <div class="menu-info">
           <h4>Cold Brew</h4>
           <p>Steeped 18 hrs, smooth & refreshing</p>
           <div class="menu-price"><span class="price">₱120</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🍵</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=320&fit=crop&auto=format" alt="Matcha Latte" loading="lazy"></div>
         <div class="menu-info">
           <h4>Matcha Latte</h4>
           <p>Ceremonial-grade matcha, oat or almond milk</p>
           <div class="menu-price"><span class="price">₱155</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🥐</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=320&fit=crop&auto=format" alt="Vegan Croissant" loading="lazy"></div>
         <div class="menu-info">
           <h4>Vegan Croissant</h4>
           <p>Buttery, flaky — 100% plant-based</p>
           <div class="menu-price"><span class="price">₱95</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🍰</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="{{ asset('image/menu/bananaloaf.jpg') }}" alt="Banana Loaf" loading="lazy"></div>
         <div class="menu-info">
           <h4>Banana Loaf</h4>
           <p>Moist organic banana bread, slice or whole</p>
           <div class="menu-price"><span class="price">₱110</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🧊</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="{{ asset('image/menu/icedamericano.jpg') }}" alt="Iced Americano" loading="lazy"></div>
         <div class="menu-info">
           <h4>Iced Americano</h4>
           <p>Double shot over glacier ice, crisp & clean</p>
           <div class="menu-price"><span class="price">₱105</span><span class="eco-badge">🌿 Eco</span></div>
         </div>
       </div>
-      <div class="menu-item">
-        <div class="menu-img">🍫</div>
+      <div class="menu-item" onclick="window.location.href='{{ path('app_login') }}'">
+        <div class="menu-img"><img src="{{ asset('image/menu/cacaobrew.jpg') }}" alt="Cacao Brew" loading="lazy"></div>
         <div class="menu-info">
           <h4>Cacao Brew</h4>
           <p>Filipino tablea hot chocolate, rich & earthy</p>
@@ -304,10 +550,92 @@
     <div><div class="stat-num">6 Tons</div><div class="stat-label">CO₂ Offset This Year</div></div>
   </div>
 
+  {# ── NEW: SUSTAINABILITY PLEDGE ── #}
+  <section class="pledge-section">
+    <div class="pledge-inner">
+      <div class="pledge-text">
+        <h2>Our <em>Sustainability</em> Pledge</h2>
+        <p>Every cup you order is a vote for a healthier planet. We hold ourselves accountable to measurable, transparent commitments — not just good intentions.</p>
+        <ul class="pledge-list">
+          <li><span class="check">✓</span> 100% compostable packaging across all takeaway orders</li>
+          <li><span class="check">✓</span> Direct trade relationships with 12 local farm partners</li>
+          <li><span class="check">✓</span> Zero single-use plastics in our café since 2023</li>
+          <li><span class="check">✓</span> 20% of profits reinvested into reforestation programs</li>
+          <li><span class="check">✓</span> Solar-powered kitchen and cold storage units</li>
+        </ul>
+      </div>
+      <div class="pledge-cards">
+        <div class="pledge-card">
+          <span class="p-icon">♻️</span>
+          <h4>Zero Waste Goal</h4>
+          <p>Diverting 98% of café waste from landfills through composting and recycling.</p>
+        </div>
+        <div class="pledge-card">
+          <span class="p-icon">🌱</span>
+          <h4>Farm to Cup</h4>
+          <p>Direct sourcing from local farms means fresher beans and fairer pay for growers.</p>
+        </div>
+        <div class="pledge-card">
+          <span class="p-icon">☀️</span>
+          <h4>Clean Energy</h4>
+          <p>Our kitchen runs on solar — reducing our carbon footprint one brew at a time.</p>
+        </div>
+        <div class="pledge-card">
+          <span class="p-icon">🤝</span>
+          <h4>Community First</h4>
+          <p>Partnering with local vendors and hiring from the neighborhood we serve.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ── NEW: TESTIMONIALS ── #}
+  <section class="testimonials-section">
+    <div class="testimonials-header">
+      <h2>What Our Regulars Say</h2>
+      <p>Real people. Real cups. Real love for EcoBrew.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">The oat latte here is genuinely the best I've had in Cebu. You can taste the care in every sip — and knowing it's eco-friendly makes it even better.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">☕</div>
+          <div class="author-info">
+            <div class="name">Maria Santos</div>
+            <div class="role">Regular since 2023 · IT Park</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">I switched from my old coffee shop after trying EcoBrew's cold brew. The taste is incredible and I love that they're serious about sustainability — not just greenwashing.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🌿</div>
+          <div class="author-info">
+            <div class="name">James Reyes</div>
+            <div class="role">Remote Worker · Cebu City</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">The cacao brew is unlike anything else — it tastes like home. And the staff here genuinely know their craft. EcoBrew is my non-negotiable morning ritual now.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🍵</div>
+          <div class="author-info">
+            <div class="name">Ana Villanueva</div>
+            <div class="role">Educator · Mandaue</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   {# FOOTER #}
   <footer>
     <div class="footer-brand">
-      <h3>☕ EcoBrew Café</h3>
+      <h3><span class="footer-brand-name">🍵EcoBrew</span> Café</h3>
       <p>Sustainably sourced coffee for a better tomorrow. Sip by sip, we're making a difference.</p>
     </div>
     <div>
@@ -342,6 +670,3 @@
 
 </div>
 {% endblock %}
-
-
-

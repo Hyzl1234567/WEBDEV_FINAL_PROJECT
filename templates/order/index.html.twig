@@ -4,405 +4,495 @@
 
 {% block body %}
 <style>
-    body {
-        background-color: #fff;
-        font-family: Arial, sans-serif;
-    }
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --darkforest: #142E17;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --limelight: #B8DC8E;
+    --paper: #F5FAF2;
+  }
 
-    .order-container {
-        width: 90%;
-        max-width: 1400px;
-        margin: 40px auto;
-        padding: 25px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
+  .page-wrapper {
+    min-height: 100vh;
+    background: var(--cream);
+    padding: 100px 2rem 3rem;
+  }
 
-    .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-    }
+  .page-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-    .order-header-left h2 {
-        color: #1D4A23;
-        margin: 0 0 10px 0;
-        font-size: 26px;
-        font-weight: bold;
-    }
+  /* ── Page Header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1.5px solid rgba(29,74,35,0.12);
+  }
 
-    .order-header-left p {
-        color: #555;
-        margin: 0;
-        font-size: 15px;
-    }
+  .page-header-left h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 0.2rem;
+  }
 
-    .btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
+  .page-header-left p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+  }
 
-    .btn-primary {
-        background-color: #1D4A23;
-        color: white;
-    }
+  /* ── Alerts ── */
+  .alert {
+    padding: 11px 16px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .btn-primary:hover {
-        background-color: #2d6b34;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(29, 74, 35, 0.3);
-    }
+  .alert-success {
+    background: rgba(153,204,103,0.18);
+    color: var(--forest);
+    border: 1px solid rgba(153,204,103,0.45);
+  }
 
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 13px;
-        margin: 0 3px;
-    }
+  .alert-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
 
-    .btn-info {
-        background-color: #3498db;
-        color: white;
-    }
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.15px;
+  }
 
-    .btn-info:hover {
-        background-color: #2980b9;
-    }
+  .btn-primary {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+  }
 
-    .btn-warning {
-        background-color: #FFD700;
-        color: #333;
-    }
+  .btn-primary:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(153,204,103,0.35);
+  }
 
-    .btn-warning:hover {
-        background-color: #e6c200;
-    }
+  .btn-sm {
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
 
-    .btn-danger {
-        background-color: #E74C3C;
-        color: white;
-    }
+  .btn-info {
+    background: rgba(52,152,219,0.1);
+    color: #1a6fa8;
+    border: 1.5px solid rgba(52,152,219,0.25);
+  }
 
-    .btn-danger:hover {
-        background-color: #c0392b;
-    }
+  .btn-info:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+  }
 
-    .btn-locked {
-        background-color: #bdc3c7;
-        color: #666;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+  .btn-warning {
+    background: rgba(212,163,58,0.12);
+    color: #7a5c00;
+    border: 1.5px solid rgba(212,163,58,0.3);
+  }
 
-    /* DataTable wrapper styling */
-    .dataTables_wrapper {
-        padding: 20px 0;
-    }
+  .btn-warning:hover {
+    background: #C9A84C;
+    color: white;
+    border-color: #C9A84C;
+  }
 
-    /* DataTable search box */
-    .dataTables_filter input {
-        border: 2px solid #1D4A23;
-        border-radius: 6px;
-        padding: 6px 12px;
-        margin-left: 8px;
-    }
+  .btn-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1.5px solid rgba(192,57,43,0.25);
+  }
 
-    /* DataTable length selector */
-    .dataTables_length select {
-        border: 2px solid #1D4A23;
-        border-radius: 6px;
-        padding: 4px 8px;
-        margin: 0 8px;
-    }
+  .btn-danger:hover {
+    background: #c0392b;
+    color: white;
+    border-color: #c0392b;
+  }
 
-    /* DataTable pagination */
-    .dataTables_paginate .paginate_button {
-        padding: 6px 12px;
-        margin: 0 2px;
-        border-radius: 6px;
-        border: 1px solid #1D4A23;
-        background: white;
-        color: #1D4A23 !important;
-    }
+  .btn-locked {
+    background: rgba(189,195,199,0.2);
+    color: #aab;
+    border: 1.5px solid rgba(189,195,199,0.4);
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
 
-    .dataTables_paginate .paginate_button:hover {
-        background: #1D4A23 !important;
-        color: white !important;
-        border: 1px solid #1D4A23;
-    }
+  /* ── Table Card ── */
+  .table-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(29,74,35,0.08);
+    overflow: hidden;
+  }
 
-    .dataTables_paginate .paginate_button.current {
-        background: #1D4A23 !important;
-        color: white !important;
-        border: 1px solid #1D4A23;
-    }
+  /* ── DataTable Controls ── */
+  .dataTables_wrapper {
+    padding: 1.5rem;
+  }
 
-    .dataTables_paginate .paginate_button.disabled {
-        color: #ccc !important;
-    }
+  .dataTables_filter label,
+  .dataTables_length label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--midforest);
+    font-weight: 500;
+  }
 
-    /* DataTable info text */
-    .dataTables_info {
-        color: #666;
-        font-size: 14px;
-    }
+  .dataTables_filter input {
+    border: 1.5px solid rgba(29,74,35,0.2) !important;
+    border-radius: 8px !important;
+    padding: 7px 13px !important;
+    margin-left: 8px !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
 
-    table {
-        width: 100% !important;
-        border-collapse: collapse;
-        border-radius: 10px;
-        overflow: hidden;
-    }
+  .dataTables_filter input:focus {
+    border-color: var(--lime) !important;
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.15) !important;
+  }
 
-    thead {
-        background-color: #1D4A23;
-        color: white;
-    }
+  .dataTables_length select {
+    border: 1.5px solid rgba(29,74,35,0.2) !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    margin: 0 6px !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+  }
 
-    th, td {
-        padding: 12px 15px;
-        text-align: center;
-        font-size: 15px;
-        border-bottom: 1px solid #ddd;
-    }
+  /* ── Table ── */
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+  }
 
-    tbody tr:hover {
-        background-color: #f4f9ef;
-        transition: 0.2s ease-in-out;
-    }
+  thead {
+    background: var(--forest);
+  }
 
-    .badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: bold;
-    }
+  thead th {
+    padding: 14px 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(240,247,236,0.85);
+    border: none;
+    text-align: center;
+  }
 
-    .bg-warning {
-        background-color: #FFD700;
-        color: #333;
-    }
+  tbody tr {
+    border-bottom: 1px solid rgba(29,74,35,0.07);
+    transition: background 0.15s;
+  }
 
-    .bg-info {
-        background-color: #3498db;
-        color: white;
-    }
+  tbody tr:hover {
+    background: var(--paper);
+  }
 
-    .bg-success {
-        background-color: #99CC67;
-        color: #1D4A23;
-    }
+  tbody tr:last-child { border-bottom: none; }
 
-    .bg-danger {
-        background-color: #E74C3C;
-        color: white;
-    }
+  td {
+    padding: 12px 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+  }
 
-    .bg-secondary {
-        background-color: #bdc3c7;
-        color: white;
-    }
+  /* ── Status Badges ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
 
-    .creator-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        color: white;
-    }
+  .bg-warning  { background: rgba(255,215,0,0.18);   color: #7a5c00; border: 1px solid rgba(255,215,0,0.45); }
+  .bg-info     { background: rgba(52,152,219,0.1);   color: #1a6fa8; border: 1px solid rgba(52,152,219,0.3); }
+  .bg-success  { background: rgba(153,204,103,0.18); color: var(--midforest); border: 1px solid rgba(153,204,103,0.4); }
+  .bg-danger   { background: rgba(192,57,43,0.1);    color: #c0392b; border: 1px solid rgba(192,57,43,0.25); }
+  .bg-secondary{ background: rgba(149,165,166,0.15); color: #666;    border: 1px solid rgba(149,165,166,0.3); }
 
-    .creator-admin {
-        background-color: #9b59b6;
-    }
+  /* ── Creator Badge ── */
+  .creator-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
 
-    .creator-staff {
-        background-color: #3498db;
-    }
+  .creator-admin {
+    background: rgba(155,89,182,0.12);
+    color: #7d3c98;
+    border: 1px solid rgba(155,89,182,0.25);
+  }
 
-    .no-orders {
-        text-align: center;
-        color: #555;
-        padding: 40px 20px;
-        font-size: 15px;
-    }
+  .creator-staff {
+    background: rgba(52,152,219,0.1);
+    color: #1a6fa8;
+    border: 1px solid rgba(52,152,219,0.25);
+  }
 
-    .actions-cell {
-        white-space: nowrap;
-    }
+  /* ── Quantity Badge ── */
+  .quantity-badge {
+    display: inline-block;
+    background: rgba(153,204,103,0.15);
+    color: var(--midforest);
+    border: 1px solid rgba(153,204,103,0.35);
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
 
-    .delete-form {
-        display: inline;
-    }
+  /* ── Actions Cell ── */
+  .actions-cell {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
 
-    .flash-messages {
-        margin-bottom: 20px;
-    }
+  .delete-form { display: inline; margin: 0; }
 
-    .alert {
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        font-size: 14px;
-    }
+  /* ── Pagination ── */
+  .dataTables_paginate { margin-top: 1rem; }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
+  .dataTables_paginate .paginate_button {
+    padding: 6px 13px !important;
+    margin: 0 2px !important;
+    border-radius: 8px !important;
+    border: 1.5px solid rgba(29,74,35,0.18) !important;
+    background: white !important;
+    color: var(--forest) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    transition: all 0.15s !important;
+    cursor: pointer;
+  }
 
-    .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
+  .dataTables_paginate .paginate_button:hover {
+    background: var(--forest) !important;
+    color: white !important;
+    border-color: var(--forest) !important;
+  }
 
-    /* Center no records message */
-    td.dataTables_empty {
-        text-align: center;
-        color: #777;
-        font-style: italic;
-        padding: 30px !important;
-    }
+  .dataTables_paginate .paginate_button.current {
+    background: var(--forest) !important;
+    color: white !important;
+    border-color: var(--forest) !important;
+  }
 
-    /* Quantity badge styling */
-    .quantity-badge {
-        display: inline-block;
-        background-color: #e8f5e9;
-        color: #1D4A23;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 13px;
-    }
+  .dataTables_paginate .paginate_button.disabled {
+    color: rgba(29,74,35,0.3) !important;
+    border-color: rgba(29,74,35,0.1) !important;
+    cursor: default !important;
+  }
+
+  .dataTables_info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.83rem;
+    color: rgba(29,74,35,0.55);
+    margin-top: 1rem;
+  }
+
+  td.dataTables_empty {
+    text-align: center;
+    color: rgba(29,74,35,0.4);
+    font-style: italic;
+    padding: 3rem !important;
+    font-size: 0.9rem;
+  }
+
+  .no-orders {
+    text-align: center;
+    color: rgba(29,74,35,0.5);
+    padding: 3rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+  }
 </style>
 
-<div class="order-container">
+<div class="page-wrapper">
+  <div class="page-inner">
+
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
+      <div class="alert alert-success">✓ {{ message }}</div>
     {% endfor %}
-    
     {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">{{ message }}</div>
+      <div class="alert alert-danger">⚠ {{ message }}</div>
     {% endfor %}
 
-    <div class="order-header">
-        <div class="order-header-left">
-            <h2>📦 Orders</h2>
-            <p>Manage and view all customer orders here.</p>
-        </div>
-        <div class="order-header-right">
-            <a href="{{ path('app_order_new') }}" class="btn btn-primary">+ Create New Order</a>
-        </div>
+    <div class="page-header">
+      <div class="page-header-left">
+        <h2>Orders</h2>
+        <p>Manage and view all customer orders here.</p>
+      </div>
+      <div class="order-header-right">
+        <a href="{{ path('app_order_new') }}" class="btn btn-primary">+ Create New Order</a>
+      </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-card">
+      <div class="table-responsive">
         <table id="ordersTable">
-            <thead>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Total Price</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Created By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if orders is defined and orders|length > 0 %}
+              {% for order in orders %}
                 <tr>
-                    <th>#</th>
-                    <th>Customer</th>
-                    <th>Product</th>
-                    <th>Qty</th>
-                    <th>Unit Price</th>
-                    <th>Total Price</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Created By</th>
-                    <th>Actions</th>
+                  <td style="opacity:0.5; font-size:0.8rem;">#{{ order.id }}</td>
+                  <td>
+                    {% if order.customer %}
+                      <strong>{{ order.customer.name }}</strong>
+                    {% else %}
+                      <span class="badge bg-secondary">Deleted Customer</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if order.product %}
+                      {{ order.product.name }}
+                    {% else %}
+                      <span class="badge bg-secondary">Deleted Product</span>
+                    {% endif %}
+                  </td>
+                  <td><span class="quantity-badge">{{ order.quantity ?? 1 }}</span></td>
+                  <td>
+                    {% if order.product and order.product.price is not null %}
+                      ₱{{ order.product.price|number_format(2, '.', ',') }}
+                    {% else %}
+                      ₱0.00
+                    {% endif %}
+                  </td>
+                  <td><strong>₱{{ order.totalPrice|number_format(2, '.', ',') }}</strong></td>
+                  <td>
+                    {% if order.status == 'Pending' %}
+                      <span class="badge bg-warning">Pending</span>
+                    {% elseif order.status == 'Processing' %}
+                      <span class="badge bg-info">Processing</span>
+                    {% elseif order.status == 'Completed' %}
+                      <span class="badge bg-success">Completed</span>
+                    {% elseif order.status == 'Cancelled' %}
+                      <span class="badge bg-danger">Cancelled</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.83rem; color:rgba(29,74,35,0.6);">
+                    {{ order.createdAt ? order.createdAt|date('Y-m-d H:i') : '—' }}
+                  </td>
+                  <td>
+                    {% if order.createdBy %}
+                      <span class="creator-badge {{ 'ROLE_ADMIN' in order.createdBy.roles ? 'creator-admin' : 'creator-staff' }}">
+                        {{ 'ROLE_ADMIN' in order.createdBy.roles ? '👑' : '👤' }} {{ order.createdBy.username }}
+                      </span>
+                    {% else %}
+                      <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td class="actions-cell">
+                    <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-sm btn-info" title="View">👁️ View</a>
+
+                    {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+
+                    {% if canEdit %}
+                      <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-sm btn-warning" title="Edit">✏️ Edit</a>
+                      <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" class="delete-form"
+                            onsubmit="return confirm('⚠️ Are you sure you want to delete this order?\n\nOrder #{{ order.id }}\n\nThis action cannot be undone!');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">🗑️ Delete</button>
+                      </form>
+                    {% else %}
+                      <span class="btn btn-sm btn-locked" title="You can only edit/delete your own records">🔒 Locked</span>
+                    {% endif %}
+                  </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% if orders is defined and orders|length > 0 %}
-                    {% for order in orders %}
-                        <tr>
-                            <td>{{ order.id }}</td>
-                            <td>
-                                {% if order.customer %}
-                                    {{ order.customer.name }}
-                                {% else %}
-                                    <span class="badge bg-secondary" title="Customer deleted">Deleted Customer</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if order.product %}
-                                    {{ order.product.name }}
-                                {% else %}
-                                    <span class="badge bg-secondary" title="Product deleted">Deleted Product</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="quantity-badge">{{ order.quantity ?? 1 }}</span>
-                            </td>
-                            <td>
-                                {% if order.product and order.product.price is not null %}
-                                    ₱{{ order.product.price|number_format(2, '.', ',') }}
-                                {% else %}
-                                    ₱0.00
-                                {% endif %}
-                            </td>
-                            <td><strong>₱{{ order.totalPrice|number_format(2, '.', ',') }}</strong></td>
-                            <td>
-                                {% if order.status == 'Pending' %}
-                                    <span class="badge bg-warning">Pending</span>
-                                {% elseif order.status == 'Processing' %}
-                                    <span class="badge bg-info">Processing</span>
-                                {% elseif order.status == 'Completed' %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% elseif order.status == 'Cancelled' %}
-                                    <span class="badge bg-danger">Cancelled</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Unknown</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ order.createdAt ? order.createdAt|date('Y-m-d H:i') : '—' }}</td>
-                            <td>
-                                {% if order.createdBy %}
-                                    <span class="creator-badge {{ 'ROLE_ADMIN' in order.createdBy.roles ? 'creator-admin' : 'creator-staff' }}">
-                                        {{ 'ROLE_ADMIN' in order.createdBy.roles ? '👑' : '👤' }} {{ order.createdBy.username }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Unknown</span>
-                                {% endif %}
-                            </td>
-                            <td class="actions-cell">
-                                <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-sm btn-info" title="View">👁️ View</a>
-                                
-                                {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-                                
-                                {% if canEdit %}
-                                    <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-sm btn-warning" title="Edit">✏️ Edit</a>
-                                    <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" class="delete-form" onsubmit="return confirm('⚠️ Are you sure you want to delete this order?\n\nOrder #{{ order.id }}\n\nThis action cannot be undone!');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">🗑️ Delete</button>
-                                    </form>
-                                {% else %}
-                                    <span class="btn btn-sm btn-locked" title="You can only edit/delete your own records">🔒 Locked</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="10" class="no-orders">
-                            <p>No orders found.</p>
-                            <a href="{{ path('app_order_new') }}" class="btn btn-primary" style="margin-top: 15px;">Create Your First Order</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="10" class="no-orders">
+                  <p>No orders found.</p>
+                  <a href="{{ path('app_order_new') }}" class="btn btn-primary" style="margin-top: 15px;">Create Your First Order</a>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
         </table>
+      </div>
     </div>
+
+  </div>
 </div>
 {% endblock %}
 
@@ -410,7 +500,7 @@
 <script>
 $(document).ready(function() {
     $('#ordersTable').DataTable({
-        "order": [[0, "desc"]], // Sort by Order ID descending (newest first)
+        "order": [[0, "desc"]],
         "pageLength": 10,
         "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         "language": {
@@ -429,14 +519,8 @@ $(document).ready(function() {
             }
         },
         "columnDefs": [
-            { 
-                "orderable": false, 
-                "targets": [9] // Disable sorting on Actions column
-            },
-            {
-                "type": "num",
-                "targets": [3, 4, 5] // Quantity, Unit Price, and Total Price columns - for proper numeric sorting
-            }
+            { "orderable": false, "targets": [9] },
+            { "type": "num", "targets": [3, 4, 5] }
         ]
     });
 });

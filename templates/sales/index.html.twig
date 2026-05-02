@@ -4,142 +4,207 @@
 
 {% block body %}
 <style>
-    .sales-container {
-        background-color: #FDFBF5; /* cream white */
-        font-family: 'Poppins', sans-serif;
-        color: #1D4A23;
-        padding: 30px 60px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin: 20px auto;
-        max-width: 1100px;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    .sales-header {
-        text-align: center;
-        color: #1D4A23;
-        font-size: 34px;
-        font-weight: 700;
-        margin-bottom: 40px;
-    }
+  :root {
+    --forest: #1D4A23;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --cream: #F0F7EC;
+    --paper: #F0F7EC;
+  }
 
-    .summary {
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        margin-bottom: 50px;
-        flex-wrap: wrap;
-    }
+  .sales-container {
+    max-width: 1200px;
+    margin: 36px auto;
+    padding: 0 24px;
+    font-family: 'DM Sans', sans-serif;
+  }
 
-    .summary-card {
-        flex: 1;
-        min-width: 220px;
-        max-width: 320px;
-        background: white;
-        padding: 25px 40px;
-        border-radius: 16px;
-        border: 2px solid #99CC67;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        text-align: center;
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
+  /* ── PAGE HEADER ── */
+  .sales-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(29,74,35,0.12);
+  }
 
-    .summary-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-    }
+  .sales-page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin: 0 0 4px;
+  }
 
-    .summary-card h3 {
-        margin: 0;
-        font-size: 18px;
-        color: #1D4A23;
-        margin-bottom: 10px;
-    }
+  .sales-page-header p {
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+    margin: 0;
+  }
 
-    .summary-card p {
-        font-size: 28px;
-        font-weight: bold;
-        color: #99CC67;
-    }
+  /* ── SUMMARY CARDS ── */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        background-color: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+  .summary-card {
+    background: var(--cream);
+    border: 1px solid rgba(29,74,35,0.1);
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px rgba(29,74,35,0.07);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
 
-    th, td {
-        padding: 15px;
-        text-align: left;
-        border-bottom: 1px solid #eaeaea;
-        font-size: 15px;
-    }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--lime);
+    border-radius: 4px 0 0 4px;
+  }
 
-    th {
-        background-color: #1D4A23;
-        color: white;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
+  .summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(29,74,35,0.12);
+  }
 
-    tr:hover {
-        background-color: #f7ffef;
-    }
+  .summary-card h3 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--midforest);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 10px;
+  }
 
-    td:nth-child(4) {
-        font-weight: 600;
-        color: #1D4A23;
-    }
+  .summary-card p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--forest);
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+  }
 
-    .no-records {
-        text-align: center;
-        color: #1D4A23;
-        padding: 20px;
-    }
+  /* ── TABLE CARD ── */
+  .table-card {
+    background: var(--cream);
+    border-radius: 16px;
+    border: 1px solid rgba(29,74,35,0.08);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(29,74,35,0.07);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--cream);
+  }
+
+  thead {
+    background: var(--forest);
+  }
+
+  th {
+    padding: 14px 18px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: left;
+  }
+
+  td {
+    padding: 14px 18px;
+    font-size: 0.88rem;
+    color: #2c3e50;
+    border-bottom: 1px solid rgba(29,74,35,0.06);
+    background: var(--cream);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td {
+    background: #e4f0da;
+    transition: background 0.2s ease;
+  }
+
+  td:nth-child(4) {
+    font-weight: 700;
+    color: var(--forest);
+  }
+
+  .no-records {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 48px 20px !important;
+    background: var(--cream) !important;
+  }
 </style>
 
 <div class="sales-container">
-    <h1 class="sales-header">Sales Overview</h1>
 
-    <div class="summary">
-        <div class="summary-card">
-            <h3>Total Sales</h3>
-            <p>{{ totalSales }}</p>
-        </div>
-        <div class="summary-card">
-            <h3>Total Revenue</h3>
-            <p>₱{{ totalRevenue|number_format(2, '.', ',') }}</p>
-        </div>
+  <div class="sales-page-header">
+    <div>
+      <h1>Sales Overview</h1>
+      <p>Track revenue and transaction history across EcoBrew.</p>
     </div>
+  </div>
 
+  {# Summary Cards #}
+  <div class="summary">
+    <div class="summary-card">
+      <h3>Total Sales</h3>
+      <p>{{ totalSales }}</p>
+    </div>
+    <div class="summary-card">
+      <h3>Total Revenue</h3>
+      <p>₱{{ totalRevenue|number_format(2, '.', ',') }}</p>
+    </div>
+  </div>
+
+  {# Sales Table #}
+  <div class="table-card">
     <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Total Amount</th>
-                <th>Sale Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sale in sales %}
-                <tr>
-                    <td>{{ sale.id }}</td>
-                    <td>{{ sale.product.name }}</td>
-                    <td>{{ sale.quantity }}</td>
-                    <td>₱{{ sale.totalAmount|number_format(2, '.', ',') }}</td>
-                    <td>{{ sale.saleDate|date('Y-m-d H:i') }}</td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="5" class="no-records">No sales records found.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Total Amount</th>
+          <th>Sale Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sale in sales %}
+          <tr>
+            <td><strong>#{{ sale.id }}</strong></td>
+            <td>{{ sale.product.name }}</td>
+            <td>{{ sale.quantity }}</td>
+            <td>₱{{ sale.totalAmount|number_format(2, '.', ',') }}</td>
+            <td>{{ sale.saleDate|date('Y-m-d H:i') }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="5" class="no-records">No sales records found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
     </table>
+  </div>
+
 </div>
 {% endblock %}

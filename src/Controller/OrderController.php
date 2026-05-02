@@ -27,8 +27,6 @@ final class OrderController extends AbstractController
     #[Route(name: 'app_order_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository): Response
     {
-        // Use an eager-loading repository method to avoid Doctrine trying to lazy-load
-        // related entities that may have been deleted (which causes EntityNotFound exceptions).
         return $this->render('order/index.html.twig', [
             'orders' => $orderRepository->findAllWithRelations(),
         ]);
@@ -43,26 +41,32 @@ final class OrderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $order->setCreatedBy($this->getUser());
-            
+
             $entityManager->persist($order);
             $entityManager->flush();
+
+            $snapshot = [
+                'customer'    => $order->getCustomer()?->getName(),
+                'product'     => $order->getProduct()?->getName(),
+                'quantity'    => $order->getQuantity(),
+                'total_price' => $order->getTotalPrice(),
+                'created_by'  => $order->getCreatedBy()?->getUsername(),
+            ];
 
             $this->activityLogger->logCreate(
                 $this->getUser(),
                 'Order',
                 $order->getId(),
-                sprintf(
-                    '#%d - Customer: %s, Product: %s, Quantity: %d, Total: ₱%s',
+                sprintf('Order #%d - Customer: %s, Product: %s (ID: %d)',
                     $order->getId(),
-                    $order->getCustomer() ? $order->getCustomer()->getName() : 'Deleted Customer',
-                    $order->getProduct() ? $order->getProduct()->getName() : 'Deleted Product',
-                    $order->getQuantity(),
-                    number_format($order->getTotalPrice(), 2)
-                )
+                    $order->getCustomer()?->getName() ?? 'Deleted Customer',
+                    $order->getProduct()?->getName() ?? 'Deleted Product',
+                    $order->getId()
+                ),
+                $snapshot
             );
 
             $this->addFlash('success', 'Order created successfully!');
-
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -92,21 +96,29 @@ final class OrderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Snapshot captured BEFORE flush to record old values
+            $snapshot = [
+                'customer'    => $order->getCustomer()?->getName(),
+                'product'     => $order->getProduct()?->getName(),
+                'quantity'    => $order->getQuantity(),
+                'total_price' => $order->getTotalPrice(),
+            ];
+
             $entityManager->flush();
 
             $this->activityLogger->logUpdate(
                 $this->getUser(),
                 'Order',
                 $order->getId(),
-                sprintf(
-                    '#%d - Customer: %s',
+                sprintf('Order #%d - Customer: %s (ID: %d)',
                     $order->getId(),
-                    $order->getCustomer() ? $order->getCustomer()->getName() : 'Deleted Customer'
-                )
+                    $order->getCustomer()?->getName() ?? 'Deleted Customer',
+                    $order->getId()
+                ),
+                $snapshot
             );
 
             $this->addFlash('success', 'Order updated successfully!');
-
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -125,24 +137,33 @@ final class OrderController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->getPayload()->getString('_token'))) {
-            $orderId = $order->getId();
-            $customerName = $order->getCustomer() ? $order->getCustomer()->getName() : 'Deleted Customer';
-            $productName = $order->getProduct() ? $order->getProduct()->getName() : 'Deleted Product';
+            $orderId      = $order->getId();
+            $customerName = $order->getCustomer()?->getName() ?? 'Deleted Customer';
+            $productName  = $order->getProduct()?->getName()  ?? 'Deleted Product';
 
-            $entityManager->remove($order);
-            $entityManager->flush();
+            $snapshot = [
+                'customer'    => $customerName,
+                'product'     => $productName,
+                'quantity'    => $order->getQuantity(),
+                'total_price' => $order->getTotalPrice(),
+                'deleted_at'  => (new \DateTimeImmutable())->format('c'),
+            ];
 
             $this->activityLogger->logDelete(
                 $this->getUser(),
                 'Order',
                 $orderId,
-                sprintf(
-                    '#%d - Customer: %s, Product: %s',
+                sprintf('Order #%d - Customer: %s, Product: %s (ID: %d)',
                     $orderId,
                     $customerName,
-                    $productName
-                )
+                    $productName,
+                    $orderId
+                ),
+                $snapshot
             );
+
+            $entityManager->remove($order);
+            $entityManager->flush();
 
             $this->addFlash('success', 'Order deleted successfully!');
         }
@@ -153,12 +174,11 @@ final class OrderController extends AbstractController
     private function canEditOrDelete(Order $order): bool
     {
         $currentUser = $this->getUser();
-        
+
         if (!$order->getCreatedBy()) {
             return true;
         }
 
-        // Both ADMIN and STAFF have full access
         if (in_array('ROLE_ADMIN', $currentUser->getRoles()) || in_array('ROLE_STAFF', $currentUser->getRoles())) {
             return true;
         }

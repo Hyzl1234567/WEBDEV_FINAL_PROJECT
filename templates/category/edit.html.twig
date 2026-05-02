@@ -4,189 +4,292 @@
 
 {% block body %}
 <style>
-    body {
-        background-color: #99CC67;
-        font-family: 'Poppins', sans-serif;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    .form-container {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        width: 600px;
-        margin: 80px auto;
-        padding: 50px;
-        text-align: center;
-    }
+  :root {
+    --forest: #1D4A23;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --cream: #F0F7EC;
+    --error: #c0392b;
+    --success: #27ae60;
+  }
 
-    h1 {
-        text-align: center;
-        color: #1D4A23;
-        margin-bottom: 25px;
-        font-size: 24px;
-        font-weight: bold;
-    }
+  .edit-wrap {
+    max-width: 680px;
+    margin: 48px auto;
+    padding: 0 24px;
+    font-family: 'DM Sans', sans-serif;
+  }
 
-    /* Flash messages */
-    .alert {
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(29,74,35,0.12);
+  }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin: 0 0 4px;
+  }
 
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
+  .page-header p {
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+    margin: 0;
+  }
 
-    label {
-        display: block;
-        text-align: left;
-        color: #2e5d24;
-        font-weight: bold;
-        margin-top: 15px;
-        margin-bottom: 8px;
-    }
+  /* ── FLASH ── */
+  .flash-success {
+    background: rgba(39,174,96,0.1);
+    border-left: 4px solid var(--success);
+    color: var(--success);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
 
-    input[type="text"], textarea {
-        width: 100%;
-        padding: 14px;
-        border: 2px solid #a3d18b;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        outline: none;
-        font-size: 16px;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-    }
+  .flash-error {
+    background: rgba(192,57,43,0.08);
+    border-left: 4px solid var(--error);
+    color: var(--error);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
 
-    input[type="text"]:focus, textarea:focus {
-        border-color: #6fa84f;
-        box-shadow: 0 0 8px #6fa84f;
-    }
+  /* ── FORM CARD ── */
+  .form-card {
+    background: var(--cream);
+    border-radius: 16px;
+    border: 1px solid rgba(29,74,35,0.08);
+    box-shadow: 0 4px 24px rgba(29,74,35,0.07);
+    padding: 36px 40px;
+  }
 
-    .button-group {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 15px;
-    }
+  /* ── CREATOR INFO ── */
+  .creator-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1px solid rgba(29,74,35,0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 28px;
+    font-size: 0.85rem;
+    color: var(--midforest);
+    font-weight: 500;
+  }
 
-    .btn {
-        display: inline-block;
-        padding: 12px 24px;
-        font-weight: bold;
-        font-size: 15px;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        text-decoration: none;
-        transition: 0.3s ease;
-    }
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        opacity: 0.9;
-    }
+  .badge-admin { background: #fde8e8; color: #c0392b; }
+  .badge-staff { background: #e0f7f5; color: #1a8a7a; }
 
-    .btn-update {
-        background-color: #2e5d24;
-    }
+  /* ── FORM FIELDS ── */
+  .edit-wrap label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--forest);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 7px;
+  }
 
-    .btn-back {
-        background-color: #99CC67;
-        color: #1D4A23;
-    }
+  .edit-wrap input[type="text"],
+  .edit-wrap textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid rgba(29,74,35,0.2);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: #2c3e50;
+    background: white;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+  }
 
-    .btn-delete {
-        background-color: #6F4E37;
-    }
+  .edit-wrap input[type="text"]:focus,
+  .edit-wrap textarea:focus {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.18);
+  }
 
-    .delete-form {
-        display: inline;
-        margin: 0;
-    }
+  .edit-wrap textarea { resize: vertical; min-height: 100px; }
 
-    /* Badge for creator info */
-    .creator-info {
-        background-color: #f0f8ff;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        color: #2e5d24;
-    }
+  /* ── DIVIDER ── */
+  .section-divider {
+    border: none;
+    border-top: 1px solid rgba(29,74,35,0.1);
+    margin: 28px 0;
+  }
 
-    .badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-        color: white;
-    }
+  /* ── BUTTON GROUP ── */
+  .button-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
 
-    .badge-admin {
-        background-color: #9b59b6;
-    }
+  .button-group-right { justify-content: flex-end; }
+  .button-group-split { justify-content: space-between; }
 
-    .badge-staff {
-        background-color: #3498db;
-    }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-back {
+    background: var(--cream);
+    color: var(--forest);
+    border: 1.5px solid rgba(29,74,35,0.2);
+  }
+  .btn-back:hover {
+    background: white;
+    border-color: var(--forest);
+  }
+
+  .btn-update {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 14px rgba(29,74,35,0.2);
+  }
+  .btn-update:hover {
+    background: var(--midforest);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(29,74,35,0.25);
+  }
+
+  .btn-delete {
+    background: #fdecea;
+    color: var(--error);
+    border: 1.5px solid #f5c6c6;
+  }
+  .btn-delete:hover {
+    background: #f5c6c6;
+    transform: translateY(-1px);
+  }
+
+  .delete-form { display: inline; margin: 0; }
+
+  .danger-section {
+    background: rgba(192,57,43,0.04);
+    border: 1px solid rgba(192,57,43,0.12);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .danger-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--error);
+    margin-bottom: 2px;
+  }
+
+  .danger-hint {
+    font-size: 0.78rem;
+    color: #999;
+  }
 </style>
 
-<div class="form-container">
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-    
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-error">{{ message }}</div>
-    {% endfor %}
+<div class="edit-wrap">
 
-    <h1>✏️ Edit Category</h1>
+  {% for message in app.flashes('success') %}
+    <div class="flash-success">✓ {{ message }}</div>
+  {% endfor %}
+  {% for message in app.flashes('error') %}
+    <div class="flash-error">⚠ {{ message }}</div>
+  {% endfor %}
+
+  <div class="page-header">
+    <div>
+      <h1>Edit Category</h1>
+      <p>Update the details for this category.</p>
+    </div>
+    <a href="{{ path('app_category_index') }}" class="btn btn-back">← Back</a>
+  </div>
+
+  <div class="form-card">
 
     {% if category.createdBy %}
-        <div class="creator-info">
-            Created by: 
-            <span class="badge {{ 'ROLE_ADMIN' in category.createdBy.roles ? 'badge-admin' : 'badge-staff' }}">
-                {{ 'ROLE_ADMIN' in category.createdBy.roles ? '👑 ' : '👤 ' }}{{ category.createdBy.username }}
-            </span>
-        </div>
+      <div class="creator-info">
+        <span style="color:#aaa; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Created by</span>
+        <span class="badge {{ 'ROLE_ADMIN' in category.createdBy.roles ? 'badge-admin' : 'badge-staff' }}">
+          {{ 'ROLE_ADMIN' in category.createdBy.roles ? 'Admin' : 'Staff' }} — {{ category.createdBy.username }}
+        </span>
+      </div>
     {% endif %}
 
     {# UPDATE FORM #}
     {{ form_start(form, {'attr': {'id': 'update-form'}}) }}
-        {{ form_row(form.name) }}
-        {{ form_row(form.description) }}
-        <div class="button-group">
-            <a href="{{ path('app_category_index') }}" class="btn btn-back">← Back</a>
-            <button type="submit" class="btn btn-update">💾 Update</button>
-        </div>
+      {{ form_row(form.name) }}
+      {{ form_row(form.description) }}
+
+      <div class="button-group button-group-right" style="margin-top: 8px;">
+        <button type="submit" class="btn btn-update">💾 Save Changes</button>
+      </div>
     {{ form_end(form) }}
 
-    {# DELETE FORM (SEPARATE) - Both ADMIN and STAFF have full access #}
+    {# DELETE SECTION #}
     {% set canDelete = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-    
     {% if canDelete %}
-        <div class="button-group" style="margin-top: 20px;">
-            <form method="post"
-                  action="{{ path('app_category_delete', {'id': category.id}) }}"
-                  class="delete-form"
-                  onsubmit="return confirm('⚠️ Are you sure you want to delete this category?\n\nCategory: {{ category.name }}\n\nThis action cannot be undone!');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
-                <button type="submit" class="btn btn-delete">🗑️ Delete Category</button>
-            </form>
+      <hr class="section-divider">
+      <div class="danger-section">
+        <div>
+          <div class="danger-label">Delete this category</div>
+          <div class="danger-hint">This action is permanent and cannot be undone.</div>
         </div>
+        <form method="post"
+              action="{{ path('app_category_delete', {'id': category.id}) }}"
+              class="delete-form"
+              onsubmit="return confirm('⚠️ Are you sure you want to delete this category?\n\nCategory: {{ category.name }}\n\nThis action cannot be undone!');">
+          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+          <button type="submit" class="btn btn-delete">🗑️ Delete Category</button>
+        </form>
+      </div>
     {% endif %}
+
+  </div>
 </div>
 {% endblock %}

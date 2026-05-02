@@ -18,6 +18,12 @@ class ActivityLog
     #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $username = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $role = null;
+
     #[ORM\Column(length: 255)]
     private ?string $action = null;
 
@@ -32,6 +38,9 @@ class ActivityLog
 
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $ipAddress = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $targetData = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -49,7 +58,28 @@ class ActivityLog
     public function setUser(?User $user): static
     {
         $this->user = $user;
+        return $this;
+    }
 
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): static
+    {
+        $this->username = $username;
+        return $this;
+    }
+
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(?string $role): static
+    {
+        $this->role = $role;
         return $this;
     }
 
@@ -61,7 +91,6 @@ class ActivityLog
     public function setAction(string $action): static
     {
         $this->action = $action;
-
         return $this;
     }
 
@@ -73,7 +102,6 @@ class ActivityLog
     public function setEntity(?string $entity): static
     {
         $this->entity = $entity;
-
         return $this;
     }
 
@@ -85,7 +113,6 @@ class ActivityLog
     public function setEntityId(?int $entityId): static
     {
         $this->entityId = $entityId;
-
         return $this;
     }
 
@@ -97,7 +124,6 @@ class ActivityLog
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -109,7 +135,17 @@ class ActivityLog
     public function setIpAddress(?string $ipAddress): static
     {
         $this->ipAddress = $ipAddress;
+        return $this;
+    }
 
+    public function getTargetData(): ?array
+    {
+        return $this->targetData;
+    }
+
+    public function setTargetData(?array $targetData): static
+    {
+        $this->targetData = $targetData;
         return $this;
     }
 
@@ -121,7 +157,6 @@ class ActivityLog
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 }

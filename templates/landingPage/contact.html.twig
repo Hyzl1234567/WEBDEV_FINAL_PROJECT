@@ -3,192 +3,495 @@
 {% block title %}Contact – EcoBrew Café{% endblock %}
 
 {% block extra_styles %}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --ink:       #142E17;
+  --espresso:  #1D4A23;
+  --roast:     #2A6132;
+  --caramel:   #7AAD4C;
+  --cream:     #F0F7EC;
+  --parchment: #C8E8AD;
+  --sage:      #B8DC8E;
+  --mist:      #F5FAF2;
+  --warm-white:#fdfaf5;
+}
+  
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { background: var(--warm-white); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+
+/* ── HERO ── */
 .contact-hero {
-  background: var(--paper);
-  padding: 4rem 5rem 3rem;
-  text-align: center;
-  border-bottom: 1px solid rgba(29,74,35,0.1);
+  position: relative;
+  height: 420px;
   margin-top: 70px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
 }
-.contact-hero h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 3rem; font-weight: 900;
-  color: var(--forest); margin-bottom: 0.75rem;
-}
-.contact-hero p { color: var(--midforest); font-size: 1.05rem; opacity: 0.8; }
 
+.hero-image {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=85&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center 40%;
+  transform: scale(1.04);
+  transition: transform 8s ease;
+}
+.contact-hero:hover .hero-image { transform: scale(1); }
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(26,20,16,0.88) 0%,
+    rgba(26,20,16,0.40) 50%,
+    rgba(26,20,16,0.10) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 0 5rem 3rem;
+  width: 100%;
+}
+
+.hero-eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--caramel);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--caramel);
+}
+
+.hero-content h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.6rem;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.6rem;
+}
+.hero-content h1 em {
+  font-style: italic;
+  color: var(--caramel);
+  font-weight: 400;
+}
+
+.hero-content p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.62);
+  letter-spacing: 0.02em;
+  font-weight: 300;
+}
+
+/* ── BODY GRID ── */
 .contact-body {
-  padding: 4rem 5rem;
-  display: grid; grid-template-columns: 1fr 1.4fr;
-  gap: 4rem;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 0;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 3.5rem 3rem 4rem;
+  gap: 3rem;
+  align-items: start;
 }
 
-.contact-info h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem; font-weight: 700;
-  color: var(--forest); margin-bottom: 1.5rem;
+/* ── LEFT COLUMN ── */
+.contact-left { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.left-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--espresso);
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.01em;
 }
-.info-item {
-  display: flex; gap: 1rem; align-items: flex-start;
-  margin-bottom: 1.5rem;
+
+/* Cafe image card */
+.cafe-photo-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 220px;
+  background: var(--parchment);
+  box-shadow: 0 8px 32px rgba(44,26,14,0.14);
 }
+.cafe-photo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 6s ease;
+}
+.cafe-photo-card:hover img { transform: scale(1.06); }
+
+.cafe-photo-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(26,20,16,0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(200,137,74,0.35);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 0.7rem;
+  color: var(--caramel);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Info cards */
+.info-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--mist);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(44,26,14,0.05);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 1rem 1.3rem;
+  border-bottom: 1px solid rgba(44,26,14,0.06);
+  transition: background 0.2s;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row:hover { background: var(--cream); }
+
 .info-icon {
-  width: 44px; height: 44px; flex-shrink: 0;
-  border-radius: 12px;
-  background: rgba(153,204,103,0.15);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--parchment);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
 }
-.info-item h4 {
-  font-size: 0.82rem; font-weight: 600; color: var(--limeshadow);
-  margin-bottom: 0.25rem; letter-spacing: 0.5px; text-transform: uppercase;
-}
-.info-item p { font-size: 0.9rem; color: var(--midforest); opacity: 0.85; line-height: 1.5; }
 
-.hours-grid {
-  background: white; border-radius: 16px; padding: 1.5rem;
-  border: 1px solid rgba(29,74,35,0.08);
-  margin-top: 1.5rem;
+.info-text strong {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--caramel);
+  margin-bottom: 2px;
 }
-.hours-grid h4 {
-  font-family: 'Playfair Display', serif;
-  font-weight: 700; margin-bottom: 1rem; color: var(--forest);
+.info-text span {
+  font-size: 0.88rem;
+  color: var(--espresso);
+  font-weight: 400;
 }
+
+/* Hours card */
+.hours-card {
+  background: var(--espresso);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(44,26,14,0.18);
+}
+.hours-header {
+  padding: 1rem 1.3rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hours-header span.label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--caramel);
+}
+
 .hour-row {
-  display: flex; justify-content: space-between;
-  font-size: 0.88rem; color: var(--midforest); padding: 0.4rem 0;
-  border-bottom: 1px solid rgba(29,74,35,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1.3rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.85rem;
 }
-.hour-row:last-child { border-bottom: none; }
-.hour-row .day { font-weight: 500; }
-.hour-row .time { opacity: 0.75; font-family: 'DM Mono', monospace; font-size: 0.82rem; }
+.hour-row .day { color: rgba(255,255,255,0.55); font-weight: 300; }
+.hour-row .time { color: #fff; font-weight: 500; font-size: 0.82rem; }
+.hour-row.today { background: rgba(200,137,74,0.13); }
+.hour-row.today .day { color: var(--caramel); }
 
+/* ── RIGHT COLUMN – FORM ── */
 .contact-form-wrap {
-  background: white; border-radius: 24px; padding: 2.5rem;
-  border: 1px solid rgba(29,74,35,0.08);
-  box-shadow: 0 8px 32px rgba(29,74,35,0.06);
-}
-.contact-form-wrap h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem; font-weight: 700;
-  color: var(--forest); margin-bottom: 1.75rem;
-}
-.success-msg {
-  display: none;
-  background: rgba(39,174,96,0.1); color: var(--success);
-  border: 1px solid rgba(39,174,96,0.3);
-  padding: 12px 16px; border-radius: 10px;
-  font-size: 0.9rem; font-weight: 500; margin-top: 1rem;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid var(--mist);
+  overflow: hidden;
+  box-shadow: 0 4px 28px rgba(44,26,14,0.07);
 }
 
-@media (max-width: 900px) {
-  .contact-hero, .contact-body { padding: 3rem 1.5rem; }
-  .contact-body { grid-template-columns: 1fr; }
+.form-header {
+  padding: 2rem 2.25rem 1.4rem;
+  border-bottom: 1px solid rgba(44,26,14,0.07);
+  background: var(--cream);
+}
+
+.form-header-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--caramel);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+.form-header-eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--caramel);
+}
+
+.form-header h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--espresso);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.form-header p {
+  font-size: 0.82rem;
+  color: #888;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.google-form iframe {
+  width: 100%;
+  min-height: 720px;
+  border: none;
+  display: block;
+}
+
+.form-footer {
+  padding: 1rem 2.25rem;
+  border-top: 1px solid rgba(44,26,14,0.07);
+  background: var(--warm-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.form-footer-note {
+  font-size: 0.75rem;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.form-footer-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+  flex-shrink: 0;
+}
+.form-footer-brand {
+  font-size: 0.7rem;
+  color: var(--caramel);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--espresso);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 2rem;
+  padding: 3.5rem 5rem;
+  margin-top: 1rem;
+}
+.footer-brand h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.footer-brand-name {
+    font-family: 'Mollani-Regular', serif;
+}
+footer h4 {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--caramel);
+  margin-bottom: 1rem;
+}
+footer ul { list-style: none; }
+footer ul li { margin-bottom: 0.55rem; }
+footer ul li a {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.48);
+  text-decoration: none;
+  font-weight: 300;
+  transition: color 0.2s;
+}
+footer ul li a:hover { color: #fff; }
+
+.footer-bottom {
+  background: rgba(26,20,16,0.6);
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.28);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.footer-bottom { background: #120d08; }
+
+@media (max-width: 960px) {
+  .contact-hero { height: 320px; }
+  .hero-content { padding: 0 2rem 2.5rem; }
+  .hero-content h1 { font-size: 2.6rem; }
+  .contact-body { grid-template-columns: 1fr; padding: 2rem 1.5rem; }
+  footer { grid-template-columns: 1fr 1fr; padding: 3rem 2rem; }
 }
 {% endblock %}
 
 {% block body %}
-{# HERO #}
+
+<!-- HERO -->
 <div class="contact-hero">
-  <h1>Let's Talk Coffee</h1>
-  <p>Have a question, a collaboration idea, or just want to say hello? We'd love to hear from you.</p>
+  <div class="hero-image"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+       <h3><span class="footer-brand-name">🍵EcoBrew</span> Café</h3>
+    <h1>Get in <em>Touch</em></h1>
+    <p>Questions, partnerships, or just want to talk coffee — we're always here.</p>
+  </div>
 </div>
 
-{# BODY #}
 <div class="contact-body">
-  {# Contact Info #}
-  <div class="contact-info">
-    <h3>Find Us</h3>
-    <div class="info-item">
-      <div class="info-icon">📍</div>
-      <div>
-        <h4>Address</h4>
-        <p>123 Rizal Boulevard, Dumaguete City<br>Negros Oriental, Philippines 6200</p>
-      </div>
-    </div>
-    <div class="info-item">
-      <div class="info-icon">📞</div>
-      <div>
-        <h4>Phone</h4>
-        <p>(035) 422-1234<br>+63 917 123 4567</p>
-      </div>
-    </div>
-    <div class="info-item">
-      <div class="info-icon">✉️</div>
-      <div>
-        <h4>Email</h4>
-        <p>hello@ecobrewcafe.ph<br>orders@ecobrewcafe.ph</p>
-      </div>
-    </div>
-    <div class="info-item">
-      <div class="info-icon">🌐</div>
-      <div>
-        <h4>Social</h4>
-        <p>@ecobrewcafe on Instagram & Facebook</p>
+
+  <!-- LEFT -->
+  <div class="contact-left">
+    <div>
+      <div class="left-section-title">Find Us</div>
+
+      <!-- Aesthetic café photo -->
+      <div class="cafe-photo-card">
+        <img
+          src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=800&q=85&auto=format&fit=crop"
+          alt="Inside EcoBrew Café"
+          loading="lazy"
+        />
+        <div class="cafe-photo-badge">☕ Open Today</div>
       </div>
     </div>
 
-    <div class="hours-grid">
-      <h4>🕐 Opening Hours</h4>
-      <div class="hour-row"><span class="day">Monday – Friday</span><span class="time">7:00 AM – 8:00 PM</span></div>
-      <div class="hour-row"><span class="day">Saturday</span><span class="time">8:00 AM – 9:00 PM</span></div>
-      <div class="hour-row"><span class="day">Sunday</span><span class="time">9:00 AM – 6:00 PM</span></div>
-      <div class="hour-row"><span class="day">Holidays</span><span class="time">10:00 AM – 5:00 PM</span></div>
+    <!-- Contact info -->
+    <div class="info-card">
+      <div class="info-row">
+        <div class="info-icon">📍</div>
+        <div class="info-text">
+          <strong>Address</strong>
+          <span>123 Rizal Boulevard, Dumaguete City</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">📞</div>
+        <div class="info-text">
+          <strong>Phone</strong>
+          <span>+63 917 123 4567</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">✉️</div>
+        <div class="info-text">
+          <strong>Email</strong>
+          <span>hello@ecobrewcafe.ph</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hours -->
+    <div class="hours-card">
+      <div class="hours-header">
+        <span class="label">Opening Hours</span>
+      </div>
+      <div class="hour-row">
+        <span class="day">Monday – Friday</span>
+        <span class="time">7:00 AM – 8:00 PM</span>
+      </div>
+      <div class="hour-row today">
+        <span class="day">Saturday</span>
+        <span class="time">8:00 AM – 9:00 PM</span>
+      </div>
+      <div class="hour-row">
+        <span class="day">Sunday</span>
+        <span class="time">9:00 AM – 6:00 PM</span>
+      </div>
     </div>
   </div>
 
-  {# Contact Form #}
+  <!-- RIGHT -->
   <div class="contact-form-wrap">
-    <h3>Send Us a Message</h3>
+    <div class="form-header">
+      <div class="form-header-eyebrow">Direct Message</div>
+      <h3>Send Us a Message</h3>
+      <p>We typically respond within one business day.</p>
+    </div>
 
-    {% if contactSuccess is defined and contactSuccess %}
-      <div class="success-msg" style="display:block;">
-        ✅ Message sent! We'll get back to you within 24 hours.
-      </div>
-    {% endif %}
+    <div class="google-form">
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLSfG2Q4telQ7cBkEDtLAy6Giseav3MKob_VaJ6K0hsRXzzcjsg/viewform?embedded=true&hl=en">
+        Loading…
+      </iframe>
+    </div>
 
-    <form method="post" action="{{ path('contact') }}">
-      <input type="hidden" name="_token" value="{{ csrf_token('contact') }}">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="firstName">First Name</label>
-          <input type="text" id="firstName" name="firstName" placeholder="Juan" required>
-        </div>
-        <div class="form-group">
-          <label for="lastName">Last Name</label>
-          <input type="text" id="lastName" name="lastName" placeholder="dela Cruz" required>
-        </div>
+    <div class="form-footer">
+      <div class="form-footer-note">
+        <div class="form-footer-dot"></div>
+        Your message goes directly to our team inbox.
       </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="juan@email.com" required>
-      </div>
-      <div class="form-group">
-        <label for="subject">Subject</label>
-        <select id="subject" name="subject">
-          <option>General Inquiry</option>
-          <option>Order Support</option>
-          <option>Wholesale / Partnership</option>
-          <option>Feedback</option>
-          <option>Events & Bookings</option>
-          <option>Press / Media</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" placeholder="Tell us what's on your mind…" required></textarea>
-      </div>
-      <button type="submit" class="btn-full">Send Message →</button>
-      <div class="success-msg" id="contactSuccess"></div>
-    </form>
+      <div class="form-footer-brand">EcoBrew Café</div>
+    </div>
   </div>
+
 </div>
 
-{# FOOTER #}
+<!-- FOOTER -->
 <footer>
   <div class="footer-brand">
-    <h3>☕ EcoBrew Café</h3>
-    <p>Sustainably sourced coffee for a better tomorrow.</p>
+    <h3>🍵 <span class="footer-brand-name">EcoBrew</span> Café</h3>
+    <p>Sustainably sourced coffee for a better tomorrow, brewed with care in Dumaguete.</p>
   </div>
   <div>
     <h4>Navigate</h4>
@@ -215,5 +518,6 @@
     </ul>
   </div>
 </footer>
-<div class="footer-bottom">© 2025 EcoBrew Café. Built with love & Symfony.</div>
+<div class="footer-bottom">© 2025 EcoBrew Café · Built with love & Symfony.</div>
+
 {% endblock %}

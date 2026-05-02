@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/stock')]
-#[IsGranted('ROLE_USER')] // Staff and Admin can access
+#[IsGranted('ROLE_USER')]
 class StockController extends AbstractController
 {
     private ActivityLogger $activityLogger;
@@ -33,11 +33,15 @@ class StockController extends AbstractController
             $stocks = $stockRepository->createQueryBuilder('s')
                 ->join('s.product', 'p')
                 ->where('p.name LIKE :query OR s.id LIKE :query')
+                ->andWhere('s.isHistoryEntry = false OR s.isHistoryEntry IS NULL')
                 ->setParameter('query', '%' . $query . '%')
                 ->getQuery()
                 ->getResult();
         } else {
-            $stocks = $stockRepository->findAll();
+            $stocks = $stockRepository->createQueryBuilder('s')
+                ->where('s.isHistoryEntry = false OR s.isHistoryEntry IS NULL')
+                ->getQuery()
+                ->getResult();
         }
 
         return $this->render('stock/index.html.twig', [
@@ -46,47 +50,95 @@ class StockController extends AbstractController
     }
 
     #[Route('/new', name: 'app_stock_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, StockRepository $stockRepository): Response
     {
         $stock = new Stock();
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Set who created this stock record
-            $stock->setCreatedBy($this->getUser());
-            
-            $entityManager->persist($stock);
-            $entityManager->flush();
-
-            // 🟢 Recalculate total stock quantity for related product
             $product = $stock->getProduct();
-            if ($product) {
-                $totalStock = $entityManager->getRepository(Stock::class)
-                    ->createQueryBuilder('s')
-                    ->select('SUM(s.quantity)')
-                    ->where('s.product = :product')
-                    ->setParameter('product', $product)
-                    ->getQuery()
-                    ->getSingleScalarResult();
+            $quantityToAdd = $stock->getQuantity();
 
-                $product->setQuantity((int)($totalStock ?? 0));
+            // Only match main stock entries, not history entries
+            $existingStock = $product
+                ? $stockRepository->findOneBy(['product' => $product, 'isHistoryEntry' => false])
+                : null;
+
+            if ($existingStock) {
+                // Update existing stock quantity
+                $existingStock->setQuantity($existingStock->getQuantity() + $quantityToAdd);
+                $existingStock->setLastUpdated(new \DateTimeImmutable());
+
+                // Create history entry only — do NOT persist $stock
+                $historyEntry = new Stock();
+                $historyEntry->setProduct($product);
+                $historyEntry->setQuantity($quantityToAdd);
+                $historyEntry->setCreatedBy($this->getUser());
+                $historyEntry->setCreatedAt(new \DateTimeImmutable());
+                $historyEntry->setLastUpdated(new \DateTimeImmutable());
+                $historyEntry->setIsHistoryEntry(true);
+
+                $entityManager->persist($historyEntry);
+                $entityManager->flush();
+
+                $product->setQuantity($existingStock->getQuantity());
                 $entityManager->persist($product);
                 $entityManager->flush();
-            }
 
-            // Log the activity
-            $this->activityLogger->logCreate(
-                $this->getUser(),
-                'Stock',
-                $stock->getId(),
-                sprintf(
-                    '#%d - Product: %s, Qty: %d',
+                $this->activityLogger->logCreate(
+                    $this->getUser(),
+                    'Stock',
+                    $existingStock->getId(),
+                    sprintf('Stock restocked: %s +%d units', $product?->getName() ?? 'Unknown', $quantityToAdd),
+                    [
+                        'product'    => $product?->getName(),
+                        'product_id' => $product?->getId(),
+                        'quantity'   => $quantityToAdd,
+                        'created_by' => $this->getUser()?->getUsername(),
+                    ]
+                );
+
+            } else {
+                // First time — persist $stock as the main entry
+                $stock->setCreatedBy($this->getUser());
+                $stock->setCreatedAt(new \DateTimeImmutable());
+                $stock->setIsHistoryEntry(false);
+
+                $entityManager->persist($stock);
+                $entityManager->flush();
+
+                // Also save it as the first history entry
+                $historyEntry = new Stock();
+                $historyEntry->setProduct($product);
+                $historyEntry->setQuantity($quantityToAdd);
+                $historyEntry->setCreatedBy($this->getUser());
+                $historyEntry->setCreatedAt(new \DateTimeImmutable());
+                $historyEntry->setLastUpdated(new \DateTimeImmutable());
+                $historyEntry->setIsHistoryEntry(true);
+
+                $entityManager->persist($historyEntry);
+
+                if ($product) {
+                    $product->setQuantity($stock->getQuantity());
+                    $entityManager->persist($product);
+                }
+
+                $entityManager->flush();
+
+                $this->activityLogger->logCreate(
+                    $this->getUser(),
+                    'Stock',
                     $stock->getId(),
-                    $product ? $product->getName() : 'Unknown',
-                    $stock->getQuantity()
-                )
-            );
+                    sprintf('Stock: %s (ID: %d)', $product?->getName() ?? 'Unknown', $stock->getId()),
+                    [
+                        'product'    => $product?->getName(),
+                        'product_id' => $product?->getId(),
+                        'quantity'   => $stock->getQuantity(),
+                        'created_by' => $stock->getCreatedBy()?->getUsername(),
+                    ]
+                );
+            }
 
             $this->addFlash('success', 'Stock added successfully!');
             return $this->redirectToRoute('app_stock_index');
@@ -94,43 +146,52 @@ class StockController extends AbstractController
 
         return $this->render('stock/new.html.twig', [
             'stock' => $stock,
-            'form' => $form,
+            'form'  => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'app_stock_show', methods: ['GET'])]
-    public function show(Stock $stock): Response
+    public function show(Stock $stock, StockRepository $stockRepository): Response
     {
+        $stockHistory = $stock->getProduct()
+            ? $stockRepository->findHistoryByProduct($stock->getProduct()->getId())
+            : [];
+
         return $this->render('stock/show.html.twig', [
-            'stock' => $stock,
+            'stock'        => $stock,
+            'stockHistory' => $stockHistory,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_stock_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Stock $stock, EntityManagerInterface $entityManager, StockRepository $stockRepository): Response
     {
-        // Check if user can edit this stock record
         if (!$this->canEditOrDelete($stock)) {
-            $this->addFlash('error', 'You do not have permission to edit this stock record. You can only edit your own records.');
+            $this->addFlash('error', 'You do not have permission to edit this stock record.');
             return $this->redirectToRoute('app_stock_index');
         }
 
         $oldQuantity = $stock->getQuantity();
-        
+
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $newQuantity = $stock->getQuantity();
-            
+            $snapshot = [
+                'product'      => $stock->getProduct()?->getName(),
+                'product_id'   => $stock->getProduct()?->getId(),
+                'old_quantity' => $oldQuantity,
+                'new_quantity' => $stock->getQuantity(),
+            ];
+
             $entityManager->flush();
 
-            // 🟢 Recalculate total stock for the related product
             $product = $stock->getProduct();
             if ($product) {
                 $totalStock = $stockRepository->createQueryBuilder('s')
                     ->select('SUM(s.quantity)')
                     ->where('s.product = :product')
+                    ->andWhere('s.isHistoryEntry = false OR s.isHistoryEntry IS NULL')
                     ->setParameter('product', $product)
                     ->getQuery()
                     ->getSingleScalarResult();
@@ -140,18 +201,12 @@ class StockController extends AbstractController
                 $entityManager->flush();
             }
 
-            // Log the activity
             $this->activityLogger->logUpdate(
                 $this->getUser(),
                 'Stock',
                 $stock->getId(),
-                sprintf(
-                    '#%d - Product: %s (Qty: %d → %d)',
-                    $stock->getId(),
-                    $product ? $product->getName() : 'Unknown',
-                    $oldQuantity,
-                    $newQuantity
-                )
+                sprintf('Stock: %s (ID: %d)', $product?->getName() ?? 'Unknown', $stock->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Stock updated successfully!');
@@ -160,48 +215,48 @@ class StockController extends AbstractController
 
         return $this->render('stock/edit.html.twig', [
             'stock' => $stock,
-            'form' => $form,
+            'form'  => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'app_stock_delete', methods: ['POST'])]
     public function delete(Request $request, Stock $stock, EntityManagerInterface $entityManager): Response
     {
-        // Check if user can delete this stock record
         if (!$this->canEditOrDelete($stock)) {
-            $this->addFlash('error', 'You do not have permission to delete this stock record. You can only delete your own records.');
+            $this->addFlash('error', 'You do not have permission to delete this stock record.');
             return $this->redirectToRoute('app_stock_index');
         }
 
         if ($this->isCsrfTokenValid('delete' . $stock->getId(), $request->request->get('_token'))) {
-            $product = $stock->getProduct();
+            $product       = $stock->getProduct();
+            $stockId       = $stock->getId();
+            $productName   = $product?->getName() ?? 'Unknown';
             $stockQuantity = $stock->getQuantity();
-            $stockId = $stock->getId();
-            $productName = $product ? $product->getName() : 'Unknown';
 
-            // Log before deletion
+            $snapshot = [
+                'product'    => $productName,
+                'product_id' => $product?->getId(),
+                'quantity'   => $stockQuantity,
+                'deleted_at' => (new \DateTimeImmutable())->format('c'),
+            ];
+
             $this->activityLogger->logDelete(
                 $this->getUser(),
                 'Stock',
                 $stockId,
-                sprintf(
-                    '#%d - Product: %s, Qty: %d',
-                    $stockId,
-                    $productName,
-                    $stockQuantity
-                )
+                sprintf('Stock: %s (ID: %d)', $productName, $stockId),
+                $snapshot
             );
 
-            // 🟢 Remove the stock entry
             $entityManager->remove($stock);
             $entityManager->flush();
 
-            // 🟢 Recalculate total stock for the related product
             if ($product) {
                 $totalStock = $entityManager->getRepository(Stock::class)
                     ->createQueryBuilder('s')
                     ->select('SUM(s.quantity)')
                     ->where('s.product = :product')
+                    ->andWhere('s.isHistoryEntry = false OR s.isHistoryEntry IS NULL')
                     ->setParameter('product', $product)
                     ->getQuery()
                     ->getSingleScalarResult();
@@ -217,20 +272,14 @@ class StockController extends AbstractController
         return $this->redirectToRoute('app_stock_index');
     }
 
-    /**
-     * Check if the current user can edit or delete the stock record
-     * - Admin and Staff have full access to all records
-     */
     private function canEditOrDelete(Stock $stock): bool
     {
         $currentUser = $this->getUser();
-        
-        // If no creator is set, allow access (for legacy records)
+
         if (!$stock->getCreatedBy()) {
             return true;
         }
 
-        // Both ADMIN and STAFF have full access
         if (in_array('ROLE_ADMIN', $currentUser->getRoles()) || in_array('ROLE_STAFF', $currentUser->getRoles())) {
             return true;
         }

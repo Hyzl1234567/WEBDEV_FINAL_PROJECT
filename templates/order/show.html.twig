@@ -4,339 +4,390 @@
 
 {% block body %}
 <style>
-    .order-detail-container {
-        width: 90%;
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 30px;
-        border-radius: 12px;
-        background: white;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --darkforest: #142E17;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --limelight: #B8DC8E;
+    --paper: #F5FAF2;
+  }
 
-    .order-detail-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid #1D4A23;
-    }
+  .show-page {
+    min-height: 100vh;
+    background: var(--cream);
+    padding: 100px 2rem 3rem;
+  }
 
-    .order-detail-header h1 {
-        color: #1D4A23;
-        margin: 0;
-        font-size: 28px;
-        font-weight: bold;
-    }
+  .show-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
 
-    .order-badge {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: bold;
-    }
+  /* ── Alerts ── */
+  .alert {
+    padding: 11px 16px;
+    border-radius: 10px;
+    margin-bottom: 1.1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    .order-badge.pending {
-        background-color: #FFD700;
-        color: #333;
-    }
+  .alert-success {
+    background: rgba(153,204,103,0.18);
+    color: var(--forest);
+    border: 1px solid rgba(153,204,103,0.45);
+  }
 
-    .order-badge.processing {
-        background-color: #3498db;
-        color: white;
-    }
+  .alert-warning {
+    background: rgba(212,163,58,0.1);
+    border: 1px solid rgba(212,163,58,0.3);
+    color: #7a5c00;
+    margin-top: 1rem;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+  }
 
-    .order-badge.completed {
-        background-color: #99CC67;
-        color: #1D4A23;
-    }
+  /* ── Page Card ── */
+  .detail-card {
+    background: white;
+    border-radius: 22px;
+    box-shadow: 0 8px 48px rgba(29,74,35,0.1);
+    overflow: hidden;
+  }
 
-    .order-badge.cancelled {
-        background-color: #E74C3C;
-        color: white;
-    }
+  /* ── Card Header ── */
+  .detail-card-header {
+    background: var(--forest);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
 
-    .order-info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
+  .detail-card-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: white;
+    margin: 0;
+  }
 
-    .info-card {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 4px solid #1D4A23;
-    }
+  /* ── Status Badge ── */
+  .order-badge {
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
 
-    .info-label {
-        font-size: 13px;
-        color: #666;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        font-weight: 600;
-    }
+  .order-badge.pending    { background: rgba(255,215,0,0.22);   color: #7a5c00; border: 1.5px solid rgba(255,215,0,0.5); }
+  .order-badge.processing { background: rgba(52,152,219,0.18);  color: #1a6fa8; border: 1.5px solid rgba(52,152,219,0.4); }
+  .order-badge.completed  { background: rgba(153,204,103,0.22); color: var(--midforest); border: 1.5px solid rgba(153,204,103,0.5); }
+  .order-badge.cancelled  { background: rgba(192,57,43,0.15);   color: #c0392b; border: 1.5px solid rgba(192,57,43,0.3); }
 
-    .info-value {
-        font-size: 18px;
-        color: #1D4A23;
-        font-weight: bold;
-    }
+  /* ── Card Body ── */
+  .detail-card-body {
+    padding: 2rem 2.5rem;
+  }
 
-    .creator-badge {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        color: white;
-    }
+  /* ── Product Pricing Block ── */
+  .product-details {
+    background: var(--paper);
+    border: 1px solid rgba(29,74,35,0.09);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
 
-    .creator-admin {
-        background-color: #9b59b6;
-    }
+  .product-details h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--forest);
+    margin: 0 0 1.1rem 0;
+  }
 
-    .creator-staff {
-        background-color: #3498db;
-    }
+  .product-info-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
 
-    .order-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #ddd;
-        flex-wrap: wrap;
-    }
+  .product-info-table tr {
+    border-bottom: 1px solid rgba(29,74,35,0.08);
+  }
 
-    .btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
+  .product-info-table tr:last-child {
+    border-bottom: none;
+    border-top: 1.5px solid rgba(29,74,35,0.15);
+  }
 
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-    }
+  .product-info-table td {
+    padding: 11px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+  }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
-        transform: translateY(-2px);
-    }
+  .product-info-table td:first-child {
+    color: rgba(29,74,35,0.55);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    width: 40%;
+  }
 
-    .btn-warning {
-        background-color: #FFD700;
-        color: #333;
-    }
+  .product-info-table td:last-child {
+    color: var(--forest);
+    font-weight: 600;
+    text-align: right;
+  }
 
-    .btn-warning:hover {
-        background-color: #e6c200;
-        transform: translateY(-2px);
-    }
+  .product-info-table tr:last-child td {
+    font-size: 1rem;
+    font-weight: 700;
+    padding-top: 13px;
+  }
 
-    .btn-danger {
-        background-color: #E74C3C;
-        color: white;
-    }
+  /* ── Info Grid ── */
+  .order-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
 
-    .btn-danger:hover {
-        background-color: #c0392b;
-        transform: translateY(-2px);
-    }
+  .info-card {
+    background: var(--paper);
+    padding: 1.1rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid rgba(29,74,35,0.08);
+    border-left: 3.5px solid var(--lime);
+  }
 
-    .delete-form {
-        display: inline;
-    }
+  .info-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(29,74,35,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 0.5rem;
+  }
 
-    .product-details {
-        background: #e8f5e9;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
+  .info-value {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--forest);
+  }
 
-    .product-details h3 {
-        color: #1D4A23;
-        margin: 0 0 15px 0;
-        font-size: 18px;
-    }
+  /* ── Creator Badge ── */
+  .creator-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
 
-    .product-info-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+  .creator-admin {
+    background: rgba(155,89,182,0.12);
+    color: #7d3c98;
+    border: 1px solid rgba(155,89,182,0.25);
+  }
 
-    .product-info-table tr {
-        border-bottom: 1px solid #c8e6c9;
-    }
+  .creator-staff {
+    background: rgba(52,152,219,0.1);
+    color: #1a6fa8;
+    border: 1px solid rgba(52,152,219,0.25);
+  }
 
-    .product-info-table tr:last-child {
-        border-bottom: none;
-        border-top: 2px solid #1D4A23;
-    }
+  /* ── Actions ── */
+  .order-actions {
+    display: flex;
+    gap: 0.65rem;
+    justify-content: center;
+    padding-top: 1.5rem;
+    border-top: 1.5px solid rgba(29,74,35,0.08);
+    flex-wrap: wrap;
+  }
 
-    .product-info-table td {
-        padding: 12px 0;
-        font-size: 15px;
-    }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.15px;
+  }
 
-    .product-info-table td:first-child {
-        color: #666;
-        font-weight: 600;
-        width: 40%;
-    }
+  .btn-secondary {
+    background: transparent;
+    color: var(--midforest);
+    border: 1.5px solid rgba(29,74,35,0.25);
+  }
 
-    .product-info-table td:last-child {
-        color: #1D4A23;
-        font-weight: bold;
-        text-align: right;
-    }
+  .btn-secondary:hover {
+    background: var(--forest);
+    color: white;
+    border-color: var(--forest);
+  }
 
-    .product-info-table tr:last-child td {
-        font-size: 18px;
-        padding-top: 15px;
-    }
+  .btn-warning {
+    background: rgba(212,163,58,0.12);
+    color: #7a5c00;
+    border: 1.5px solid rgba(212,163,58,0.3);
+  }
 
-    .alert {
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
+  .btn-warning:hover {
+    background: #C9A84C;
+    color: white;
+    border-color: #C9A84C;
+    transform: translateY(-1px);
+  }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
+  .btn-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1.5px solid rgba(192,57,43,0.25);
+  }
 
-    .alert-warning {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeaa7;
-        margin-top: 20px;
-    }
+  .btn-danger:hover {
+    background: #c0392b;
+    color: white;
+    border-color: #c0392b;
+    transform: translateY(-1px);
+  }
 
-    .alert-warning strong {
-        font-weight: bold;
-    }
+  .delete-form { display: inline; }
 </style>
 
-<div class="order-detail-container">
+<div class="show-page">
+  <div class="show-inner">
+
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
+      <div class="alert alert-success">✓ {{ message }}</div>
     {% endfor %}
 
-    <div class="order-detail-header">
+    <div class="detail-card">
+
+      <div class="detail-card-header">
         <h1>📦 Order #{{ order.id }}</h1>
         <span class="order-badge {{ order.status|lower }}">{{ order.status }}</span>
-    </div>
+      </div>
 
-    <!-- Product Details with Pricing Breakdown -->
-    {% if order.product %}
-    <div class="product-details">
-        <h3>📦 Product & Pricing Information</h3>
-        <table class="product-info-table">
-            <tr>
-                <td>Product Name:</td>
-                <td>{{ order.product.name }}</td>
-            </tr>
-            <tr>
-                <td>Unit Price:</td>
-                <td>₱{{ order.product.price|number_format(2) }}</td>
-            </tr>
-            <tr>
-                <td>Quantity:</td>
-                <td>{{ order.quantity }} {{ order.quantity > 1 ? 'units' : 'unit' }}</td>
-            </tr>
-            <tr>
-                <td><strong>Total Amount:</strong></td>
-                <td><strong>₱{{ order.totalPrice|number_format(2) }}</strong></td>
-            </tr>
-        </table>
-    </div>
-    {% endif %}
+      <div class="detail-card-body">
 
-    <!-- Order Information Grid -->
-    <div class="order-info-grid">
-        <div class="info-card">
+        {% if order.product %}
+        <div class="product-details">
+          <h3>📦 Product & Pricing Information</h3>
+          <table class="product-info-table">
+            <tr>
+              <td>Product Name</td>
+              <td>{{ order.product.name }}</td>
+            </tr>
+            <tr>
+              <td>Unit Price</td>
+              <td>₱{{ order.product.price|number_format(2) }}</td>
+            </tr>
+            <tr>
+              <td>Quantity</td>
+              <td>{{ order.quantity }} {{ order.quantity > 1 ? 'units' : 'unit' }}</td>
+            </tr>
+            <tr>
+              <td><strong>Total Amount</strong></td>
+              <td><strong>₱{{ order.totalPrice|number_format(2) }}</strong></td>
+            </tr>
+          </table>
+        </div>
+        {% endif %}
+
+        <div class="order-info-grid">
+          <div class="info-card">
             <div class="info-label">Order ID</div>
             <div class="info-value">#{{ order.id }}</div>
-        </div>
-
-        <div class="info-card">
+          </div>
+          <div class="info-card">
             <div class="info-label">Customer Name</div>
             <div class="info-value">{{ order.customer }}</div>
-        </div>
-
-        <div class="info-card">
+          </div>
+          <div class="info-card">
             <div class="info-label">Order Status</div>
             <div class="info-value">{{ order.status }}</div>
-        </div>
-
-        <div class="info-card">
+          </div>
+          <div class="info-card">
             <div class="info-label">Order Date</div>
             <div class="info-value">{{ order.createdAt ? order.createdAt|date('M d, Y') : 'N/A' }}</div>
-        </div>
-
-        <div class="info-card">
+          </div>
+          <div class="info-card">
             <div class="info-label">Order Time</div>
             <div class="info-value">{{ order.createdAt ? order.createdAt|date('h:i A') : 'N/A' }}</div>
-        </div>
-
-        <div class="info-card">
+          </div>
+          <div class="info-card">
             <div class="info-label">Created By</div>
             <div class="info-value">
-                {% if order.createdBy %}
-                    <span class="creator-badge {{ 'ROLE_ADMIN' in order.createdBy.roles ? 'creator-admin' : 'creator-staff' }}">
-                        {{ 'ROLE_ADMIN' in order.createdBy.roles ? '👑 Admin' : '👤 Staff' }}<br>{{ order.createdBy.username }}
-                    </span>
-                {% else %}
-                    <span style="color: #999;">Unknown</span>
-                {% endif %}
+              {% if order.createdBy %}
+                <span class="creator-badge {{ 'ROLE_ADMIN' in order.createdBy.roles ? 'creator-admin' : 'creator-staff' }}">
+                  {{ 'ROLE_ADMIN' in order.createdBy.roles ? '👑 Admin' : '👤 Staff' }} — {{ order.createdBy.username }}
+                </span>
+              {% else %}
+                <span style="color:rgba(29,74,35,0.35); font-size:0.875rem;">Unknown</span>
+              {% endif %}
             </div>
+          </div>
         </div>
-    </div>
 
-    <!-- Actions -->
-    <div class="order-actions">
-        <a href="{{ path('app_order_index') }}" class="btn btn-secondary">
-            ← Back to Orders
-        </a>
-        
-        {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-        
-        {% if canEdit %}
-            <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-warning">
-                ✏️ Edit Order
-            </a>
-            <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" class="delete-form" onsubmit="return confirm('⚠️ Are you sure you want to delete this order?\n\nOrder #{{ order.id }}\nCustomer: {{ order.customer }}\n\nThis action cannot be undone!');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
-                <button type="submit" class="btn btn-danger">🗑️ Delete Order</button>
+        <div class="order-actions">
+          <a href="{{ path('app_order_index') }}" class="btn btn-secondary">← Back to Orders</a>
+
+          {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+
+          {% if canEdit %}
+            <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-warning">✏️ Edit Order</a>
+            <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" class="delete-form"
+                  onsubmit="return confirm('⚠️ Are you sure you want to delete this order?\n\nOrder #{{ order.id }}\nCustomer: {{ order.customer }}\n\nThis action cannot be undone!');">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+              <button type="submit" class="btn btn-danger">🗑️ Delete Order</button>
             </form>
+          {% endif %}
+        </div>
+
+        {% if not canEdit %}
+          <div class="alert-warning">
+            🔒 <strong>Permission Notice:</strong> You can only edit or delete your own records. This order was created by
+            {% if order.createdBy %}
+              <strong>{{ order.createdBy.username }}</strong>
+            {% else %}
+              <strong>another user</strong>
+            {% endif %}.
+          </div>
         {% endif %}
+
+      </div>
     </div>
 
-    {% if not canEdit %}
-        <div class="alert alert-warning">
-            🔒 <strong>Permission Notice:</strong> You can only edit or delete your own records. This order was created by 
-            {% if order.createdBy %}
-                <strong>{{ order.createdBy.username }}</strong>
-            {% else %}
-                <strong>another user</strong>
-            {% endif %}.
-        </div>
-    {% endif %}
+  </div>
 </div>
 {% endblock %}

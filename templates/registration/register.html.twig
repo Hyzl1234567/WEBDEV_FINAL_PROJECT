@@ -1,235 +1,375 @@
- 
 {% extends 'landingPage/base.html.twig' %}
 
 {% block title %}Register – EcoBrew Café{% endblock %}
 
 {% block extra_styles %}
 .auth-wrap {
-  min-height: calc(100vh - 70px);
-  display: grid; grid-template-columns: 1fr 1fr;
-  margin-top: 70px;
+    min-height: calc(100vh - 70px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 70px;
 }
+
 .auth-visual {
-  background: linear-gradient(160deg, var(--midforest) 0%, var(--forest) 60%, var(--darkforest) 100%);
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  padding: 4rem;
-  position: relative; overflow: hidden;
+    background: linear-gradient(160deg, var(--midforest) 0%, var(--forest) 60%, var(--darkforest) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
 }
 .auth-visual::before {
-  content: '';
-  position: absolute; top: -150px; left: -150px;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(153,204,103,0.15) 0%, transparent 70%);
-  border-radius: 50%;
+    content: '';
+    position: absolute;
+    top: -150px; left: -150px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(153,204,103,0.15) 0%, transparent 70%);
+    border-radius: 50%;
 }
 .auth-visual::after {
-  content: '';
-  position: absolute; bottom: -100px; right: -100px;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(153,204,103,0.08) 0%, transparent 70%);
-  border-radius: 50%;
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(153,204,103,0.08) 0%, transparent 70%);
+    border-radius: 50%;
 }
 .auth-visual-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.5rem; font-weight: 900;
-  color: white; text-align: center; line-height: 1.2;
-  margin-bottom: 1rem; position: relative; z-index: 1;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 900;
+    color: white; text-align: center;
+    line-height: 1.2; margin-bottom: 1rem;
+    position: relative; z-index: 1;
 }
 .auth-visual-sub {
-  color: rgba(255,255,255,0.65); text-align: center;
-  font-size: 1rem; line-height: 1.65;
-  max-width: 300px; position: relative; z-index: 1;
+    color: rgba(255,255,255,0.65);
+    text-align: center; font-size: 1rem;
+    line-height: 1.65; max-width: 300px;
+    position: relative; z-index: 1;
 }
-.auth-big-emoji { font-size: 5rem; margin-bottom: 1.5rem; display: block; position: relative; z-index: 1; }
-
+.auth-big-emoji {
+    font-size: 5rem; margin-bottom: 1.5rem;
+    display: block; position: relative; z-index: 1;
+}
 .auth-perks {
-  display: flex; flex-direction: column; gap: 0.85rem;
-  margin-top: 2rem; position: relative; z-index: 1; width: 100%; max-width: 280px;
+    display: flex; flex-direction: column;
+    gap: 0.85rem; margin-top: 2rem;
+    position: relative; z-index: 1;
+    width: 100%; max-width: 280px;
 }
 .auth-perk {
-  display: flex; align-items: center; gap: 0.75rem;
-  color: rgba(255,255,255,0.8); font-size: 0.88rem;
+    display: flex; align-items: center;
+    gap: 0.75rem; color: rgba(255,255,255,0.8);
+    font-size: 0.88rem;
 }
 .auth-perk-icon {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: rgba(153,204,103,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(153,204,103,0.2);
+    display: flex; align-items: center;
+    justify-content: center; font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .auth-form-wrap {
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  padding: 4rem;
-  background: var(--paper);
-  overflow-y: auto;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4rem; background: var(--paper);
+    overflow-y: auto;
 }
 .auth-form-inner { width: 100%; max-width: 420px; }
 .auth-form-inner h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem; font-weight: 800;
-  color: var(--forest); margin-bottom: 0.4rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 800;
+    color: var(--forest); margin-bottom: 0.4rem;
 }
 .auth-form-inner .sub {
-  color: var(--midforest); opacity: 0.75; font-size: 0.9rem; margin-bottom: 2rem;
+    color: var(--midforest); opacity: 0.75;
+    font-size: 0.9rem; margin-bottom: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
 }
 
 .password-hint {
-  background: rgba(153,204,103,0.1);
-  border: 1px solid rgba(153,204,103,0.25);
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin-top: 8px;
-  font-size: 0.82rem;
-  color: var(--midforest);
+    background: rgba(153,204,103,0.1);
+    border: 1px solid rgba(153,204,103,0.25);
+    border-radius: 8px; padding: 10px 14px;
+    margin-top: 8px; font-size: 0.82rem;
+    color: var(--midforest);
 }
 .password-hint strong { color: var(--forest); display: block; margin-bottom: 4px; }
 .password-hint ul { margin: 0 0 0 16px; padding: 0; }
 .password-hint ul li { margin: 2px 0; }
 
-.auth-switch { text-align: center; font-size: 0.88rem; color: var(--midforest); margin-top: 1.5rem; }
+.auth-switch {
+    text-align: center; font-size: 0.88rem;
+    color: var(--midforest); margin-top: 1.5rem;
+}
 .auth-switch a { color: var(--forest); font-weight: 600; text-decoration: none; }
 .auth-switch a:hover { color: var(--limeshadow); text-decoration: underline; }
 
-.alert { padding: 12px 15px; border-radius: 8px; margin-bottom: 1.25rem; font-size: 0.9rem; font-weight: 500; }
-.alert-error {
-  background: rgba(192,57,43,0.08); color: var(--error);
-  border-left: 4px solid var(--error);
+.alert {
+    padding: 12px 15px; border-radius: 8px;
+    margin-bottom: 1.25rem; font-size: 0.9rem;
+    font-weight: 500; display: none;
 }
-.alert-success {
-  background: rgba(39,174,96,0.1); color: var(--success);
-  border-left: 4px solid var(--success);
+.alert.show { display: block; }
+.alert-error   { background: rgba(192,57,43,0.08); color: var(--error);   border-left: 4px solid var(--error); }
+.alert-success { background: rgba(39,174,96,0.1);  color: var(--success); border-left: 4px solid var(--success); }
+
+.divider {
+    display: flex; align-items: center;
+    gap: 0.75rem; margin: 1.25rem 0;
+    color: var(--midforest); opacity: 0.5;
+    font-size: 0.82rem;
+}
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--midforest);
+    opacity: 0.25;
+}
+
+.btn-google {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 10px;
+    background: #fff;
+    color: #3c4043;
+    font-size: 0.92rem; font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    text-decoration: none;
+}
+.btn-google:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border-color: rgba(0,0,0,0.22);
+    color: #3c4043;
+    text-decoration: none;
+}
+.btn-google svg {
+    width: 18px; height: 18px; flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
-  .auth-wrap { grid-template-columns: 1fr; }
-  .auth-visual { display: none; }
-  .auth-form-wrap { padding: 2.5rem 1.5rem; }
+    .auth-wrap { grid-template-columns: 1fr; }
+    .auth-visual { display: none; }
+    .auth-form-wrap { padding: 2.5rem 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
 }
 {% endblock %}
 
 {% block body %}
 <div class="auth-wrap">
 
-  {# Left visual panel #}
-  <div class="auth-visual">
-    <span class="auth-big-emoji">🌱</span>
-    <div class="auth-visual-title">Join the<br>EcoBrew<br>Family</div>
-    <div class="auth-visual-sub">Create an account and start earning loyalty points on every sustainable sip.</div>
-    <div class="auth-perks">
-      <div class="auth-perk">
-        <div class="auth-perk-icon">☕</div>
-        <span>Earn points on every order</span>
-      </div>
-      <div class="auth-perk">
-        <div class="auth-perk-icon">🌍</div>
-        <span>Track your eco impact</span>
-      </div>
-      <div class="auth-perk">
-        <div class="auth-perk-icon">🎁</div>
-        <span>Exclusive member rewards</span>
-      </div>
+    {# Left visual panel #}
+    <div class="auth-visual">
+        <span class="auth-big-emoji">🌿</span>
+        <div class="auth-visual-title">Join the<br>EcoBrew<br>Family</div>
+        <div class="auth-visual-sub">Create an account and start earning loyalty points on every sustainable sip.</div>
+        <div class="auth-perks">
+            <div class="auth-perk">
+                <div class="auth-perk-icon">☕</div>
+                <span>Earn coupons on every order review</span>
+            </div>
+            <div class="auth-perk">
+                <div class="auth-perk-icon">🌍</div>
+                <span>Track your eco impact</span>
+            </div>
+            <div class="auth-perk">
+                <div class="auth-perk-icon">🎁</div>
+                <span>Exclusive member rewards</span>
+            </div>
+        </div>
     </div>
-  </div>
 
-  {# Register form #}
-  <div class="auth-form-wrap">
-    <div class="auth-form-inner">
-      <h2>Create Account</h2>
-      <p class="sub">Join thousands of eco-conscious coffee lovers.</p>
+    {# Right form panel #}
+    <div class="auth-form-wrap">
+        <div class="auth-form-inner">
+            <h2>Create Account</h2>
+            <p class="sub">Join thousands of eco-conscious coffee lovers.</p>
 
-      {% for message in app.flashes('error') %}
-        <div class="alert alert-error">{{ message }}</div>
-      {% endfor %}
+            {# Flash messages from Symfony (e.g. Google auth errors) #}
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-error show">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success show">{{ message }}</div>
+            {% endfor %}
 
-      {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
-      {% endfor %}
+            <div class="alert alert-error"   id="msg-error"></div>
+            <div class="alert alert-success" id="msg-success"></div>
 
-      <form method="post">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            placeholder="e.g. juandelacruz"
-            value="{{ username ?? '' }}"
-            required
-            autocomplete="username">
+
+            <div class="divider">register with email</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" placeholder="Juan" required autocomplete="given-name">
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" placeholder="dela Cruz" required autocomplete="family-name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="e.g. juandelacruz" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="juan@email.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Min. 6 characters" required autocomplete="new-password">
+                <div class="password-hint">
+                    <strong>Requirements</strong>
+                    <ul>
+                        <li>Minimum 6 characters</li>
+                        <li>Mix of letters and numbers recommended</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" placeholder="Repeat your password" required autocomplete="new-password">
+            </div>
+
+               <div class="divider"></div>
+
+                {# Google Sign-Up Button #}
+            <a href="{{ path('connect_google') }}" class="btn-google">
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                Continue with Google
+            </a>
+
+             <div class="divider"></div>
+
+            <div class="form-group" style="display:flex;align-items:flex-start;gap:10px;margin-top:0.25rem;">
+                <input type="checkbox" id="terms" style="width:auto;margin-top:3px;" required>
+                <label for="terms" style="font-size:0.83rem;color:var(--midforest);opacity:0.85;font-weight:400;">
+                    I agree to the <a href="#" style="color:var(--forest);font-weight:600;">Terms of Service</a>
+                    and <a href="#" style="color:var(--forest);font-weight:600;">Privacy Policy</a>
+                </label>
+            </div>
+
+            <button type="button" class="btn-full" id="register-btn" style="margin-top:0.5rem;" onclick="handleRegister()">
+                Create Account
+            </button>
+
+            <div class="auth-switch">
+                Already have an account? <a href="{{ path('app_login') }}">Sign in here</a>
+            </div>
         </div>
-
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="juan@email.com"
-            value="{{ email ?? '' }}"
-            required
-            autocomplete="email">
-        </div>
-
-        <div class="form-group">
-          <label for="full_name">Full Name</label>
-          <input
-            type="text"
-            id="full_name"
-            name="full_name"
-            placeholder="Juan dela Cruz"
-            value="{{ full_name ?? '' }}"
-            required
-            autocomplete="name">
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Min. 6 characters"
-            required
-            autocomplete="new-password">
-          <div class="password-hint">
-            <strong>Requirements</strong>
-            <ul>
-              <li>Minimum 6 characters</li>
-              <li>Mix of letters and numbers recommended</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="confirm_password">Confirm Password</label>
-          <input
-            type="password"
-            id="confirm_password"
-            name="confirm_password"
-            placeholder="Repeat your password"
-            required
-            autocomplete="new-password">
-        </div>
-
-        <div class="form-group" style="display:flex;align-items:flex-start;gap:10px;margin-top:0.25rem;">
-          <input type="checkbox" id="terms" name="terms" style="width:auto;margin-top:3px;" required>
-          <label for="terms" style="font-size:0.83rem;color:var(--midforest);opacity:0.85;font-weight:400;">
-            I agree to the <a href="#" style="color:var(--forest);font-weight:600;">Terms of Service</a> and <a href="#" style="color:var(--forest);font-weight:600;">Privacy Policy</a>
-          </label>
-        </div>
-
-        <button type="submit" class="btn-full" style="margin-top:0.5rem;">
-          Create Account →
-        </button>
-      </form>
-
-      <div class="auth-switch">
-        Already have an account? <a href="{{ path('app_login') }}">Sign in here</a>
-      </div>
     </div>
-  </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+async function handleRegister() {
+    const btn        = document.getElementById('register-btn');
+    const errorBox   = document.getElementById('msg-error');
+    const successBox = document.getElementById('msg-success');
+
+    errorBox.classList.remove('show');
+    successBox.classList.remove('show');
+
+    const firstName       = document.getElementById('first_name').value.trim();
+    const lastName        = document.getElementById('last_name').value.trim();
+    const username        = document.getElementById('username').value.trim();
+    const email           = document.getElementById('email').value.trim();
+    const password        = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const terms           = document.getElementById('terms').checked;
+
+    if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+        errorBox.textContent = 'Please fill in all fields.';
+        errorBox.classList.add('show');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        errorBox.textContent = 'Passwords do not match.';
+        errorBox.classList.add('show');
+        return;
+    }
+
+    if (password.length < 6) {
+        errorBox.textContent = 'Password must be at least 6 characters.';
+        errorBox.classList.add('show');
+        return;
+    }
+
+    if (!terms) {
+        errorBox.textContent = 'You must agree to the Terms of Service.';
+        errorBox.classList.add('show');
+        return;
+    }
+
+    btn.textContent = 'Creating account...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('{{ path('api_register') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username:  username,
+                email:     email,
+                password:  password,
+                full_name: firstName + ' ' + lastName
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            successBox.textContent = '✔ Account created! Please check your email to verify your account before logging in.';
+            successBox.classList.add('show');
+            btn.textContent = 'Check Your Email ✉';
+            btn.disabled = true;
+
+            ['first_name','last_name','username','email','password','confirm_password'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('terms').checked = false;
+
+        } else {
+            errorBox.textContent = data.message || 'Something went wrong.';
+            errorBox.classList.add('show');
+            btn.textContent = 'Create Account';
+            btn.disabled = false;
+        }
+
+    } catch (e) {
+        errorBox.textContent = 'Network error. Please try again.';
+        errorBox.classList.add('show');
+        btn.textContent = 'Create Account';
+        btn.disabled = false;
+    }
+}
 {% endblock %}

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,18 +49,17 @@ nav {
 }
 .nav-logo-icon {
   width: 36px; height: 36px;
-  background: var(--forest);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
 }
 @font-face {
-    font-family: 'Mollani';
-    src: url('/fonts/mollani.ttf') format('truetype');
+    font-family: 'Mollani-Regular';
+    src: url('/fonts/Mollani-Regular.ttf') format('truetype');
 }
 
 .nav-logo-text {
-    font-family: 'Mollani', serif;
+    font-family: 'Mollani-Regular', serif;
     font-size: 1.8rem;
     color: var(--forest);
 }
@@ -232,21 +230,14 @@ footer ul li a:hover { color: var(--lime); }
 <!-- NAV -->
 <nav>
   <a class="nav-logo" href="{{ path('home') }}">
-    <div class="nav-logo-icon">☕</div>
-    <div class="nav-logo-text">EcoBrew</div>  
+    
+    <div class="nav-logo-text">🍵EcoBrew</div>  
   </a>
   <div class="nav-links">
     <a href="{{ path('home') }}" {% if app.request.attributes.get('_route') == 'home' %}style="color:var(--lime)"{% endif %}>Home</a>
     <a href="{{ path('about') }}" {% if app.request.attributes.get('_route') == 'about' %}style="color:var(--lime)"{% endif %}>About Us</a>
     <a href="{{ path('contact') }}" {% if app.request.attributes.get('_route') == 'contact' %}style="color:var(--lime)"{% endif %}>Contact</a>
-    {% if is_granted('ROLE_ADMIN') %}
-      <a href="{{ path('admin') }}" {% if app.request.attributes.get('_route') starts with 'admin' %}style="color:var(--lime)"{% endif %}>Admin</a>
-    {% endif %}
-    {% if app.user %}
-      <a href="{{ path('logout') }}" class="nav-btn">Logout</a>
-    {% else %}
-      <a href="{{ path('login') }}" class="nav-btn">Login</a>
-    {% endif %}
+    <a href="{{ path('login') }}" class="nav-btn">Login</a>
   </div>
 </nav>
 

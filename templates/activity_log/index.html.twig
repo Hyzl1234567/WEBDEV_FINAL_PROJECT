@@ -4,401 +4,467 @@
 
 {% block body %}
 <style>
-    .logs-container {
-        max-width: 1600px;
-        margin: 30px auto;
-        padding: 20px;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    .logs-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 3px solid #1D4A23;
-    }
+  :root {
+    --forest: #1D4A23;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --cream: #F0F7EC;
+    --error: #c0392b;
+    --success: #27ae60;
+  }
 
-    .logs-header h1 {
-        color: #1D4A23;
-        margin: 0;
-        font-size: 28px;
-        font-weight: bold;
-    }
+  .logs-wrap {
+    max-width: 1600px;
+    margin: 36px auto;
+    padding: 0 24px;
+    font-family: 'DM Sans', sans-serif;
+  }
 
-    .filter-section {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 25px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(29,74,35,0.12);
+  }
 
-    .filter-section h3 {
-        color: #1D4A23;
-        margin: 0 0 15px 0;
-        font-size: 18px;
-    }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin: 0 0 4px;
+  }
 
-    .filter-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-    }
+  .page-header p {
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+    margin: 0;
+  }
 
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-    }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
 
-    .filter-group label {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-        font-size: 14px;
-    }
+  /* ── STAT CARDS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
 
-    .filter-group select,
-    .filter-group input {
-        padding: 10px;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        font-size: 14px;
-    }
+  .stat-card {
+    background: var(--cream);
+    border: 1px solid rgba(29,74,35,0.08);
+    border-radius: 14px;
+    padding: 20px 18px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(29,74,35,0.06);
+  }
 
-    .filter-group select:focus,
-    .filter-group input:focus {
-        outline: none;
-        border-color: #1D4A23;
-    }
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
 
-    .filter-actions {
-        display: flex;
-        gap: 10px;
-        align-items: flex-end;
-    }
+  .stat-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--midforest);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.75;
+  }
 
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-    }
+  /* ── FILTER SECTION ── */
+  .filter-card {
+    background: var(--cream);
+    border: 1px solid rgba(29,74,35,0.08);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(29,74,35,0.06);
+  }
 
-    .btn-primary {
-        background-color: #1D4A23;
-        color: white;
-    }
+  .filter-card-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--forest);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 16px;
+  }
 
-    .btn-primary:hover {
-        background-color: #2d6b34;
-        transform: translateY(-2px);
-    }
+  .filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    align-items: end;
+  }
 
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-    }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
 
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
+  .filter-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--forest);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
+  .filter-group select,
+  .filter-group input {
+    padding: 9px 12px;
+    border: 1.5px solid rgba(29,74,35,0.2);
+    border-radius: 9px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    background: white;
+    color: #2c3e50;
+    outline: none;
+    transition: border-color 0.2s;
+  }
 
-    .btn-export {
-        background-color: #99CC67;
-        color: #1D4A23;
-    }
+  .filter-group select:focus,
+  .filter-group input:focus {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.15);
+  }
 
-    .btn-export:hover {
-        background-color: #b6df8a;
-    }
+  .filter-actions { display: flex; gap: 8px; align-items: flex-end; }
 
-    table {
-        width: 100%;
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        border-collapse: collapse;
-    }
+  /* ── TABLE CARD ── */
+  .table-card {
+    background: var(--cream);
+    border-radius: 16px;
+    border: 1px solid rgba(29,74,35,0.08);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(29,74,35,0.07);
+  }
 
-    thead {
-        background-color: #1D4A23;
-        color: white;
-    }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--cream);
+  }
 
-    th, td {
-        padding: 15px;
-        text-align: left;
-        font-size: 14px;
-        border-bottom: 1px solid #eee;
-    }
+  .table thead { background: var(--forest); }
 
-    tbody tr:hover {
-        background-color: #f4f9ef;
-        cursor: pointer;
-    }
+  .table th {
+    padding: 14px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: left;
+  }
 
-    .action-badge {
-        padding: 5px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
-        text-transform: uppercase;
-    }
+  .table td {
+    padding: 13px 16px;
+    font-size: 0.87rem;
+    color: #2c3e50;
+    border-bottom: 1px solid rgba(29,74,35,0.06);
+    background: var(--cream);
+    vertical-align: middle;
+  }
 
-    .action-create {
-        background-color: #d4edda;
-        color: #155724;
-    }
+  .table tbody tr:last-child td { border-bottom: none; }
 
-    .action-update {
-        background-color: #fff3cd;
-        color: #856404;
-    }
+  .table tbody tr:hover td {
+    background: #e4f0da;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
 
-    .action-delete {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
+  /* ── ACTION BADGES ── */
+  .action-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
 
-    .action-login {
-        background-color: #cfe2ff;
-        color: #084298;
-    }
+  .action-create  { background: #d4edda; color: #155724; }
+  .action-update  { background: #fff3cd; color: #856404; }
+  .action-delete  { background: #f8d7da; color: #721c24; }
+  .action-login   { background: #cfe2ff; color: #084298; }
+  .action-logout  { background: #e2e3e5; color: #383d41; }
 
-    .action-logout {
-        background-color: #e2e3e5;
-        color: #383d41;
-    }
+  /* ── INLINE BADGES ── */
+  .role-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(29,74,35,0.08);
+    color: var(--forest);
+    margin: 1px;
+  }
 
-    .no-logs {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-    }
+  .entity-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #ecf0f1;
+    color: #2c3e50;
+  }
 
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
-        margin-bottom: 25px;
-    }
+  .target-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #fff3cd;
+    color: #856404;
+  }
 
-    .stat-card {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        text-align: center;
-    }
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 18px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
 
-    .stat-number {
-        font-size: 32px;
-        font-weight: bold;
-        color: #1D4A23;
-    }
+  .btn-primary {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 14px rgba(29,74,35,0.2);
+  }
+  .btn-primary:hover {
+    background: var(--midforest);
+    transform: translateY(-1px);
+  }
 
-    .stat-label {
-        font-size: 13px;
-        color: #666;
-        margin-top: 5px;
-    }
+  .btn-secondary {
+    background: var(--cream);
+    color: var(--forest);
+    border: 1.5px solid rgba(29,74,35,0.2);
+  }
+  .btn-secondary:hover {
+    background: white;
+    border-color: var(--forest);
+  }
 
-    .role-badge {
-        font-size: 11px;
-        background: #e8f5e9;
-        padding: 3px 8px;
-        border-radius: 4px;
-        display: inline-block;
-        margin: 2px;
-        color: #1D4A23;
-        font-weight: 600;
-    }
+  .btn-export {
+    background: var(--lime);
+    color: var(--forest);
+  }
+  .btn-export:hover {
+    background: #b6df8a;
+    transform: translateY(-1px);
+  }
 
-    .entity-badge {
-        background: #ecf0f1;
-        color: #2c3e50;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-    }
+  .btn-sm {
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .no-logs {
+    text-align: center;
+    padding: 56px 20px;
+    color: #999;
+    font-style: italic;
+    font-size: 0.9rem;
+    background: var(--cream);
+  }
 </style>
 
-<div class="logs-container">
-    <div class="logs-header">
-        <h1>📋 System Activity Logs</h1>
-        <div style="display: flex; gap: 10px;">
-           <!-- <a href="{{ path('app_activity_log_export', current_filters) }}" class="btn btn-export">📥 Export CSV</a>-->
-            <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">← Back</a>
-        </div>
+<div class="logs-wrap">
+
+  <div class="page-header">
+    <div>
+      <h1>Activity Logs</h1>
+      <p>Full audit trail of system actions across EcoBrew.</p>
     </div>
-
-    <!-- Statistics -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-number">{{ logs|length }}</div>
-            <div class="stat-label">Total Results</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ logs|filter(l => l.action == 'create')|length }}</div>
-            <div class="stat-label">Created</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ logs|filter(l => l.action == 'update')|length }}</div>
-            <div class="stat-label">Updated</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ logs|filter(l => l.action == 'delete')|length }}</div>
-            <div class="stat-label">Deleted</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ logs|filter(l => l.action == 'login')|length }}</div>
-            <div class="stat-label">Logins</div>
-        </div>
+    <div class="header-actions">
+      <!-- <a href="{{ path('app_activity_log_export', current_filters) }}" class="btn btn-export">📥 Export CSV</a> -->
+      <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">← Back</a>
     </div>
+  </div>
 
-    <!-- Filters -->
-    <div class="filter-section">
-        <h3>🔍 Filter Logs</h3>
-        <form method="get" class="filter-form">
-            <div class="filter-group">
-                <label for="user">User</label>
-                <select name="user" id="user">
-                    <option value="">All Users</option>
-                    {% for u in users %}
-                        <option value="{{ u.id }}" {% if current_filters.user and current_filters.user == u.id %}selected{% endif %}>
-                            {{ u.username }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="action">Action</label>
-                <select name="action" id="action">
-                    <option value="">All Actions</option>
-                    {% for act in actions %}
-                        <option value="{{ act.action }}" {% if current_filters.action == act.action %}selected{% endif %}>
-                            {{ act.action|capitalize }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="entity">Entity</label>
-                <select name="entity" id="entity">
-                    <option value="">All Entities</option>
-                    {% for ent in entities %}
-                        <option value="{{ ent.entity }}" {% if current_filters.entity == ent.entity %}selected{% endif %}>
-                            {{ ent.entity }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="start_date">Start Date</label>
-                <input type="date" name="start_date" id="start_date" value="{{ current_filters.start_date }}">
-            </div>
-
-            <div class="filter-group">
-                <label for="end_date">End Date</label>
-                <input type="date" name="end_date" id="end_date" value="{{ current_filters.end_date }}">
-            </div>
-
-            <div class="filter-actions">
-                <button type="submit" class="btn btn-primary">🔍 Apply Filters</button>
-                <a href="{{ path('app_activity_log_index') }}" class="btn btn-secondary">Clear</a>
-            </div>
-        </form>
+  <!-- Statistics -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-number">{{ logs|length }}</div>
+      <div class="stat-label">Total Results</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ logs|filter(l => l.action == 'create')|length }}</div>
+      <div class="stat-label">Created</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ logs|filter(l => l.action == 'update')|length }}</div>
+      <div class="stat-label">Updated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ logs|filter(l => l.action == 'delete')|length }}</div>
+      <div class="stat-label">Deleted</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ logs|filter(l => l.action == 'login')|length }}</div>
+      <div class="stat-label">Logins</div>
+    </div>
+  </div>
 
-    <!-- Logs Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>User ID</th>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Action</th>
-                <th>Entity</th>
-                <th>Description</th>
-                <th>IP Address</th>
-                <th>Timestamp</th>
-                <th>Actions</th>
+  <!-- Filters -->
+  <div class="filter-card">
+    <div class="filter-card-title">Filter Logs</div>
+    <form method="get" class="filter-form">
+      <div class="filter-group">
+        <label for="user">User</label>
+        <select name="user" id="user">
+          <option value="">All Users</option>
+          {% for u in users %}
+            <option value="{{ u.id }}" {% if current_filters.user and current_filters.user == u.id %}selected{% endif %}>
+              {{ u.username }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="action">Action</label>
+        <select name="action" id="action">
+          <option value="">All Actions</option>
+          {% for act in actions %}
+            <option value="{{ act.action }}" {% if current_filters.action == act.action %}selected{% endif %}>
+              {{ act.action|capitalize }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="entity">Entity</label>
+        <select name="entity" id="entity">
+          <option value="">All Entities</option>
+          {% for ent in entities %}
+            <option value="{{ ent.entity }}" {% if current_filters.entity == ent.entity %}selected{% endif %}>
+              {{ ent.entity }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="start_date">Start Date</label>
+        <input type="date" name="start_date" id="start_date" value="{{ current_filters.start_date }}">
+      </div>
+
+      <div class="filter-group">
+        <label for="end_date">End Date</label>
+        <input type="date" name="end_date" id="end_date" value="{{ current_filters.end_date }}">
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary">🔍 Apply</button>
+        <a href="{{ path('app_activity_log_index') }}" class="btn btn-secondary">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Logs Table -->
+  <div class="table-card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Action</th>
+          <th>Entity</th>
+          <th>Target</th>
+          <th>Description</th>
+          <th>Timestamp</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if logs|length > 0 %}
+          {% for log in logs %}
+            <tr onclick="window.location.href='{{ path('app_activity_log_show', {id: log.id}) }}'">
+              <td><strong>#{{ log.id }}</strong></td>
+              <td>
+                <strong>{{ log.username ?? (log.user ? log.user.username : 'System') }}</strong>
+                {% if log.user %}
+                  <br><small style="color:#aaa;">#{{ log.user.id }}</small>
+                {% endif %}
+              </td>
+              <td>
+                {% if log.role %}
+                  <span class="role-badge">{{ log.role|replace({'ROLE_': ''}) }}</span>
+                {% elseif log.user %}
+                  {% for role in log.user.roles %}
+                    {% if role != 'ROLE_USER' %}
+                      <span class="role-badge">{{ role|replace({'ROLE_': ''}) }}</span>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                <span class="action-badge action-{{ log.action }}">{{ log.action }}</span>
+              </td>
+              <td>
+                {% if log.entity %}
+                  <span class="entity-badge">{{ log.entity }}</span>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                {% if log.description %}
+                  <span class="target-badge">{{ log.description|slice(0, 40) }}{% if log.description|length > 40 %}...{% endif %}</span>
+                {% else %}—{% endif %}
+              </td>
+              <td style="color:#666; font-size:0.83rem;">
+                {{ log.description|slice(0, 50) }}{% if log.description|length > 50 %}...{% endif %}
+              </td>
+              <td style="white-space: nowrap; font-size:0.83rem; color:#777;">
+                {{ log.createdAt|date('M d, Y H:i:s') }}
+              </td>
+              <td>
+                <a href="{{ path('app_activity_log_show', {id: log.id}) }}" class="btn btn-primary btn-sm" onclick="event.stopPropagation();">
+                  View
+                </a>
+              </td>
             </tr>
-        </thead>
-        <tbody>
-            {% if logs|length > 0 %}
-                {% for log in logs %}
-                    <tr onclick="window.location.href='{{ path('app_activity_log_show', {id: log.id}) }}'">
-                        <td>#{{ log.id }}</td>
-                        <td>
-                            {% if log.user %}
-                                <strong>#{{ log.user.id }}</strong>
-                            {% else %}
-                                <em>—</em>
-                            {% endif %}
-                        </td>
-                        <td>{{ log.user ? log.user.username : 'System' }}</td>
-                        <td>
-                            {% if log.user %}
-                                {% for role in log.user.roles %}
-                                    {% if role != 'ROLE_USER' %}
-                                        <span class="role-badge">
-                                            {{ role|replace({'ROLE_': ''}) }}
-                                        </span>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="action-badge action-{{ log.action }}">
-                                {{ log.action }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if log.entity %}
-                                <span class="entity-badge">{{ log.entity }}</span>
-                                {% if log.entityId %}<small>#{{ log.entityId }}</small>{% endif %}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                        <td>{{ log.description|slice(0, 60) }}{% if log.description|length > 60 %}...{% endif %}</td>
-                        <td>{{ log.ipAddress ?? '—' }}</td>
-                        <td>{{ log.createdAt|date('M d, Y H:i:s') }}</td>
-                        <td>
-                            <a href="{{ path('app_activity_log_show', {id: log.id}) }}" class="btn btn-primary btn-sm" onclick="event.stopPropagation();">
-                                View
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="10" class="no-logs">
-                        <p>No activity logs found matching your filters.</p>
-                    </td>
-                </tr>
-            {% endif %}
-        </tbody>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10" class="no-logs">No activity logs found matching your filters.</td>
+          </tr>
+        {% endif %}
+      </tbody>
     </table>
+  </div>
+
 </div>
 {% endblock %}

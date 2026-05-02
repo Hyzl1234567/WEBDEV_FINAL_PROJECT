@@ -36,7 +36,7 @@ class UserManagementController extends AbstractController
             $user->setUsername($request->request->get('username'));
             $user->setEmail($request->request->get('email'));
             $user->setFullName($request->request->get('full_name'));
-            
+
             $role = $request->request->get('role');
             if ($role === 'ROLE_ADMIN') {
                 $user->setRoles(['ROLE_ADMIN']);
@@ -54,13 +54,20 @@ class UserManagementController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // LOG: Admin creates a user
-            $activityLogger->log(
+            $snapshot = [
+                'username'  => $user->getUsername(),
+                'email'     => $user->getEmail(),
+                'full_name' => $user->getFullName(),
+                'role'      => $role,
+                'status'    => 'active',
+            ];
+
+            $activityLogger->logCreate(
                 $this->getUser(),
-                'create',
                 'User',
                 $user->getId(),
-                sprintf('Admin created user: %s with role: %s', $user->getUsername(), $role)
+                sprintf('User: %s (ID: %d)', $user->getUsername(), $user->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'User created successfully!');
@@ -74,13 +81,22 @@ class UserManagementController extends AbstractController
     public function edit(User $user, Request $request, EntityManagerInterface $entityManager, ActivityLogger $activityLogger): Response
     {
         if ($request->isMethod('POST')) {
-            $oldRole = $user->getRoles()[0] ?? 'ROLE_USER';
+            $oldRole   = $user->getRoles()[0] ?? 'ROLE_USER';
             $oldStatus = $user->getStatus();
-            
+
+            // Snapshot BEFORE applying changes
+            $snapshot = [
+                'username'  => $user->getUsername(),
+                'email'     => $user->getEmail(),
+                'full_name' => $user->getFullName(),
+                'role'      => $oldRole,
+                'status'    => $oldStatus,
+            ];
+
             $user->setUsername($request->request->get('username'));
             $user->setEmail($request->request->get('email'));
             $user->setFullName($request->request->get('full_name'));
-            
+
             $role = $request->request->get('role');
             if ($role === 'ROLE_ADMIN') {
                 $user->setRoles(['ROLE_ADMIN']);
@@ -95,23 +111,12 @@ class UserManagementController extends AbstractController
 
             $entityManager->flush();
 
-            // LOG: Admin updates a user
-            $changes = [];
-            if ($oldRole !== $role) {
-                $changes[] = sprintf('role: %s → %s', $oldRole, $role);
-            }
-            if ($oldStatus !== $newStatus) {
-                $changes[] = sprintf('status: %s → %s', $oldStatus, $newStatus);
-            }
-            
-            $changeDescription = !empty($changes) ? ' (' . implode(', ', $changes) . ')' : '';
-            
-            $activityLogger->log(
+            $activityLogger->logUpdate(
                 $this->getUser(),
-                'update',
                 'User',
                 $user->getId(),
-                sprintf('Admin updated user: %s%s', $user->getUsername(), $changeDescription)
+                sprintf('User: %s (ID: %d)', $user->getUsername(), $user->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'User updated successfully!');
@@ -127,7 +132,7 @@ class UserManagementController extends AbstractController
     public function resetPassword(User $user, Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ActivityLogger $activityLogger): Response
     {
         if ($request->isMethod('POST')) {
-            $newPassword = $request->request->get('new_password');
+            $newPassword     = $request->request->get('new_password');
             $confirmPassword = $request->request->get('confirm_password');
 
             if ($newPassword !== $confirmPassword) {
@@ -140,17 +145,23 @@ class UserManagementController extends AbstractController
                 return $this->redirectToRoute('app_user_management_reset_password', ['id' => $user->getId()]);
             }
 
+            $snapshot = [
+                'username' => $user->getUsername(),
+                'email'    => $user->getEmail(),
+                'role'     => $user->getRoles()[0] ?? 'ROLE_USER',
+                'note'     => 'password reset by admin',
+            ];
+
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $entityManager->flush();
 
-            // LOG: Admin resets password
-            $activityLogger->log(
+            $activityLogger->logUpdate(
                 $this->getUser(),
-                'update',
                 'User',
                 $user->getId(),
-                sprintf('Admin reset password for user: %s', $user->getUsername())
+                sprintf('User: %s (ID: %d)', $user->getUsername(), $user->getId()),
+                $snapshot
             );
 
             $this->addFlash('success', 'Password reset successfully!');
@@ -166,26 +177,32 @@ class UserManagementController extends AbstractController
     public function toggleStatus(User $user, EntityManagerInterface $entityManager, ActivityLogger $activityLogger): Response
     {
         $oldStatus = $user->getStatus();
-        
+
+        // Snapshot BEFORE applying the toggle
+        $snapshot = [
+            'username'   => $user->getUsername(),
+            'role'       => $user->getRoles()[0] ?? 'ROLE_USER',
+            'old_status' => $oldStatus,
+        ];
+
         if ($user->getStatus() === 'active') {
             $user->setStatus('disabled');
+            $snapshot['new_status'] = 'disabled';
             $message = 'User account disabled.';
-            $description = sprintf('Admin disabled user account: %s (status: active → disabled)', $user->getUsername());
         } else {
             $user->setStatus('active');
+            $snapshot['new_status'] = 'active';
             $message = 'User account activated.';
-            $description = sprintf('Admin activated user account: %s (status: %s → active)', $user->getUsername(), $oldStatus);
         }
 
         $entityManager->flush();
 
-        // LOG: Admin updates status
-        $activityLogger->log(
+        $activityLogger->logUpdate(
             $this->getUser(),
-            'update',
             'User',
             $user->getId(),
-            $description
+            sprintf('User: %s (ID: %d)', $user->getUsername(), $user->getId()),
+            $snapshot
         );
 
         $this->addFlash('success', $message);
@@ -196,16 +213,24 @@ class UserManagementController extends AbstractController
     public function archive(User $user, EntityManagerInterface $entityManager, ActivityLogger $activityLogger): Response
     {
         $oldStatus = $user->getStatus();
+
+        // Snapshot BEFORE archiving
+        $snapshot = [
+            'username'   => $user->getUsername(),
+            'role'       => $user->getRoles()[0] ?? 'ROLE_USER',
+            'old_status' => $oldStatus,
+            'new_status' => 'archived',
+        ];
+
         $user->setStatus('archived');
         $entityManager->flush();
 
-        // LOG: Admin archives user
-        $activityLogger->log(
+        $activityLogger->logUpdate(
             $this->getUser(),
-            'update',
             'User',
             $user->getId(),
-            sprintf('Admin archived user account: %s (status: %s → archived)', $user->getUsername(), $oldStatus)
+            sprintf('User: %s (ID: %d)', $user->getUsername(), $user->getId()),
+            $snapshot
         );
 
         $this->addFlash('success', 'User account archived.');
@@ -215,17 +240,21 @@ class UserManagementController extends AbstractController
     #[Route('/{id}/delete', name: 'app_user_management_delete', methods: ['POST'])]
     public function delete(User $user, EntityManagerInterface $entityManager, ActivityLogger $activityLogger): Response
     {
-        $username = $user->getUsername();
-        $userId = $user->getId();
-        $userRole = $user->getRoles()[0] ?? 'ROLE_USER';
+        $snapshot = [
+            'username'   => $user->getUsername(),
+            'email'      => $user->getEmail(),
+            'full_name'  => $user->getFullName(),
+            'role'       => $user->getRoles()[0] ?? 'ROLE_USER',
+            'status'     => $user->getStatus(),
+            'deleted_at' => (new \DateTimeImmutable())->format('c'),
+        ];
 
-        // LOG BEFORE DELETION: Admin deletes a user
-        $activityLogger->log(
+        $activityLogger->logDelete(
             $this->getUser(),
-            'delete',
             'User',
-            $userId,
-            sprintf('Admin deleted user account: %s (role: %s)', $username, $userRole)
+            $user->getId(),
+            sprintf('User: %s (ID: %d)', $user->getUsername(), $user->getId()),
+            $snapshot
         );
 
         $entityManager->remove($user);

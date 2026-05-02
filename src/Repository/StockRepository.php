@@ -16,28 +16,48 @@ class StockRepository extends ServiceEntityRepository
         parent::__construct($registry, Stock::class);
     }
 
-    //    /**
-    //     * @return Stock[] Returns an array of Stock objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Returns all history entries for a product, ordered oldest → newest.
+     *
+     * @return Stock[]
+     */
+    public function findHistoryByProduct(int $productId): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.product = :productId')
+            ->andWhere('s.isHistoryEntry = :isHistory')
+            ->setParameter('productId', $productId)
+            ->setParameter('isHistory', true)
+            ->orderBy('s.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Stock
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Returns all main stock entries (excludes history entries).
+     *
+     * @return Stock[]
+     */
+    public function findMainStocks(): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.isHistoryEntry = false OR s.isHistoryEntry IS NULL')
+            ->orderBy('s.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Returns the single main stock entry for a product (not a history entry).
+     */
+    public function findMainStockByProduct(int $productId): ?Stock
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.product = :productId')
+            ->andWhere('s.isHistoryEntry = false OR s.isHistoryEntry IS NULL')
+            ->setParameter('productId', $productId)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

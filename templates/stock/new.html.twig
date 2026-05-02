@@ -4,41 +4,154 @@
 
 {% block body %}
 <style>
-    body {
-        background-color: #99CC67;
-        font-family: 'Poppins', sans-serif;
-        margin: 0;
-        padding: 0;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    .new-stock-page {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding-top: 50px;
-    }
+  :root {
+    --forest: #1D4A23;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --cream: #F0F7EC;
+    --paper: #F0F7EC;
+  }
 
-    .form-container {
-        background-color: #fff;
-        padding: 40px 60px;
-        border-radius: 12px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        width: 450px;
-        position: relative;
-    }
+  .cu-wrap {
+    min-height: calc(100vh - 70px);
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    font-family: 'DM Sans', sans-serif;
+  }
 
-    .new-stock-page h1 {
-        text-align: center;
-        color: #1f4e25;
-        font-size: 2rem;
-        margin-bottom: 20px;
-    }
+  .cu-card {
+    background: var(--cream);
+    border-radius: 20px;
+    border: 1px solid rgba(29,74,35,0.1);
+    box-shadow: 0 8px 40px rgba(29,74,35,0.09);
+    width: 100%;
+    max-width: 540px;
+    overflow: hidden;
+  }
+
+  .cu-card-header {
+    background: linear-gradient(135deg, var(--forest), var(--midforest));
+    padding: 28px 32px;
+  }
+
+  .cu-card-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: white;
+    margin: 0 0 4px;
+  }
+
+  .cu-card-header p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.65);
+    margin: 0;
+    font-weight: 300;
+  }
+
+  .cu-card-body { padding: 32px; }
+
+  /* Symfony form widget overrides */
+  .cu-card-body label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--forest);
+    margin-bottom: 0.45rem;
+    margin-top: 1.1rem;
+    letter-spacing: 0.3px;
+  }
+
+  .cu-card-body label:first-of-type { margin-top: 0; }
+
+  .cu-card-body input,
+  .cu-card-body select,
+  .cu-card-body textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(29,74,35,0.18);
+    border-radius: 10px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--forest);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  .cu-card-body input:focus,
+  .cu-card-body select:focus,
+  .cu-card-body textarea:focus {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.15);
+  }
+
+  .cu-card-body textarea { resize: vertical; min-height: 90px; }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.75rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 4px 16px rgba(29,74,35,0.2);
+  }
+
+  .btn-primary:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(153,204,103,0.3);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--forest);
+    border: 1.5px solid rgba(29,74,35,0.15);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--lime);
+    background: #e8f5e0;
+  }
 </style>
 
-<div class="new-stock-page">
-    <div class="form-container">
-        <h1>Create new Stock</h1>
-        {{ include('stock/_form.html.twig') }}
+<div class="cu-wrap">
+  <div class="cu-card">
+
+    <div class="cu-card-header">
+      <h1>New Stock Entry</h1>
+      <p>Add a new stock record to the EcoBrew inventory.</p>
     </div>
+
+    <div class="cu-card-body">
+      {{ include('stock/_form.html.twig') }}
+
+       
+  </div>
 </div>
 {% endblock %}

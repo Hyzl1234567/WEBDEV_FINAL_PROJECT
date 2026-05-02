@@ -4,330 +4,481 @@
 
 {% block body %}
 <style>
-    .container {
-        max-width: 1400px;
-        margin: 30px auto;
-        padding: 20px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --darkforest: #142E17;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --limelight: #B8DC8E;
+    --limeshadow: #7AAD4C;
+    --paper: #F5FAF2;
+    --leaf: #C8E8AD;
+    --gold: #C9A84C;
+    --amber: #D4863A;
+  }
 
-    h1 {
-        text-align: center;
-        color: #1D4A23;
-        font-size: 2rem;
-        margin-bottom: 25px;
-    }
+  .page-wrapper {
+    min-height: 100vh;
+    background: var(--cream);
+    padding: 100px 2rem 3rem;
+  }
 
-    /* Flash messages */
-    .alert {
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
+  .page-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
+  /* ── Page Header ── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1.5px solid rgba(29,74,35,0.12);
+  }
 
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
+  .page-header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 0.2rem;
+  }
 
-    /* DataTable wrapper styling */
-    .dataTables_wrapper {
-        padding: 20px 0;
-    }
+  .page-header-left p {
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+  }
 
-    /* DataTable search box */
-    .dataTables_filter input {
-        border: 2px solid #1D4A23;
-        border-radius: 6px;
-        padding: 6px 12px;
-        margin-left: 8px;
-    }
+  /* ── Alert ── */
+  .alert {
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-    /* DataTable length selector */
-    .dataTables_length select {
-        border: 2px solid #1D4A23;
-        border-radius: 6px;
-        padding: 4px 8px;
-        margin: 0 8px;
-    }
+  .alert-success {
+    background: rgba(153,204,103,0.2);
+    color: var(--forest);
+    border: 1px solid rgba(153,204,103,0.5);
+  }
 
-    /* DataTable pagination */
-    .dataTables_paginate .paginate_button {
-        padding: 6px 12px;
-        margin: 0 2px;
-        border-radius: 6px;
-        border: 1px solid #1D4A23;
-        background: white;
-        color: #1D4A23 !important;
-    }
+  .alert-error {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
 
-    .dataTables_paginate .paginate_button:hover {
-        background: #1D4A23 !important;
-        color: white !important;
-        border: 1px solid #1D4A23;
-    }
+  /* ── Add button ── */
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: var(--forest);
+    color: white;
+    border-radius: 50px;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
 
-    .dataTables_paginate .paginate_button.current {
-        background: #1D4A23 !important;
-        color: white !important;
-        border: 1px solid #1D4A23;
-    }
+  .btn-add:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(153,204,103,0.35);
+  }
 
-    .dataTables_paginate .paginate_button.disabled {
-        color: #ccc !important;
-    }
+  /* ── Card ── */
+  .table-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(29,74,35,0.08);
+    overflow: hidden;
+  }
 
-    /* DataTable info text */
-    .dataTables_info {
-        color: #666;
-        font-size: 14px;
-    }
+  /* ── DataTable Controls ── */
+  .dataTables_wrapper {
+    padding: 1.5rem;
+  }
 
-    /* Table styling */
-    table {
-        width: 100% !important;
-        border-collapse: collapse;
-        background: #fff;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+  .dataTables_filter label,
+  .dataTables_length label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--midforest);
+    font-weight: 500;
+  }
 
-    thead {
-        background: #1D4A23;
-        color: white;
-    }
+  .dataTables_filter input {
+    border: 1.5px solid rgba(29,74,35,0.2) !important;
+    border-radius: 8px !important;
+    padding: 7px 13px !important;
+    margin-left: 8px !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
 
-    th, td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
+  .dataTables_filter input:focus {
+    border-color: var(--lime) !important;
+    box-shadow: 0 0 0 3px rgba(153,204,103,0.15) !important;
+  }
 
-    tbody tr:hover {
-        background-color: #f9f9f9;
-    }
+  .dataTables_length select {
+    border: 1.5px solid rgba(29,74,35,0.2) !important;
+    border-radius: 8px !important;
+    padding: 5px 10px !important;
+    margin: 0 6px !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+  }
 
-    tbody tr:last-child td {
-        border-bottom: none;
-    }
+  /* ── Table ── */
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+  }
 
-    table img {
-        max-width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+  thead {
+    background: var(--forest);
+  }
 
-    /* Badge for Created By */
-    .badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-        color: white;
-    }
+  thead th {
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(240,247,236,0.85);
+    border: none;
+  }
 
-    .badge-admin {
-        background-color: #9b59b6;
-    }
+  tbody tr {
+    border-bottom: 1px solid rgba(29,74,35,0.07);
+    transition: background 0.15s;
+  }
 
-    .badge-staff {
-        background-color: #3498db;
-    }
+  tbody tr:hover {
+    background: var(--paper);
+  }
 
-    .badge-unknown {
-        background-color: #95a5a6;
-    }
+  tbody tr:last-child {
+    border-bottom: none;
+  }
 
-    /* Action buttons */
-    .btn-action {
-        display: inline-block;
-        padding: 6px 14px;
-        margin: 2px;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: bold;
-        text-decoration: none;
-        transition: 0.3s;
-        border: none;
-        cursor: pointer;
-        white-space: nowrap;
-    }
+  td {
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--forest);
+    vertical-align: middle;
+    border: none;
+  }
 
-    .btn-show {
-        background: #99CC67;
-        color: black;
-    }
-    
-    .btn-show:hover {
-        background: #6F4E37;
-        color: white;
-    }
+  td strong {
+    font-weight: 600;
+  }
 
-    .btn-edit {
-        background: #1D4A23;
-        color: white;
-    }
-    
-    .btn-edit:hover {
-        background: #99CC67;
-        color: black;
-    }
+  /* ── Product Image ── */
+  table img {
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(29,74,35,0.12);
+  }
 
-    .btn-delete {
-        background: #6F4E37;
-        color: white;
-    }
+  .no-image {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+    background: var(--cream);
+    color: rgba(29,74,35,0.35);
+    font-size: 0.75rem;
+    font-style: italic;
+    border: 1.5px dashed rgba(29,74,35,0.2);
+  }
 
-    .btn-delete:hover {
-        background: #8b6348;
-    }
+  /* ── Category Badge ── */
+  .category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: rgba(153,204,103,0.18);
+    color: var(--midforest);
+    border: 1px solid rgba(153,204,103,0.4);
+    letter-spacing: 0.2px;
+  }
 
-    .btn-locked {
-        background-color: #bdc3c7;
-        color: #7f8c8d;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+  /* ── User Badge ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
 
-    .btn-add {
-        display: inline-block;
-        padding: 10px 20px;
-        margin-bottom: 20px;
-        background: #99CC67;
-        color: black;
-        border-radius: 5px;
-        text-decoration: none;
-        font-weight: bold;
-    }
+  .badge-admin {
+    background: rgba(155,89,182,0.12);
+    color: #7d3c98;
+    border: 1px solid rgba(155,89,182,0.25);
+  }
 
-    .btn-add:hover {
-        background: #1D4A23;
-        color: white;
-    }
+  .badge-staff {
+    background: rgba(52,152,219,0.1);
+    color: #1a6fa8;
+    border: 1px solid rgba(52,152,219,0.25);
+  }
 
-    .delete-form {
-        display: inline;
-        margin: 0;
-    }
+  .badge-unknown {
+    background: rgba(149,165,166,0.15);
+    color: #666;
+    border: 1px solid rgba(149,165,166,0.3);
+  }
 
-    .no-records {
-        text-align: center;
-        color: #777;
-        font-style: italic;
-    }
+  /* ── Action Buttons ── */
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
 
-    /* Center no records message */
-    td.dataTables_empty {
-        text-align: center;
-        color: #777;
-        font-style: italic;
-        padding: 30px !important;
-    }
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    letter-spacing: 0.1px;
+  }
 
-    /* Category badge */
-    .category-badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        background-color: #99CC67;
-        color: #1D4A23;
-    }
+  .btn-show {
+    background: rgba(153,204,103,0.15);
+    color: var(--midforest);
+    border: 1.5px solid rgba(153,204,103,0.45);
+  }
+
+  .btn-show:hover {
+    background: var(--lime);
+    color: var(--forest);
+    border-color: var(--lime);
+  }
+
+  .btn-edit {
+    background: var(--forest);
+    color: white;
+    border: 1.5px solid var(--forest);
+  }
+
+  .btn-edit:hover {
+    background: var(--midforest);
+    border-color: var(--midforest);
+  }
+
+  .btn-delete {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1.5px solid rgba(192,57,43,0.25);
+  }
+
+  .btn-delete:hover {
+    background: #c0392b;
+    color: white;
+    border-color: #c0392b;
+  }
+
+  .btn-locked {
+    background: rgba(189,195,199,0.2);
+    color: #aab;
+    border: 1.5px solid rgba(189,195,199,0.4);
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .delete-form {
+    display: inline;
+    margin: 0;
+  }
+
+  /* ── Pagination ── */
+  .dataTables_paginate {
+    margin-top: 1rem;
+  }
+
+  .dataTables_paginate .paginate_button {
+    padding: 6px 13px !important;
+    margin: 0 2px !important;
+    border-radius: 8px !important;
+    border: 1.5px solid rgba(29,74,35,0.18) !important;
+    background: white !important;
+    color: var(--forest) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    transition: all 0.15s !important;
+    cursor: pointer;
+  }
+
+  .dataTables_paginate .paginate_button:hover {
+    background: var(--forest) !important;
+    color: white !important;
+    border-color: var(--forest) !important;
+  }
+
+  .dataTables_paginate .paginate_button.current {
+    background: var(--forest) !important;
+    color: white !important;
+    border-color: var(--forest) !important;
+  }
+
+  .dataTables_paginate .paginate_button.disabled {
+    color: rgba(29,74,35,0.3) !important;
+    border-color: rgba(29,74,35,0.1) !important;
+    cursor: default !important;
+  }
+
+  .dataTables_info {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.83rem;
+    color: rgba(29,74,35,0.55);
+    margin-top: 1rem;
+  }
+
+  td.dataTables_empty {
+    text-align: center;
+    color: rgba(29,74,35,0.4);
+    font-style: italic;
+    padding: 3rem !important;
+    font-size: 0.9rem;
+  }
 </style>
 
-<div class="container">
+<div class="page-wrapper">
+  <div class="page-inner">
+
     {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
+      <div class="alert alert-success">✓ {{ message }}</div>
     {% endfor %}
-    
     {% for message in app.flashes('error') %}
-        <div class="alert alert-error">{{ message }}</div>
+      <div class="alert alert-error">⚠ {{ message }}</div>
     {% endfor %}
 
-    <h1>📦 Product List</h1>
-    
-    <a class="btn-add" href="{{ path('app_product_new') }}">+ Add New Product</a>
-    
-    <table id="productsTable">               
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Product List</h1>
+        <p>Manage your café's product catalogue</p>
+      </div>
+      <a class="btn-add" href="{{ path('app_product_new') }}">
+        + Add New Product
+      </a>
+    </div>
+
+    <div class="table-card">
+      <table id="productsTable">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Products</th>
-                <th>Image</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Created By</th>
-                <th>Actions</th>
-            </tr>
+          <tr>
+            <th>Id</th>
+            <th>Product</th>
+            <th>Image</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Created By</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
         {% for product in products %}
-            <tr>
-                <td>{{ product.id }}</td>
-                <td><strong>{{ product.name }}</strong></td>
-                <td>
-                    {% if product.image %}
-                        <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="{{ product.name }}">
-                    {% else %}
-                        <em>No image</em>
-                    {% endif %}
-                </td>
-                <td>
-                    <span class="category-badge">{{ product.category }}</span>
-                </td>
-                <td>{{ product.description|slice(0, 50) }}{{ product.description|length > 50 ? '...' : '' }}</td>
-                <td><strong>{{ product.quantity }}</strong></td>
-                <td><strong>₱{{ product.price|number_format(2, '.', ',') }}</strong></td>
-                <td>
-                    {% if product.createdBy %}
-                        <span class="badge {{ 'ROLE_ADMIN' in product.createdBy.roles ? 'badge-admin' : 'badge-staff' }}">
-                            {{ 'ROLE_ADMIN' in product.createdBy.roles ? '👑 ' : '👤 ' }}{{ product.createdBy.username }}
-                        </span>
-                    {% else %}
-                        <span class="badge badge-unknown">Unknown</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn-action btn-show">👁️ Show</a>
-                    
-                    {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-                    
-                    {% if canEdit %}
-                        <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn-action btn-edit">✏️ Edit</a>
-                        <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" class="delete-form" 
-                              onsubmit="return confirm('⚠️ Are you sure you want to delete this product?\n\nProduct: {{ product.name }}\nPrice: ₱{{ product.price|number_format(2) }}\n\nThis action cannot be undone!');">
-                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
-                            <button type="submit" class="btn-action btn-delete">🗑️ Delete</button>
-                        </form>
-                    {% else %}
-                        <span class="btn-action btn-locked" title="You can only edit your own records">🔒 Locked</span>
-                    {% endif %}
-                </td>
-            </tr>
+          <tr>
+            <td style="opacity:0.5; font-size:0.8rem;">#{{ product.id }}</td>
+            <td><strong>{{ product.name }}</strong></td>
+            <td>
+              {% if product.image %}
+                <img src="{{ asset('uploads/images/' ~ product.image) }}" alt="{{ product.name }}">
+              {% else %}
+                <span class="no-image">No image</span>
+              {% endif %}
+            </td>
+            <td><span class="category-badge">{{ product.category }}</span></td>
+            <td style="max-width:200px; color: rgba(29,74,35,0.7); font-size:0.875rem;">
+              {{ product.description|slice(0, 50) }}{{ product.description|length > 50 ? '…' : '' }}
+            </td>
+            <td><strong>{{ product.quantity }}</strong></td>
+            <td><strong>₱{{ product.price|number_format(2, '.', ',') }}</strong></td>
+            <td>
+              {% if product.createdBy %}
+                <span class="badge {{ 'ROLE_ADMIN' in product.createdBy.roles ? 'badge-admin' : 'badge-staff' }}">
+                  {{ 'ROLE_ADMIN' in product.createdBy.roles ? '👑' : '👤' }} {{ product.createdBy.username }}
+                </span>
+              {% else %}
+                <span class="badge badge-unknown">Unknown</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="actions-cell">
+                <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn-action btn-show">👁 Show</a>
+
+                {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+
+                {% if canEdit %}
+                  <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn-action btn-edit">✏️ Edit</a>
+                  <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" class="delete-form"
+                        onsubmit="return confirm('⚠️ Are you sure you want to delete this product?\n\nProduct: {{ product.name }}\nPrice: ₱{{ product.price|number_format(2) }}\n\nThis action cannot be undone!');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                    <button type="submit" class="btn-action btn-delete">🗑 Delete</button>
+                  </form>
+                {% else %}
+                  <span class="btn-action btn-locked" title="You can only edit your own records">🔒 Locked</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
         {% else %}
-            <tr>
-                <td colspan="9" class="no-records">No records found</td>
-            </tr>
+          <tr>
+            <td colspan="9" class="no-records">No records found</td>
+          </tr>
         {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+
+  </div>
 </div>
 {% endblock %}
 
@@ -335,7 +486,7 @@
 <script>
 $(document).ready(function() {
     $('#productsTable').DataTable({
-        "order": [[0, "desc"]], // Sort by ID descending (newest first)
+        "order": [[0, "desc"]],
         "pageLength": 10,
         "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
         "language": {
@@ -354,14 +505,8 @@ $(document).ready(function() {
             }
         },
         "columnDefs": [
-            { 
-                "orderable": false, 
-                "targets": [2, 8] // Disable sorting on Image and Actions columns
-            },
-            {
-                "type": "num",
-                "targets": [5, 6] // Quantity and Price columns - for proper numeric sorting
-            }
+            { "orderable": false, "targets": [2, 8] },
+            { "type": "num", "targets": [5, 6] }
         ]
     });
 });

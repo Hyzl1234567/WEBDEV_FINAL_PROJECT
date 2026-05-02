@@ -80,12 +80,77 @@
 .auth-switch a { color: var(--forest); font-weight: 600; cursor: pointer; text-decoration: none; }
 .auth-switch a:hover { color: var(--lime); text-decoration: underline; }
 
-.alert-error {
-  background: rgba(192,57,43,0.08); color: var(--error);
-  border: 1px solid rgba(192,57,43,0.25);
-  padding: 12px 16px; border-radius: 10px;
-  font-size: 0.88rem; font-weight: 500; margin-bottom: 1.25rem;
+/* ── Alerts ── */
+.alert-box {
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  animation: slideIn 0.3s ease;
 }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.alert-error {
+  background: rgba(192,57,43,0.08);
+  color: #c0392b;
+  border: 1px solid rgba(192,57,43,0.25);
+}
+
+.alert-success {
+  background: rgba(39,174,96,0.08);
+  color: #1e8449;
+  border: 1px solid rgba(39,174,96,0.25);
+}
+
+.alert-warning {
+  background: rgba(212,163,58,0.10);
+  color: #7a5c00;
+  border: 1px solid rgba(212,163,58,0.3);
+}
+
+.alert-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+.alert-text { line-height: 1.5; }
+.alert-text strong { display: block; margin-bottom: 2px; }
+
+/* ── Input error highlight ── */
+.input-error {
+  border-color: #c0392b !important;
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.1) !important;
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  background: #fff;
+  color: #3c4043;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  border-radius: 10px;
+  font-size: 0.97rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, border-color 0.18s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin-bottom: 0.75rem;
+}
+.btn-google:hover {
+  background: #f7f8fa;
+  border-color: rgba(0,0,0,0.25);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.btn-google svg { flex-shrink: 0; width: 20px; height: 20px; }
 
 @media (max-width: 900px) {
   .auth-wrap { grid-template-columns: 1fr; }
@@ -95,11 +160,12 @@
 
 {% block body %}
 <div class="auth-wrap">
+
   {# Left visual panel #}
   <div class="auth-visual">
-    <span class="auth-big-emoji">☕</span>
+    <span class="auth-big-emoji">🍵</span>
     <div class="auth-visual-title">Welcome<br>Back to<br>EcoBrew</div>
-    <div class="auth-visual-sub">Your sustainable coffee journey continues. Sign in to manage orders, loyalty points, and more.</div>
+    <div class="auth-visual-sub">Your sustainable coffee journey continues. Sign in to manage orders, coupon points, and more!</div>
   </div>
 
   {# Login form #}
@@ -108,20 +174,84 @@
       <h2>Sign In</h2>
       <p class="sub">Enter your credentials to access your account.</p>
 
-    {% if error is defined and error %}
-    <div class="alert-error">{{ error }}</div>
-{% endif %}
+      {# ── Google OAuth error ── #}
+      {% set google_error = app.session.get('google_auth_error') %}
+      {% if google_error %}
+        <div class="alert-box alert-error">
+          <span class="alert-icon">🚫</span>
+          <div class="alert-text">
+            <strong>Google Sign-In Failed</strong>
+            {{ google_error }}
+          </div>
+        </div>
+        {% do app.session.remove('google_auth_error') %}
+      {% endif %}
 
-      <form method="post" action="{{ path('login') }}">
+      {# ── Login error ── #}
+      {% if error is defined and error %}
+        {% set msg = error.messageKey | trans(error.messageData, 'security') %}
+
+        {% if 'User not found' in msg or 'Username could not be found' in msg %}
+          <div class="alert-box alert-error">
+            <span class="alert-icon">👤</span>
+            <div class="alert-text">
+              <strong>Account Not Found</strong>
+              No account exists with that username. Double-check your username or <a href="{{ path('register') }}" style="color:#c0392b;font-weight:600;">register here</a>.
+            </div>
+          </div>
+
+        {% elseif 'verify your email' in msg %}
+          <div class="alert-box alert-warning">
+            <span class="alert-icon">📧</span>
+            <div class="alert-text">
+              <strong>Email Not Verified</strong>
+              Please check your inbox and verify your email address before signing in.
+            </div>
+          </div>
+
+        {% elseif 'Invalid credentials' in msg or 'credentials' in msg %}
+          <div class="alert-box alert-error">
+            <span class="alert-icon">🔑</span>
+            <div class="alert-text">
+              <strong>Wrong Password</strong>
+              The password you entered is incorrect. Please try again.
+            </div>
+          </div>
+
+        {% else %}
+          <div class="alert-box alert-error">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-text">
+              <strong>Login Failed</strong>
+              {{ msg }}
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      {# ── Flash success (e.g. after registration) ── #}
+      {% for message in app.flashes('success') %}
+        <div class="alert-box alert-success">
+          <span class="alert-icon">✓</span>
+          <div class="alert-text">{{ message }}</div>
+        </div>
+      {% endfor %}
+
+      <form method="post" action="{{ path('app_login') }}" id="loginForm">
         <div class="form-group">
           <label for="username">Username</label>
-          <input type="username" id="username" name="username" placeholder="your username"
-                 value="{{ last_username | default('')}}" autocomplete="username" required>
+          <input type="text" id="username" name="username"
+                 placeholder="your username"
+                 value="{{ last_username | default('') }}"
+                 autocomplete="username" required
+                 class="{{ error is defined and error ? 'input-error' : '' }}">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" name="password"
-                 placeholder="••••••••" autocomplete="current-password" required>
+                 placeholder="••••••••"
+                 autocomplete="current-password" required
+                 class="{{ error is defined and error ? 'input-error' : '' }}">
         </div>
         <div class="form-meta">
           <label>
@@ -130,10 +260,21 @@
           <a href="#">Forgot password?</a>
         </div>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-        <button type="submit" class="btn-full">Sign In →</button>
+        <button type="submit" class="btn-full" id="submitBtn">Sign In →</button>
       </form>
 
       <div class="auth-divider">or</div>
+
+      <a href="/connect/google" class="btn-google">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Continue with Google
+      </a>
 
       <a href="{{ path('home') }}" class="btn-full"
          style="display:block;text-align:center;background:white;color:var(--forest);border:1.5px solid rgba(29,74,35,0.2);box-shadow:none;text-decoration:none;padding:14px;border-radius:10px;font-weight:600;font-size:1rem;">
@@ -145,6 +286,16 @@
       </div>
     </div>
   </div>
-</div>
-{% endblock %}
 
+</div>
+
+<script>
+// Show loading state on submit
+document.getElementById('loginForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Signing in…';
+  btn.style.opacity = '0.75';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}
