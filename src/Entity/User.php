@@ -46,6 +46,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 20)]
     private ?string $status = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $profilePictureUrl = null;
+
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    private ?string $firebaseUid = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $displayName = null;
+
     // ✅ AUTO SET createdAt
     #[ORM\PrePersist]
     public function onPrePersist(): void
@@ -175,4 +184,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->status = $status;
         return $this;
     }
+
+    public function getProfilePictureUrl(): ?string
+    {
+        return $this->profilePictureUrl;
+    }
+
+    public function setProfilePictureUrl(?string $profilePictureUrl): static
+    {
+        $this->profilePictureUrl = $profilePictureUrl;
+
+        return $this;
+    }
+
+    public function getFirebaseUid(): ?string
+    {
+        return $this->firebaseUid;
+    }
+
+    public function setFirebaseUid(?string $firebaseUid): static
+    {
+        $this->firebaseUid = $firebaseUid;
+
+        return $this;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(?string $displayName): static
+    {
+        $this->displayName = $displayName;
+
+        return $this;
+    }
 }
+
+   
