@@ -102,7 +102,6 @@
     margin: 1.5rem 0;
   }
 
-  /* Status & role select visual hints */
   .select-hint {
     display: flex;
     gap: 6px;
@@ -119,9 +118,10 @@
     letter-spacing: 0.3px;
   }
 
-  .rp-admin  { background: #fde8e8; color: #c0392b; }
-  .rp-staff  { background: #e0f7f5; color: #1a8a7a; }
-  .rp-user   { background: var(--cream); color: var(--forest); border: 1px solid rgba(29,74,35,0.15); }
+  .rp-admin    { background: #fde8e8; color: #c0392b; }
+  .rp-staff    { background: #e0f7f5; color: #1a8a7a; }
+  .rp-customer { background: #e8f4fd; color: #1a6fa8; }  /* ← new */
+  .rp-user     { background: var(--cream); color: var(--forest); border: 1px solid rgba(29,74,35,0.15); }
 
   .sp-active   { background: #d4edda; color: #155724; }
   .sp-disabled { background: #f8d7da; color: #721c24; }
@@ -206,13 +206,27 @@
           <div class="form-group">
             <label for="role">Role *</label>
             <select name="role" id="role" required>
-              <option value="ROLE_USER" {% if 'ROLE_USER' in user.roles and 'ROLE_ADMIN' not in user.roles and 'ROLE_STAFF' not in user.roles %}selected{% endif %}>User</option>
-              <option value="ROLE_STAFF" {% if 'ROLE_STAFF' in user.roles %}selected{% endif %}>Staff</option>
-              <option value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in user.roles %}selected{% endif %}>Admin</option>
+              <option value="ROLE_CUSTOMER"
+                {% if 'ROLE_CUSTOMER' in user.roles %}selected{% endif %}>
+                Customer
+              </option>
+              <option value="ROLE_USER"
+                {% if 'ROLE_USER' in user.roles and 'ROLE_ADMIN' not in user.roles and 'ROLE_STAFF' not in user.roles and 'ROLE_CUSTOMER' not in user.roles %}selected{% endif %}>
+                User
+              </option>
+              <option value="ROLE_STAFF"
+                {% if 'ROLE_STAFF' in user.roles %}selected{% endif %}>
+                Staff
+              </option>
+              <option value="ROLE_ADMIN"
+                {% if 'ROLE_ADMIN' in user.roles %}selected{% endif %}>
+                Admin
+              </option>
             </select>
             <div class="select-hint">
               <span class="hint-pill rp-admin">Admin</span>
               <span class="hint-pill rp-staff">Staff</span>
+              <span class="hint-pill rp-customer">Customer</span>
               <span class="hint-pill rp-user">User</span>
             </div>
           </div>
@@ -220,9 +234,9 @@
           <div class="form-group">
             <label for="status">Status *</label>
             <select name="status" id="status" required>
-              <option value="active"    {% if user.status == 'active'    %}selected{% endif %}>Active</option>
-              <option value="disabled"  {% if user.status == 'disabled'  %}selected{% endif %}>Disabled</option>
-              <option value="archived"  {% if user.status == 'archived'  %}selected{% endif %}>Archived</option>
+              <option value="active"   {% if user.status == 'active'   %}selected{% endif %}>Active</option>
+              <option value="disabled" {% if user.status == 'disabled' %}selected{% endif %}>Disabled</option>
+              <option value="archived" {% if user.status == 'archived' %}selected{% endif %}>Archived</option>
             </select>
             <div class="select-hint">
               <span class="hint-pill sp-active">Active</span>

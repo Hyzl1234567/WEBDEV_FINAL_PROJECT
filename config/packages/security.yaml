@@ -13,10 +13,17 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        api:                                    # ← new firewall for mobile API
+        api:
             pattern: ^/api
             stateless: true
-            security: false                     # no session, no auth required here
+            provider: app_user_provider
+            json_login:
+                check_path: /api/login
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
 
         main:
             lazy: true
@@ -33,22 +40,34 @@ security:
                 path: /
 
     access_control:
-        - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }  # ← add this first
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/logout, roles: PUBLIC_ACCESS }
+        # ── Public API routes ──
+        - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login,       roles: PUBLIC_ACCESS }
+        - { path: ^/api/register,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/products,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/categories,  roles: PUBLIC_ACCESS }
+
+        # ── Protected API routes ──
+        # ROLE_CUSTOMER inherits ROLE_USER via hierarchy so this covers everyone
+        - { path: ^/api/orders, roles: ROLE_USER }
+        - { path: ^/api,        roles: ROLE_USER }
+
+        # ── Web routes ──
+        - { path: ^/login,        roles: PUBLIC_ACCESS }
+        - { path: ^/logout,       roles: PUBLIC_ACCESS }
         - { path: ^/verify-email, roles: PUBLIC_ACCESS }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/admin/users, roles: ROLE_ADMIN }
-        - { path: ^/profile, roles: 'ROLE_ADMIN, ROLE_STAFF' }
-        - { path: ^/dashboard, roles: ROLE_ADMIN }
-        - { path: ^/staff, roles: ROLE_STAFF }
-        - { path: ^/product, roles: 'ROLE_ADMIN, ROLE_STAFF' }
+        - { path: ^/register,     roles: PUBLIC_ACCESS }
+        - { path: ^/connect,      roles: PUBLIC_ACCESS }
+        - { path: ^/admin/users,  roles: ROLE_ADMIN }
+        - { path: ^/profile,      roles: 'ROLE_ADMIN, ROLE_STAFF' }
+        - { path: ^/dashboard,    roles: ROLE_ADMIN }
+        - { path: ^/staff,        roles: ROLE_STAFF }
+        - { path: ^/product,      roles: 'ROLE_ADMIN, ROLE_STAFF' }
 
     role_hierarchy:
-        ROLE_ADMIN: [ROLE_STAFF, ROLE_USER]
-        ROLE_STAFF: [ROLE_USER]
+        ROLE_ADMIN:    [ROLE_STAFF, ROLE_USER]
+        ROLE_STAFF:    [ROLE_USER]
+        ROLE_CUSTOMER: [ROLE_USER]   # ← customers inherit ROLE_USER for API access
 
 when@test:
     security:

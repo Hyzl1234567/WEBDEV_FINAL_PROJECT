@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+ {% extends 'base.html.twig' %}
 
 {% block title %}User Management{% endblock %}
 
@@ -78,10 +78,10 @@
     font-weight: 600;
   }
 
-  .btn-edit  { background: var(--forest); color: white; }
+  .btn-edit   { background: var(--forest); color: white; }
   .btn-edit:hover { background: var(--midforest); }
 
-  .btn-warn  { background: #fff3cd; color: #856404; border: 1px solid #ffe08a; }
+  .btn-warn   { background: #fff3cd; color: #856404; border: 1px solid #ffe08a; }
   .btn-warn:hover { background: #ffe08a; }
 
   .btn-danger { background: #fdecea; color: var(--error); border: 1px solid #f5c6c6; }
@@ -158,9 +158,10 @@
     margin: 2px 2px 2px 0;
   }
 
-  .role-admin { background: #fde8e8; color: #c0392b; }
-  .role-staff { background: #e0f7f5; color: #1a8a7a; }
-  .role-user  { background: var(--cream); color: var(--forest); }
+  .role-admin    { background: #fde8e8; color: #c0392b; }
+  .role-staff    { background: #e0f7f5; color: #1a8a7a; }
+  .role-customer { background: #e8f4fd; color: #1a6fa8; }  /* ← new */
+  .role-user     { background: var(--cream); color: var(--forest); }
 
   .empty-state { text-align: center; padding: 60px 20px; color: #888; }
   .empty-state p { font-size: 0.95rem; margin: 0; }
@@ -213,6 +214,8 @@
                 <span class="role-badge role-admin">Admin</span>
               {% elseif role == 'ROLE_STAFF' %}
                 <span class="role-badge role-staff">Staff</span>
+              {% elseif role == 'ROLE_CUSTOMER' %}
+                <span class="role-badge role-customer">Customer</span>
               {% elseif role == 'ROLE_USER' %}
                 <span class="role-badge role-user">User</span>
               {% endif %}

@@ -1,4 +1,4 @@
- {% extends 'dashboard/layout.html.twig' %}
+{% extends 'dashboard/layout.html.twig' %}
 
 {% block title %}Customers{% endblock %}
 
@@ -26,7 +26,7 @@
   }
 
   /* ── Page Header ── */
-   .page-header {
+  .page-header {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -50,29 +50,30 @@
   }
 
   /* ── Add button ── */
-.btn-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 22px;
-  background: var(--forest);
-  color: white;
-  border-radius: 50px;
-  text-decoration: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  box-shadow: 0 4px 18px rgba(29,74,35,0.22);
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-}
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: var(--forest);
+    color: white;
+    border-radius: 50px;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 18px rgba(29,74,35,0.22);
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
 
-.btn-add:hover {
-  background: var(--lime);
-  color: var(--forest);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 26px rgba(153,204,103,0.35);
-}
+  .btn-add:hover {
+    background: var(--lime);
+    color: var(--forest);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(153,204,103,0.35);
+  }
+
   /* ── Alerts ── */
   .alert {
     padding: 11px 16px;
@@ -144,6 +145,19 @@
     background: #3498db;
     color: white;
     border-color: #3498db;
+  }
+
+  /* ── Orders button — distinct green style ── */
+  .btn-orders {
+    background: rgba(153,204,103,0.15);
+    color: var(--midforest);
+    border: 1.5px solid rgba(153,204,103,0.4);
+  }
+
+  .btn-orders:hover {
+    background: var(--forest);
+    color: white;
+    border-color: var(--forest);
   }
 
   .btn-warning {
@@ -405,9 +419,6 @@
       </a>
     </div>
 
-
-    
-
     <div class="table-card">
       <div class="table-responsive">
         <table id="customersTable">
@@ -432,7 +443,13 @@
                   <td style="color:rgba(29,74,35,0.65);">{{ customer.email ?? '—' }}</td>
                   <td style="color:rgba(29,74,35,0.65);">{{ customer.phone ?? '—' }}</td>
                   <td>
-                    <span class="orders-count">{{ customer.orders|length }} {{ customer.orders|length == 1 ? 'order' : 'orders' }}</span>
+                    {# ── Clickable orders count → leads to customer orders page ── #}
+                    <a href="{{ path('app_customer_orders', {'id': customer.id}) }}"
+                       class="orders-count"
+                       style="text-decoration:none; cursor:pointer;"
+                       title="View orders for {{ customer.name }}">
+                      {{ customer.orders|length }} {{ customer.orders|length == 1 ? 'order' : 'orders' }}
+                    </a>
                   </td>
                   <td style="font-size:0.83rem; color:rgba(29,74,35,0.6);">
                     {{ customer.createdAt ? customer.createdAt|date('Y-m-d H:i') : '—' }}
@@ -446,24 +463,47 @@
                       <span class="badge bg-secondary">Unknown</span>
                     {% endif %}
                   </td>
-                  <td class="actions-cell">
-                    <a href="{{ path('app_customer_show', {'id': customer.id}) }}" class="btn btn-sm btn-info" title="View">👁️ View</a>
+                  <td>
+                    <div class="actions-cell">
+                      {# ── View Orders button ── #}
+                      <a href="{{ path('app_customer_orders', {'id': customer.id}) }}"
+                         class="btn btn-sm btn-orders"
+                         title="View Orders">
+                        📋 Orders
+                      </a>
 
-                    {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+                      <a href="{{ path('app_customer_show', {'id': customer.id}) }}"
+                         class="btn btn-sm btn-info"
+                         title="View">
+                        👁️ View
+                      </a>
 
-                    {% if canEdit %}
-                      <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-sm btn-warning" title="Edit">✏️ Edit</a>
-                      <form method="post" action="{{ path('app_customer_delete', {'id': customer.id}) }}" class="delete-form" id="deleteForm{{ customer.id }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ customer.id) }}">
-                        <button type="button" class="btn btn-sm btn-danger deleteBtn"
-                                data-id="{{ customer.id }}"
-                                data-name="{{ customer.name|escape('html_attr') }}"
-                                data-orders="{{ customer.orders|length }}"
-                                title="Delete">🗑️ Delete</button>
-                      </form>
-                    {% else %}
-                      <span class="btn btn-sm btn-locked" title="You need staff or admin privileges">🔒 Locked</span>
-                    {% endif %}
+                      {% set canEdit = is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+
+                      {% if canEdit %}
+                        <a href="{{ path('app_customer_edit', {'id': customer.id}) }}"
+                           class="btn btn-sm btn-warning"
+                           title="Edit">
+                          ✏️ Edit
+                        </a>
+                        <form method="post"
+                              action="{{ path('app_customer_delete', {'id': customer.id}) }}"
+                              class="delete-form"
+                              id="deleteForm{{ customer.id }}">
+                          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ customer.id) }}">
+                          <button type="button"
+                                  class="btn btn-sm btn-danger deleteBtn"
+                                  data-id="{{ customer.id }}"
+                                  data-name="{{ customer.name|escape('html_attr') }}"
+                                  data-orders="{{ customer.orders|length }}"
+                                  title="Delete">
+                            🗑️ Delete
+                          </button>
+                        </form>
+                      {% else %}
+                        <span class="btn btn-sm btn-locked" title="You need staff or admin privileges">🔒 Locked</span>
+                      {% endif %}
+                    </div>
                   </td>
                 </tr>
               {% endfor %}
@@ -514,9 +554,9 @@ $(document).ready(function() {
 
     // Delete confirmation with order count validation
     $(document).on('click', '.deleteBtn', function() {
-        const customerId = $(this).data('id');
+        const customerId  = $(this).data('id');
         const customerName = $(this).data('name');
-        const ordersCount = $(this).data('orders');
+        const ordersCount  = $(this).data('orders');
 
         let message = `⚠️ WARNING: DELETE CONFIRMATION\n\nAre you sure you want to delete this customer?\n\nCustomer: ${customerName}`;
 

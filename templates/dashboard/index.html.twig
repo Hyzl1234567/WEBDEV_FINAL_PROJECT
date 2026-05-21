@@ -176,7 +176,6 @@
 }
 
 .card.manage-users {
-    grid-column: span 2;
     background: var(--forest);
     border-color: transparent;
     flex-direction: row;
@@ -400,11 +399,11 @@
 @media (max-width: 900px) {
     .page-wrapper { padding: 80px 1.25rem 3rem; }
     .dashboard-cards { grid-template-columns: repeat(2, 1fr); }
-    .card.manage-users { grid-column: span 2; }
+    
 }
 @media (max-width: 600px) {
     .dashboard-cards { grid-template-columns: 1fr; }
-    .card.manage-users { grid-column: span 1; }
+    
 }
 </style>
 
@@ -428,13 +427,12 @@
     <div class="dashboard-cards">
 
         <a href="/admin/users/" class="card manage-users">
-            <div class="card-icon">⚙️</div>
-            <div class="manage-users-text">
-                <h3>Manage Users</h3>
-                <div class="card-label">Admin Panel</div>
-            </div>
-            <div class="manage-arrow">→</div>
-        </a>
+    <div class="card-icon">⚙️</div>
+    <div class="card-label">Admin Panel</div>
+    <div class="manage-users-text">
+        <h3>Manage Users</h3>
+    </div>
+</a>
 
         <div class="card">
             <div class="card-icon">👥</div>
@@ -454,6 +452,11 @@
             <div class="card-value">{{ totalStaff }}</div>
         </div>
 
+        <div class="card">
+    <div class="card-icon">🛍️</div>
+    <div class="card-label">Total Customers</div>
+    <div class="card-value">{{ totalCustomers }}</div>
+</div>
         <div class="card">
             <div class="card-icon">☕</div>
             <div class="card-label">Total Products</div>

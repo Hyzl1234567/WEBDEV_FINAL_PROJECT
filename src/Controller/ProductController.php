@@ -112,18 +112,12 @@ final class ProductController extends AbstractController
     #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        if (!$this->canEditOrDelete($product)) {
-            $this->addFlash('error', 'You do not have permission to edit this product. You can only edit your own records.');
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
-        }
-
         $oldImage = $product->getImage();
 
         $form = $this->createForm(ProductType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Snapshot captured BEFORE flush to record old values
             $snapshot = [
                 'name'  => $product->getName(),
                 'price' => $product->getPrice(),
@@ -189,11 +183,6 @@ final class ProductController extends AbstractController
     #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
     {
-        if (!$this->canEditOrDelete($product)) {
-            $this->addFlash('error', 'You do not have permission to delete this product. You can only delete your own records.');
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
-        }
-
         if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->getPayload()->getString('_token'))) {
 
             if (method_exists($product, 'getOrders') && $product->getOrders()->count() > 0) {
@@ -260,20 +249,7 @@ final class ProductController extends AbstractController
 
     private function canEditOrDelete(Product $product): bool
     {
-        $currentUser = $this->getUser();
-
-        if (in_array('ROLE_ADMIN', $currentUser->getRoles())) {
-            return true;
-        }
-
-        if (!$product->getCreatedBy()) {
-            return true;
-        }
-
-        if (in_array('ROLE_STAFF', $currentUser->getRoles())) {
-            return $product->getCreatedBy()->getId() === $currentUser->getId();
-        }
-
-        return false;
+        // All staff and admins can edit/delete any product regardless of who created it
+        return $this->isGranted('ROLE_STAFF');
     }
 }

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -34,7 +35,6 @@ class GoogleAuthenticator extends AbstractAuthenticator
         $googleUser = $client->fetchUser();
         $email = $googleUser->getEmail();
 
-        // Check if user already exists
         $user = $this->userRepository->findOneBy(['email' => $email]);
 
         if (!$user) {
@@ -46,7 +46,6 @@ class GoogleAuthenticator extends AbstractAuthenticator
             $user->setVerificationToken(null);
             $user->setPassword('');
 
-            // Generate unique username from email (e.g. juan@gmail.com → juan)
             $baseUsername = explode('@', $email)[0];
             $username = $baseUsername;
             $counter = 1;
@@ -56,7 +55,6 @@ class GoogleAuthenticator extends AbstractAuthenticator
             }
             $user->setUsername($username);
 
-            // Build full_name from Google profile, fallback to username if unavailable
             $firstName = $googleUser->getFirstName() ?? '';
             $lastName  = $googleUser->getLastName() ?? '';
             $fullName  = trim($firstName . ' ' . $lastName);
@@ -69,8 +67,13 @@ class GoogleAuthenticator extends AbstractAuthenticator
             $this->entityManager->flush();
         }
 
-        // If the user registered via email but hasn't verified yet, still allow Google login
-        // and mark them as verified since Google confirmed their email ownership
+        // ✅ AFTER — blocks only admin
+if (in_array('ROLE_ADMIN', $user->getRoles())) {
+    throw new CustomUserMessageAuthenticationException(
+        'Admin accounts cannot log in with Google. Please use your username and password.'
+    );
+}
+
         if (!$user->isVerified()) {
             $user->setIsVerified(true);
             $user->setVerificationToken(null);
@@ -90,8 +93,9 @@ class GoogleAuthenticator extends AbstractAuthenticator
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
-    {
-        $request->getSession()->set('google_auth_error', $exception->getMessageKey());
-        return new RedirectResponse('/login');
-    }
+{
+    // ✅ Use getMessage() instead of getMessageKey() to get the clean human-readable message
+    $request->getSession()->set('google_auth_error', $exception->getMessage());
+    return new RedirectResponse('/login');
+}
 }

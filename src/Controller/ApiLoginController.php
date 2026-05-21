@@ -13,13 +13,10 @@ class ApiLoginController extends AbstractController
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(#[CurrentUser] ?User $user): JsonResponse
     {
-        if (null === $user) {
-            return $this->json(['message' => 'missing credentials'], 401);
-        }
-
-        return $this->json([
-            'user' => $user->getUserIdentifier(),
-            'roles' => $user->getRoles(),
-        ]);
+        // This method body is intentionally empty.
+        // JWT is handled automatically by lexik_jwt_authentication
+        // via the json_login success_handler in security.yaml.
+        // This route just needs to exist so Symfony registers it.
+        throw new \LogicException('This should never be reached.');
     }
-}    
+}

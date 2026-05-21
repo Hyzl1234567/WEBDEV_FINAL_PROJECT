@@ -1,36 +1,69 @@
- services:
+services:
+
+  # ── MySQL Database ────────────────────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: test_demo_root_password
-      MYSQL_DATABASE: test_demo_db
-      MYSQL_USER: test_demo_user
-      MYSQL_PASSWORD: test_demo_password
+      MYSQL_DATABASE:      test_demo_db
+      MYSQL_USER:          test_demo_user
+      MYSQL_PASSWORD:      test_demo_password
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ptest_demo_root_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - test_demo_network
 
+  # ── phpMyAdmin ────────────────────────────────────────────────────────────────
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: mysql
-      PMA_USER: test_demo_user
+      PMA_HOST:     mysql
+      PMA_USER:     test_demo_user
       PMA_PASSWORD: test_demo_password
     ports:
       - "8080:80"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - test_demo_network
 
- volumes:
-  mysql_data:
+  # ── Symfony App ───────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      APP_ENV:        prod
+      APP_SECRET:     your_app_secret_here
+      DATABASE_URL:   mysql://test_demo_user:test_demo_password@mysql:3306/test_demo_db?serverVersion=8.0&charset=utf8mb4
+      JWT_PASSPHRASE: your_jwt_passphrase_here
+    volumes:
+      - jwt_keys:/var/www/html/config/jwt
+      - uploads:/var/www/html/public/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - test_demo_network
 
- networks:
+volumes:
+  mysql_data:
+  jwt_keys:
+  uploads:
+
+networks:
   test_demo_network:
     driver: bridge

@@ -51,58 +51,63 @@ final class AuthController extends AbstractController
         $user = new User();
         $user->setUsername($data['username']);
         $user->setEmail($data['email']);
-        $user->setFullName($data['full_name']);  // ✅ use actual full_name from request
+        $user->setFullName($data['full_name']);
         $user->setIsVerified(false);
         $user->setStatus('active');
         $user->setRoles(['ROLE_USER']);
-
         $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
 
-        // ✅ Correct method name
         $token = $emailService->generateVerificationToken();
         $user->setVerificationToken($token);
 
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // ✅ Build verification URL and use correct method name
+        // ✅ Fixed: use correct route name
         $verificationUrl = $urlGenerator->generate(
-            'verify_email',
+            'app_verify_email',
             ['token' => $token],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $emailService->sendVerificationEmail($user, $verificationUrl);
+        // ✅ Fixed: try/catch so SMTP errors don't crash the response
+        try {
+            $emailService->sendVerificationEmail($user, $verificationUrl);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'message' => 'Account created but verification email could not be sent. Please contact support.'
+            ], 201);
+        }
 
         return new JsonResponse([
             'message' => 'Registration successful. Please check your email to verify your account.'
         ], 201);
     }
 
-    #[Route('/verify-email', name: 'verify_email', methods: ['GET'])]
+    // ✅ Kept for backwards compat but app_verify_email in RegistrationController is the real one
+    #[Route('/verify-email-plain', name: 'verify_email', methods: ['GET'])]
     public function verifyEmail(
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-
         $token = $request->query->get('token');
 
         if (!$token) {
-            return new Response("Invalid token");
+            return new Response('Invalid token');
         }
 
         $user = $entityManager->getRepository(User::class)
             ->findOneBy(['verificationToken' => $token]);
 
         if (!$user) {
-            return new Response("Invalid or expired token");
+            return new Response('Invalid or expired token');
         }
 
         $user->setIsVerified(true);
         $user->setVerificationToken(null);
         $entityManager->flush();
 
-        return new Response("✔ Email verified! You can now log in.");
+        return new Response('✔ Email verified! You can now log in.');
     }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]

@@ -32,7 +32,20 @@ class Stock
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isHistoryEntry = false;
+    
+    #[ORM\Column(type: 'string', length: 30, options: ['default' => 'restock'])]
+private string $type = 'restock';
 
+public function getType(): string
+{
+    return $this->type;
+}
+
+public function setType(string $type): static
+{
+    $this->type = $type;
+    return $this;
+}
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();

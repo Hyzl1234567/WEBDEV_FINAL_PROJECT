@@ -25,6 +25,12 @@
         <env name="JWT_PUBLIC_KEY" value="%kernel.project_dir%/config/jwt/public.pem"/>
         <env name="JWT_PASSPHRASE" value="07bda16f91dccfe712c1d8b4a2b54a0848303e69c1a26a36a9407de6fe41c96e"/>
         <!-- ###- lexik/jwt-authentication-bundle ### -->
+
+        <!-- ###+ pusher/pusher-php-server ### -->
+        <env name="PUSHER_APP_ID" value=""/>
+        <env name="PUSHER_KEY" value=""/>
+        <env name="PUSHER_SECRET" value=""/>
+        <!-- ###- pusher/pusher-php-server ### -->
     </php>
 
     <testsuites>

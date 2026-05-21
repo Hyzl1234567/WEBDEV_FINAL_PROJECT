@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Customer;
+use App\Entity\Order;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
 use App\Service\ActivityLogger;
+use App\Service\PusherService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,10 +20,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class CustomerController extends AbstractController
 {
     private ActivityLogger $activityLogger;
+    private PusherService $pusher;
 
-    public function __construct(ActivityLogger $activityLogger)
+    public function __construct(ActivityLogger $activityLogger, PusherService $pusher)
     {
         $this->activityLogger = $activityLogger;
+        $this->pusher = $pusher;
     }
 
     #[Route(name: 'app_customer_index', methods: ['GET'])]
@@ -90,7 +94,6 @@ final class CustomerController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Snapshot BEFORE flush to capture old values
             $snapshot = [
                 'name'  => $customer->getName(),
                 'email' => $customer->getEmail() ?? 'N/A',
@@ -163,12 +166,77 @@ final class CustomerController extends AbstractController
         return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    #[Route('/{id}/orders', name: 'app_customer_orders', methods: ['GET', 'POST'])]
+    public function orders(
+        Customer $customer,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($request->isMethod('POST')) {
+            $orderId   = $request->request->get('order_id');
+            $newStatus = $request->request->get('status');
+            $token     = $request->request->get('_token');
+
+            $allowed = ['Pending', 'Processing', 'Completed', 'Cancelled'];
+
+            if (
+                $this->isCsrfTokenValid('order_status_' . $orderId, $token)
+                && in_array($newStatus, $allowed)
+            ) {
+                $order = $entityManager->getRepository(Order::class)->find($orderId);
+
+                if ($order && $order->getCustomer()?->getId() === $customer->getId()) {
+                    $old = $order->getStatus();
+
+                    $order->setStatus($newStatus);
+                    $entityManager->flush();
+
+                    $this->pusher->orderStatusUpdated([
+                        'id'          => $order->getId(),
+                        'status'      => $order->getStatus(),
+                        'quantity'    => $order->getQuantity(),
+                        'total_price' => $order->getTotalPrice(),
+                        'created_at'  => $order->getCreatedAt()?->format('Y-m-d H:i:s'),
+                        'product'     => $order->getProduct() ? [
+                            'id'   => $order->getProduct()->getId(),
+                            'name' => $order->getProduct()->getName(),
+                        ] : null,
+                        'customer'    => [
+                            'id'    => $order->getCustomer()?->getId(),
+                            'name'  => $order->getCustomer()?->getName(),
+                            'email' => $order->getCustomer()?->getEmail(),
+                        ],
+                    ]);
+
+                    $this->activityLogger->logUpdate(
+                        $this->getUser(),
+                        'Order',
+                        $order->getId(),
+                        sprintf('Order #%d status changed: %s → %s', $order->getId(), $old, $newStatus),
+                        ['old_status' => $old, 'new_status' => $newStatus]
+                    );
+
+                    $this->addFlash('success', sprintf('Order #%d updated to %s.', $order->getId(), $newStatus));
+                }
+            }
+
+            return $this->redirectToRoute('app_customer_orders', ['id' => $customer->getId()]);
+        }
+
+        return $this->render('customer/orders.html.twig', [
+            'customer' => $customer,
+            'orders'   => $customer->getOrders(),
+        ]);
+    }
+
     private function canEditOrDelete(Customer $customer): bool
     {
         $currentUser = $this->getUser();
 
-        if (in_array('ROLE_ADMIN', $currentUser->getRoles()) ||
-            in_array('ROLE_STAFF', $currentUser->getRoles())) {
+        if (
+            in_array('ROLE_ADMIN', $currentUser->getRoles()) ||
+            in_array('ROLE_STAFF', $currentUser->getRoles())
+        ) {
             return true;
         }
 

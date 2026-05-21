@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Customer;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\FirebaseAuthService;
@@ -16,12 +17,15 @@ use Psr\Log\LoggerInterface;
 #[Route('/api/auth', name: 'api_auth_')]
 class AuthController extends AbstractController
 {
+    // Only these roles may sign in via Google
+    private const GOOGLE_ALLOWED_ROLES = ['ROLE_CUSTOMER', 'ROLE_STAFF', 'ROLE_USER'];
+
     public function __construct(
-        private readonly FirebaseAuthService $firebaseAuth,
-        private readonly UserRepository $userRepository,
-        private readonly EntityManagerInterface $em,
+        private readonly FirebaseAuthService      $firebaseAuth,
+        private readonly UserRepository           $userRepository,
+        private readonly EntityManagerInterface   $em,
         private readonly JWTTokenManagerInterface $jwtTokenManager,
-        private readonly LoggerInterface $logger,
+        private readonly LoggerInterface          $logger,
     ) {}
 
     #[Route('/google', name: 'google', methods: ['POST'])]
@@ -30,9 +34,7 @@ class AuthController extends AbstractController
         try {
             $this->logger->info('Firebase Google Sign-In request received');
 
-            $data = json_decode($request->getContent(), true);
-
-            // Accept both 'idToken' (from React Native) and 'firebase_token' (legacy)
+            $data    = json_decode($request->getContent(), true);
             $idToken = $data['idToken'] ?? $data['firebase_token'] ?? null;
 
             if (!$data || !$idToken) {
@@ -52,12 +54,12 @@ class AuthController extends AbstractController
             }
 
             $email = $firebaseUser['email'];
-            $user = $this->userRepository->findOneBy(['email' => $email]);
+            $user  = $this->userRepository->findOneBy(['email' => $email]);
 
             if (null === $user) {
-                // Generate unique username from email prefix
+                // ── New user: always assign ROLE_CUSTOMER ─────────────────────
                 $baseUsername = explode('@', $email)[0];
-                $username = $baseUsername;
+                $username     = $baseUsername;
                 if ($this->userRepository->findOneBy(['username' => $username])) {
                     $username = $baseUsername . '_' . substr(uniqid(), -4);
                 }
@@ -66,20 +68,35 @@ class AuthController extends AbstractController
                 $user->setFirebaseUid($firebaseUser['uid']);
                 $user->setEmail($email);
                 $user->setUsername($username);
-                $user->setFullName($firebaseUser['name'] ?? $baseUsername);    // ✅ correct method
+                $user->setFullName($firebaseUser['name'] ?? $baseUsername);
                 $user->setDisplayName($firebaseUser['name'] ?? $baseUsername);
                 $user->setProfilePictureUrl($firebaseUser['photo'] ?? null);
-                $user->setRoles(['ROLE_USER']);
-                $user->setPassword('');         // ✅ empty string — entity requires string not null
-                $user->setStatus('active');     // ✅ required field — was missing before
+                $user->setRoles(['ROLE_CUSTOMER']);
+                $user->setPassword('');
+                $user->setStatus('active');
                 $user->setIsVerified(true);
                 $user->setVerificationToken(null);
 
                 $this->em->persist($user);
-                $this->logger->info('New Google user created', ['email' => $email]);
+                $this->logger->info('New Google customer created', ['email' => $email]);
 
             } else {
-                // Update fields if changed
+                // ── Existing user: block anyone not in the allowed list ────────
+                $significantRoles = array_diff($user->getRoles(), ['ROLE_USER']);
+                $hasBlockedRole   = !empty(array_diff($significantRoles, self::GOOGLE_ALLOWED_ROLES));
+
+                if ($hasBlockedRole) {
+                    $this->logger->warning('Blocked Google Sign-In attempt', [
+                        'email' => $email,
+                        'roles' => $user->getRoles(),
+                    ]);
+
+                    return new JsonResponse([
+                        'error' => 'This account must sign in using username and password.',
+                    ], JsonResponse::HTTP_FORBIDDEN);
+                }
+
+                // Update profile fields if changed
                 if ($user->getDisplayName() !== ($firebaseUser['name'] ?? '')) {
                     $user->setDisplayName($firebaseUser['name'] ?? '');
                 }
@@ -93,12 +110,17 @@ class AuthController extends AbstractController
                     $user->setFirebaseUid($firebaseUser['uid']);
                 }
 
-                $this->logger->info('Existing Google user logged in', ['email' => $email]);
+                $this->logger->info('Existing Google user logged in', [
+                    'email' => $email,
+                    'roles' => $user->getRoles(),
+                ]);
             }
 
             $this->em->flush();
 
-            $jwt = $this->jwtTokenManager->create($user);
+            $jwt      = $this->jwtTokenManager->create($user);
+            $customer = $this->em->getRepository(Customer::class)
+                ->findOneBy(['email' => $email]);
 
             return new JsonResponse([
                 'token' => $jwt,
@@ -110,6 +132,7 @@ class AuthController extends AbstractController
                     'displayName' => $user->getDisplayName(),
                     'roles'       => $user->getRoles(),
                     'photo'       => $user->getProfilePictureUrl(),
+                    'customer_id' => $customer?->getId(),
                 ],
             ], JsonResponse::HTTP_OK);
 

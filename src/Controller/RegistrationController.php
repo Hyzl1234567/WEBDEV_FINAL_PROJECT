@@ -35,7 +35,7 @@ class RegistrationController extends AbstractController
             );
             $user->setRoles(['ROLE_USER']);
             $user->setStatus('active');
-            $user->setIsVerified(false); // Not verified yet — requires email confirmation
+            $user->setIsVerified(false);
 
             $verificationToken = $emailVerificationService->generateVerificationToken();
             $user->setVerificationToken($verificationToken);
@@ -49,12 +49,18 @@ class RegistrationController extends AbstractController
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
 
-            $emailVerificationService->sendVerificationEmail($user, $verificationUrl);
-
-            $this->addFlash(
-                'success',
-                '✔ Registration successful! Please check your email to verify your account before logging in.'
-            );
+            try {
+                $emailVerificationService->sendVerificationEmail($user, $verificationUrl);
+                $this->addFlash(
+                    'success',
+                    '✔ Registration successful! Please check your email to verify your account before logging in.'
+                );
+            } catch (\Exception $e) {
+                $this->addFlash(
+                    'warning',
+                    '✔ Account created but we could not send the verification email. Please contact support.'
+                );
+            }
 
             return $this->redirectToRoute('app_login');
         }
@@ -90,7 +96,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Mark as verified and clear the token
         $user->setIsVerified(true);
         $user->setVerificationToken(null);
         $entityManager->flush();

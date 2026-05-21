@@ -1,0 +1,421 @@
+{% extends 'dashboard/layout.html.twig' %}
+
+{% block title %}{{ customer.name }} — Orders{% endblock %}
+
+{% block body %}
+<style>
+  :root {
+    --cream: #F0F7EC;
+    --forest: #1D4A23;
+    --midforest: #2A6132;
+    --lime: #99CC67;
+    --paper: #F5FAF2;
+  }
+
+  .page-wrapper {
+    min-height: 100vh;
+    background: var(--cream);
+    padding: 100px 2rem 3rem;
+  }
+
+  .page-inner { max-width: 1200px; margin: 0 auto; }
+
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1.5px solid rgba(29,74,35,0.12);
+  }
+
+  .page-header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--forest);
+    margin-bottom: 0.2rem;
+  }
+
+  .page-header-left p {
+    font-size: 0.88rem;
+    color: var(--midforest);
+    opacity: 0.7;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 20px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-back {
+    background: white;
+    color: var(--forest);
+    border: 1.5px solid rgba(29,74,35,0.2);
+  }
+
+  .btn-back:hover { background: var(--cream); border-color: var(--lime); }
+
+  .alert {
+    padding: 11px 16px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .alert-success {
+    background: rgba(153,204,103,0.18);
+    color: var(--forest);
+    border: 1px solid rgba(153,204,103,0.45);
+  }
+
+  .alert-danger {
+    background: rgba(192,57,43,0.08);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.2);
+  }
+
+  /* ── Customer Info Card ── */
+  .customer-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 16px rgba(29,74,35,0.07);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .customer-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--forest), var(--midforest));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .customer-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--forest);
+    margin: 0 0 2px;
+  }
+
+  .customer-info p {
+    font-size: 0.83rem;
+    color: var(--midforest);
+    opacity: 0.7;
+    margin: 0;
+  }
+
+  .customer-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--forest);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--midforest);
+    opacity: 0.65;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* ── Orders Table ── */
+  .table-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(29,74,35,0.08);
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid rgba(29,74,35,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--forest);
+    margin: 0;
+  }
+
+  .count-badge {
+    background: rgba(29,74,35,0.08);
+    color: var(--midforest);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead { background: var(--forest); }
+
+  thead th {
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: rgba(240,247,236,0.85);
+    border: none;
+    text-align: left;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(29,74,35,0.07);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: var(--paper); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: var(--forest);
+    border: none;
+    vertical-align: middle;
+  }
+
+  /* ── Status Badges ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 11px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .badge-pending    { background: rgba(255,215,0,0.18); color: #7a5c00; border: 1px solid rgba(255,215,0,0.45); }
+  .badge-processing { background: rgba(52,152,219,0.1); color: #1a6fa8; border: 1px solid rgba(52,152,219,0.3); }
+  .badge-completed  { background: rgba(153,204,103,0.18); color: var(--midforest); border: 1px solid rgba(153,204,103,0.4); }
+  .badge-cancelled  { background: rgba(192,57,43,0.1); color: #c0392b; border: 1px solid rgba(192,57,43,0.25); }
+
+  /* ── Status Dropdown Form ── */
+  .status-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1.5px solid rgba(29,74,35,0.2);
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: var(--forest);
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .status-select:focus { border-color: var(--lime); }
+
+  .btn-update {
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--forest);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-update:hover { background: var(--midforest); }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: rgba(29,74,35,0.45);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+  }
+
+  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+</style>
+
+<div class="page-wrapper">
+  <div class="page-inner">
+
+    {% for message in app.flashes('success') %}
+      <div class="alert alert-success">✓ {{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+      <div class="alert alert-danger">⚠ {{ message }}</div>
+    {% endfor %}
+
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Customer Orders</h1>
+        <p>View and manage all orders for this customer.</p>
+      </div>
+      <a href="{{ path('app_customer_index') }}" class="btn btn-back">← Back to Customers</a>
+    </div>
+
+    {# ── Customer Info ── #}
+    <div class="customer-card">
+      <div class="customer-avatar">👤</div>
+      <div class="customer-info">
+        <h2>{{ customer.name }}</h2>
+        <p>{{ customer.email ?? '—' }} {% if customer.phone %}· {{ customer.phone }}{% endif %}</p>
+      </div>
+      <div class="customer-stats">
+        {% set totalSpent = 0 %}
+        {% for o in customer.orders %}{% set totalSpent = totalSpent + o.totalPrice %}{% endfor %}
+        <div class="stat">
+          <div class="stat-value">{{ customer.orders|length }}</div>
+          <div class="stat-label">Orders</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">₱{{ totalSpent|number_format(0, '.', ',') }}</div>
+          <div class="stat-label">Total Spent</div>
+        </div>
+        <div class="stat">
+          {% set pending = customer.orders|filter(o => o.status == 'Pending')|length %}
+          <div class="stat-value">{{ pending }}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+    </div>
+
+    {# ── Orders Table ── #}
+    <div class="table-card">
+      <div class="table-header">
+        <h3>📋 Order History</h3>
+        <span class="count-badge">{{ customer.orders|length }} order{{ customer.orders|length != 1 ? 's' : '' }}</span>
+      </div>
+
+      {% if customer.orders|length > 0 %}
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Update Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in customer.orders|sort((a, b) => b.createdAt <=> a.createdAt) %}
+              <tr>
+                <td style="opacity:0.5; font-size:0.8rem;">#{{ order.id }}</td>
+                <td>
+                  {% if order.product %}
+                    <strong>{{ order.product.name }}</strong>
+                    <div style="font-size:0.78rem; color:rgba(29,74,35,0.55);">₱{{ order.product.price|number_format(2) }} each</div>
+                  {% else %}
+                    <span style="opacity:0.5;">Deleted product</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span style="font-weight:600;">{{ order.quantity }}</span>
+                </td>
+                <td>
+                  <strong>₱{{ order.totalPrice|number_format(2, '.', ',') }}</strong>
+                </td>
+                <td style="font-size:0.82rem; color:rgba(29,74,35,0.6);">
+                  {{ order.createdAt ? order.createdAt|date('M d, Y H:i') : '—' }}
+                </td>
+                <td>
+                  {% if order.status == 'Pending' %}
+                    <span class="badge badge-pending">⏳ Pending</span>
+                  {% elseif order.status == 'Processing' %}
+                    <span class="badge badge-processing">🔄 Processing</span>
+                  {% elseif order.status == 'Completed' %}
+                    <span class="badge badge-completed">✅ Completed</span>
+                  {% elseif order.status == 'Cancelled' %}
+                    <span class="badge badge-cancelled">❌ Cancelled</span>
+                  {% else %}
+                    <span class="badge">{{ order.status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+                    {% if order.status != 'Completed' and order.status != 'Cancelled' %}
+                      <form method="post"
+                            action="{{ path('app_customer_orders', {'id': customer.id}) }}"
+                            class="status-form">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
+                        <select name="status" class="status-select">
+                          <option value="Pending"    {{ order.status == 'Pending'    ? 'selected' : '' }}>⏳ Pending</option>
+                          <option value="Processing" {{ order.status == 'Processing' ? 'selected' : '' }}>🔄 Processing</option>
+                          <option value="Completed"  {{ order.status == 'Completed'  ? 'selected' : '' }}>✅ Completed</option>
+                          <option value="Cancelled"  {{ order.status == 'Cancelled'  ? 'selected' : '' }}>❌ Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn-update">Update</button>
+                      </form>
+                    {% else %}
+                      <span style="font-size:0.78rem; color:rgba(29,74,35,0.4); font-style:italic;">Finalised</span>
+                    {% endif %}
+                  {% else %}
+                    <span style="font-size:0.78rem; color:rgba(29,74,35,0.4);">🔒 No permission</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>No orders found for this customer.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

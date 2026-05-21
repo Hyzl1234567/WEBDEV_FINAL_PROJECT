@@ -285,6 +285,17 @@
     font-size: 0.88rem;
   }
 
+  .qty-deducted {
+  font-weight: 700;
+  color: #c0392b;
+  font-size: 1rem;
+}
+
+.badge-deduction  { background: #fdecea; color: #c0392b; border: 1px solid #f5c6c6; }
+.badge-cancelled  { background: #e8f0fe; color: #1a6fa8; border: 1px solid #c5d8f8; }
+.badge-restock    { background: #e1f5ee; color: #0f6e56; border: 1px solid #a8dcc8; }
+.badge-customer   { background: #f3e8ff; color: #6d28d9; border: 1px solid #d8b4fe; }
+
   @media (max-width: 700px) {
     .stock-card { grid-template-columns: 1fr; }
     .stock-left { min-height: 200px; }
@@ -381,46 +392,66 @@
     </div>
   </div>
 
-  {# Stock History for this product #}
+      {% if stockHistory is not empty %}
   <div class="history-card">
     <div class="history-header">
-      <h3>📦 Stock History — {{ stock.product ? stock.product.name : 'This Product' }}</h3>
-      <span class="history-count">{{ stockHistory|length }} record{{ stockHistory|length != 1 ? 's' : '' }}</span>
+      <h3>Stock History</h3>
+      <span class="history-count">{{ stockHistory|length }}</span>
     </div>
-
-    {% if stockHistory is not empty %}
-      <table class="history-table">
-        <thead>
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Qty Change</th>
+          <th>By</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in stockHistory %}
           <tr>
-            <th>#</th>
-            <th>Date Added</th>
-            <th>Qty Added</th>
-            <th>Added By</th>
+            <td style="opacity:0.45;">{{ loop.index }}</td>
+            <td>{{ entry.createdAt ? entry.createdAt|date('M d, Y — H:i') : '—' }}</td>
+            <td>
+              {% if entry.type == 'order_deduction' %}
+                <span class="badge badge-deduction">📦 Order</span>
+              {% elseif entry.type == 'order_cancelled' %}
+                <span class="badge badge-cancelled">↩️ Cancelled</span>
+              {% else %}
+                <span class="badge badge-restock">➕ Restock</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if entry.type == 'order_deduction' %}
+                <span class="qty-deducted">−{{ entry.quantity }}</span>
+              {% elseif entry.type == 'order_cancelled' %}
+                <span class="qty-added" style="color:#1a6fa8;">+{{ entry.quantity }}</span>
+              {% else %}
+                <span class="qty-added">+{{ entry.quantity }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if entry.createdBy %}
+                <span class="badge {{ 'ROLE_ADMIN' in entry.createdBy.roles ? 'badge-admin' : 'badge-staff' }}">
+                  {{ 'ROLE_ADMIN' in entry.createdBy.roles ? 'Admin' : 'Staff' }} — {{ entry.createdBy.username }}
+                </span>
+              {% elseif entry.type in ['order_deduction', 'order_cancelled'] %}
+                <span class="badge badge-customer">👤 Customer</span>
+              {% else %}
+                <span class="badge badge-unknown">Unknown</span>
+              {% endif %}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {% for entry in stockHistory %}
-            <tr>
-              <td style="opacity:0.45;">{{ loop.index }}</td>
-              <td>{{ entry.createdAt ? entry.createdAt|date('M d, Y — H:i') : '—' }}</td>
-              <td><span class="qty-added">+{{ entry.quantity }}</span></td>
-              <td>
-                {% if entry.createdBy %}
-                  <span class="badge {{ 'ROLE_ADMIN' in entry.createdBy.roles ? 'badge-admin' : 'badge-staff' }}">
-                    {{ 'ROLE_ADMIN' in entry.createdBy.roles ? 'Admin' : 'Staff' }} — {{ entry.createdBy.username }}
-                  </span>
-                {% else %}
-                  <span class="badge badge-unknown">Unknown</span>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <div class="history-empty">No stock history found for this product.</div>
-    {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+  {% else %}
+    <div class="history-card">
+      <div class="history-empty">No stock history found for this product.</div>
+    </div>
+  {% endif %}
 
 </div>
 {% endblock %}
