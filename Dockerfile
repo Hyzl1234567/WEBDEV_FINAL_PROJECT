@@ -63,6 +63,8 @@ COPY --from=vendor /app /var/www/html
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
+    && mkdir -p /var/www/html/var/cache \
+    && mkdir -p /var/www/html/var/log \
     && chmod -R 777 /var/www/html/var
 
 # Copy and set entrypoint
