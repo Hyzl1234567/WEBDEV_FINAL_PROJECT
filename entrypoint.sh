@@ -3,6 +3,26 @@ set -e
 
 echo "🌿 EcoBrew — Starting up..."
 
+# ── 0. Create .env file from Railway environment variables ────────────────────
+echo "APP_ENV=prod" > /var/www/html/.env
+echo "APP_SECRET=${APP_SECRET}" >> /var/www/html/.env
+echo "DATABASE_URL=${DATABASE_URL}" >> /var/www/html/.env
+echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}" >> /var/www/html/.env
+echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" >> /var/www/html/.env
+echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}" >> /var/www/html/.env
+echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}" >> /var/www/html/.env
+echo "MAILER_DSN=${MAILER_DSN}" >> /var/www/html/.env
+echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN}" >> /var/www/html/.env
+echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> /var/www/html/.env
+echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> /var/www/html/.env
+echo "PUSHER_APP_ID=${PUSHER_APP_ID}" >> /var/www/html/.env
+echo "PUSHER_KEY=${PUSHER_KEY}" >> /var/www/html/.env
+echo "PUSHER_SECRET=${PUSHER_SECRET}" >> /var/www/html/.env
+echo "PUSHER_CLUSTER=${PUSHER_CLUSTER}" >> /var/www/html/.env
+
+echo "📋 Generated .env contents:"
+cat /var/www/html/.env
+
 # ── 1. Generate JWT keys if they don't exist ──────────────────────────────────
 JWT_DIR=/var/www/html/config/jwt
 
@@ -36,6 +56,8 @@ echo "✅ Cache ready."
 
 # ── 3. Run database migrations ────────────────────────────────────────────────
 echo "🗄  Running database migrations..."
+php bin/console doctrine:migrations:sync-metadata-storage --env=prod || true
+php bin/console doctrine:migrations:version --add --all --no-interaction --env=prod || true
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 echo "✅ Migrations complete."
 
@@ -43,6 +65,8 @@ echo "✅ Migrations complete."
 chown -R www-data:www-data /var/www/html/var
 chmod -R 777 /var/www/html/var
 
-# ── 5. Start supervisor (manages both Nginx + PHP-FPM) ───────────────────────
+# ── 5. Configure Nginx port & start supervisor ────────────────────────────────
 echo "🚀 Starting Nginx + PHP-FPM..."
+echo "🔌 PORT is: ${PORT}"
+sed -i "s/listen 80;/listen ${PORT};/" /etc/nginx/conf.d/default.conf
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
