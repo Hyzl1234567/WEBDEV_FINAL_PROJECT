@@ -34,3 +34,7 @@ SymfonySecurityBasics/.env
 .env
 .env.*
 !.env.example
+
+config/firebase/serviceAccountKey.json
+.env
+SymfonySecurityBasics/.env
