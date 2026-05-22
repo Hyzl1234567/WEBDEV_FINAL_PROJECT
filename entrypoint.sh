@@ -50,7 +50,8 @@ fi
 # ── 2. Clear and warm up cache ────────────────────────────────────────────────
 echo "🗂  Warming up cache..."
 cd /var/www/html
-php bin/console cache:clear --env=prod --no-warmup
+rm -rf /var/www/html/var/cache/*
+php bin/console cache:clear --env=prod
 php bin/console cache:warmup --env=prod
 echo "✅ Cache ready."
 
