@@ -12,7 +12,7 @@ echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" >> /var/www/html/.env
 echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}" >> /var/www/html/.env
 echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}" >> /var/www/html/.env
 echo "MAILER_DSN=${MAILER_DSN}" >> /var/www/html/.env
-echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN}" >> /var/www/html/.env
+echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN:-'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'}" >> /var/www/html/.env
 echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> /var/www/html/.env
 echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> /var/www/html/.env
 echo "PUSHER_APP_ID=${PUSHER_APP_ID}" >> /var/www/html/.env
@@ -58,9 +58,22 @@ echo "✅ Cache ready."
 # ── 3. Run database migrations ────────────────────────────────────────────────
 echo "🗄  Running database migrations..."
 php bin/console doctrine:migrations:sync-metadata-storage --env=prod || true
-php bin/console doctrine:migrations:version --add --all --no-interaction --env=prod || true
-php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+
+# Only skip migrations on very first boot (no recorded executions yet).
+# On subsequent boots, run migrate normally so new migrations actually execute.
+EXECUTED=$(php bin/console doctrine:migrations:list --env=prod --no-interaction 2>/dev/null | grep -c "migrated" || echo "0")
+if [ "$EXECUTED" = "0" ]; then
+    echo "⚙️  First boot — marking existing migrations as done (tables already exist)..."
+    php bin/console doctrine:migrations:version --add --all --no-interaction --env=prod || true
+fi
+
+php bin/console doctrine:migrations:migrate --no-interaction --env=prod || true
 echo "✅ Migrations complete."
+
+# ── 3b. Ensure sessions table exists (required for PDO session handler) ───────
+echo "🗄  Ensuring sessions table exists..."
+php bin/console dbal:run-sql "CREATE TABLE IF NOT EXISTS sessions (sess_id VARCHAR(128) NOT NULL PRIMARY KEY, sess_data MEDIUMBLOB NOT NULL, sess_time INTEGER UNSIGNED NOT NULL, sess_lifetime INTEGER UNSIGNED NOT NULL) COLLATE utf8mb4_bin ENGINE=InnoDB" --env=prod || true
+echo "✅ Sessions table ready."
 
 # ── 4. Fix permissions ────────────────────────────────────────────────────────
 chown -R www-data:www-data /var/www/html/var
