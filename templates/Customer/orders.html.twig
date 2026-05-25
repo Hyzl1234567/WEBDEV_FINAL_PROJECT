@@ -369,17 +369,21 @@
                   {{ order.createdAt ? order.createdAt|date('M d, Y H:i') : '—' }}
                 </td>
                 <td>
-                  {% if order.status == 'Pending' %}
-                    <span class="badge badge-pending">⏳ Pending</span>
-                  {% elseif order.status == 'Processing' %}
-                    <span class="badge badge-processing">🔄 Processing</span>
-                  {% elseif order.status == 'Completed' %}
-                    <span class="badge badge-completed">✅ Completed</span>
-                  {% elseif order.status == 'Cancelled' %}
-                    <span class="badge badge-cancelled">❌ Cancelled</span>
-                  {% else %}
-                    <span class="badge">{{ order.status }}</span>
-                  {% endif %}
+            {% if order.status == 'Pending' %}
+  <span class="badge badge-pending">⏳ Pending</span>
+{% elseif order.status == 'Confirmed' %}
+  <span class="badge" style="background:rgba(30,136,229,0.1);color:#1a6fa8;border:1px solid rgba(30,136,229,0.3);">✅ Confirmed</span>
+{% elseif order.status == 'Preparing' %}
+  <span class="badge" style="background:rgba(142,36,170,0.1);color:#6a1b9a;border:1px solid rgba(142,36,170,0.3);">👨‍🍳 Preparing</span>
+{% elseif order.status == 'Ready' %}
+  <span class="badge" style="background:rgba(0,172,193,0.1);color:#00838f;border:1px solid rgba(0,172,193,0.3);">🎉 Ready</span>
+{% elseif order.status == 'Delivered' %}
+  <span class="badge badge-completed">📦 Delivered</span>
+{% elseif order.status == 'Cancelled' %}
+  <span class="badge badge-cancelled">❌ Cancelled</span>
+{% else %}
+  <span class="badge">{{ order.status }}</span>
+{% endif %}
                 </td>
                 <td>
                   {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
@@ -389,12 +393,14 @@
                             class="status-form">
                         <input type="hidden" name="order_id" value="{{ order.id }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
-                        <select name="status" class="status-select">
-                          <option value="Pending"    {{ order.status == 'Pending'    ? 'selected' : '' }}>⏳ Pending</option>
-                          <option value="Processing" {{ order.status == 'Processing' ? 'selected' : '' }}>🔄 Processing</option>
-                          <option value="Completed"  {{ order.status == 'Completed'  ? 'selected' : '' }}>✅ Completed</option>
-                          <option value="Cancelled"  {{ order.status == 'Cancelled'  ? 'selected' : '' }}>❌ Cancelled</option>
-                        </select>
+                         <select name="status" class="status-select">
+  <option value="Pending"   {{ order.status == 'Pending'   ? 'selected' : '' }}>⏳ Pending</option>
+  <option value="Confirmed" {{ order.status == 'Confirmed' ? 'selected' : '' }}>✅ Confirmed</option>
+  <option value="Preparing" {{ order.status == 'Preparing' ? 'selected' : '' }}>👨‍🍳 Preparing</option>
+  <option value="Ready"     {{ order.status == 'Ready'     ? 'selected' : '' }}>🎉 Ready</option>
+  <option value="Delivered" {{ order.status == 'Delivered' ? 'selected' : '' }}>📦 Delivered</option>
+  <option value="Cancelled" {{ order.status == 'Cancelled' ? 'selected' : '' }}>❌ Cancelled</option>
+</select>
                         <button type="submit" class="btn-update">Update</button>
                       </form>
                     {% else %}
