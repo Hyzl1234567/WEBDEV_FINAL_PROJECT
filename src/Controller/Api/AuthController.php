@@ -17,7 +17,6 @@ use Psr\Log\LoggerInterface;
 #[Route('/api/auth', name: 'api_auth_')]
 class AuthController extends AbstractController
 {
-    // Only these roles may sign in via Google
     private const GOOGLE_ALLOWED_ROLES = ['ROLE_CUSTOMER', 'ROLE_STAFF', 'ROLE_USER'];
 
     public function __construct(
@@ -57,7 +56,6 @@ class AuthController extends AbstractController
             $user  = $this->userRepository->findOneBy(['email' => $email]);
 
             if (null === $user) {
-                // ── New user: always assign ROLE_CUSTOMER ─────────────────────
                 $baseUsername = explode('@', $email)[0];
                 $username     = $baseUsername;
                 if ($this->userRepository->findOneBy(['username' => $username])) {
@@ -81,7 +79,6 @@ class AuthController extends AbstractController
                 $this->logger->info('New Google customer created', ['email' => $email]);
 
             } else {
-                // ── Existing user: block anyone not in the allowed list ────────
                 $significantRoles = array_diff($user->getRoles(), ['ROLE_USER']);
                 $hasBlockedRole   = !empty(array_diff($significantRoles, self::GOOGLE_ALLOWED_ROLES));
 
@@ -96,7 +93,6 @@ class AuthController extends AbstractController
                     ], JsonResponse::HTTP_FORBIDDEN);
                 }
 
-                // Update profile fields if changed
                 if ($user->getDisplayName() !== ($firebaseUser['name'] ?? '')) {
                     $user->setDisplayName($firebaseUser['name'] ?? '');
                 }
@@ -136,7 +132,7 @@ class AuthController extends AbstractController
                 ],
             ], JsonResponse::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Unexpected error during Firebase authentication', [
                 'error'     => $e->getMessage(),
                 'exception' => get_class($e),

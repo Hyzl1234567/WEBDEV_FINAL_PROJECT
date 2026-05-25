@@ -42,4 +42,10 @@ public function registerPage(): Response
 {
     return $this->render('registration/register.html.twig');
 }
+
+#[Route('/payment/success', name: 'payment_success')]
+public function paymentSuccess(): Response
+{
+    return $this->render('landingPage/payment_success.html.twig');
+}
 }

@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Customer;
 use App\Entity\Order;
+use App\Entity\Sales;
 use App\Entity\Stock;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
@@ -111,6 +112,18 @@ class OrderController extends AbstractController
             $this->deductStock($product, $quantity, $user);
 
             $this->entityManager->persist($order);
+
+            // ✅ SALES RECORDING ───────────────────────────────────────────────
+            // Create a Sales record every time an order is placed.
+            // totalAmount = product price × quantity ordered.
+            $sale = new Sales();
+            $sale->setProduct($product);
+            $sale->setQuantity($quantity);
+            $sale->setTotalAmount($product->getPrice() * $quantity);
+            $sale->setSaleDate(new \DateTimeImmutable());
+            $this->entityManager->persist($sale);
+            // ─────────────────────────────────────────────────────────────────
+
             $this->entityManager->flush();
 
             $formattedOrder = $this->formatOrder($order);
@@ -257,6 +270,20 @@ class OrderController extends AbstractController
             }
 
             $order->setStatus('Cancelled');
+
+            // ✅ REVERSE SALES RECORD on cancellation ─────────────────────────
+            // Create a negative sales entry to offset the original sale.
+            // This keeps a full audit trail instead of deleting the original record.
+            if ($product) {
+                $reverseSale = new Sales();
+                $reverseSale->setProduct($product);
+                $reverseSale->setQuantity(-$quantity);
+                $reverseSale->setTotalAmount(-($product->getPrice() * $quantity));
+                $reverseSale->setSaleDate(new \DateTimeImmutable());
+                $this->entityManager->persist($reverseSale);
+            }
+            // ─────────────────────────────────────────────────────────────────
+
             $this->entityManager->flush();
 
             $formattedOrder = $this->formatOrder($order);

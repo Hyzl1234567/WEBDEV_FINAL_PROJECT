@@ -31,6 +31,10 @@
         <env name="PUSHER_KEY" value=""/>
         <env name="PUSHER_SECRET" value=""/>
         <!-- ###- pusher/pusher-php-server ### -->
+
+        <!-- ###+ stripe/stripe-php ### -->
+        <env name="STRIPE_SECRET_KEY" value="sk_test_***"/>
+        <!-- ###- stripe/stripe-php ### -->
     </php>
 
     <testsuites>

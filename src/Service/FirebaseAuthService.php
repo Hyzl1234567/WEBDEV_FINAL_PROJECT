@@ -11,33 +11,39 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 class FirebaseAuthService
 {
-    private Auth $auth;
+    private ?Auth $auth = null;
 
     public function __construct(
         private readonly string $credentialsPath,
         private readonly LoggerInterface $logger,
         private readonly CacheInterface $cache,
     ) {
-        if (!file_exists($this->credentialsPath)) {
-            throw new \RuntimeException('Firebase credentials file not found: ' . $this->credentialsPath);
+        if (file_exists($this->credentialsPath)) {
+            try {
+                $this->auth = (new Factory())
+                    ->withServiceAccount($this->credentialsPath)
+                    ->createAuth();
+            } catch (\Throwable $e) {
+                $this->logger->error('Failed to initialize Firebase: ' . $e->getMessage());
+            }
+        } else {
+            $this->logger->error('Firebase credentials file not found: ' . $this->credentialsPath);
         }
-
-        $this->auth = (new Factory())
-            ->withServiceAccount($this->credentialsPath)
-            ->createAuth();
     }
 
     public function verifyToken(string $idToken): ?array
     {
+        if (null === $this->auth) {
+            throw new \RuntimeException('Firebase credentials not configured on this server.');
+        }
+
         try {
             $this->logger->info('Attempting to verify Firebase ID token');
 
-            // Cache key based on token hash — avoids re-fetching Google public keys
-            // on every request. Cached for 5 minutes (tokens expire in 1 hour anyway).
             $cacheKey = 'firebase_token_' . md5($idToken);
 
             $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($idToken) {
-                $item->expiresAfter(300); // 5 minutes
+                $item->expiresAfter(300);
 
                 $verifiedIdToken = $this->auth->verifyIdToken($idToken);
 
@@ -62,7 +68,7 @@ class FirebaseAuthService
             ]);
             return null;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to verify Firebase ID token', [
                 'error'     => $e->getMessage(),
                 'exception' => get_class($e),

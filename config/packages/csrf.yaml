@@ -1,4 +1,4 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Stateless CSRF for Symfony Form components (UX Turbo compatible)
 framework:
     form:
         csrf_protection:
@@ -7,5 +7,4 @@ framework:
     csrf_protection:
         stateless_token_ids:
             - submit
-            - authenticate
-            - logout
+            # 'authenticate' and 'logout' use session-based CSRF (no client JS required)

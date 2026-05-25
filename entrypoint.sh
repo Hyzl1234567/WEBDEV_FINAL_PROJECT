@@ -8,8 +8,8 @@ echo "APP_ENV=prod" > /var/www/html/.env
 echo "APP_SECRET=${APP_SECRET}" >> /var/www/html/.env
 echo "DATABASE_URL=${DATABASE_URL}" >> /var/www/html/.env
 echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}" >> /var/www/html/.env
-echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" >> /var/www/html/.env
-echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}" >> /var/www/html/.env
+echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem" >> /var/www/html/.env
+echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem" >> /var/www/html/.env
 echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}" >> /var/www/html/.env
 echo "MAILER_DSN=${MAILER_DSN}" >> /var/www/html/.env
 echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN:-'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'}" >> /var/www/html/.env
@@ -22,6 +22,19 @@ echo "PUSHER_CLUSTER=${PUSHER_CLUSTER}" >> /var/www/html/.env
 
 echo "📋 Generated .env contents:"
 cat /var/www/html/.env
+
+# ── 1a. Write Firebase service account credentials ────────────────────────────
+FIREBASE_DIR=/var/www/html/config/firebase
+mkdir -p "$FIREBASE_DIR"
+if [ -n "${FIREBASE_CREDENTIALS_BASE64}" ]; then
+    echo "${FIREBASE_CREDENTIALS_BASE64}" | base64 -d > "$FIREBASE_DIR/serviceAccountKey.json"
+    echo "✅ Firebase credentials written."
+elif [ -n "${FIREBASE_CREDENTIALS}" ]; then
+    echo "${FIREBASE_CREDENTIALS}" > "$FIREBASE_DIR/serviceAccountKey.json"
+    echo "✅ Firebase credentials written (raw JSON)."
+else
+    echo "⚠️  No FIREBASE_CREDENTIALS set — Google mobile login will be unavailable."
+fi
 
 # ── 1. Generate JWT keys if they don't exist ──────────────────────────────────
 JWT_DIR=/var/www/html/config/jwt

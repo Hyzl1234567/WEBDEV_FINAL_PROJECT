@@ -31,7 +31,7 @@ final class CustomerController extends AbstractController
     #[Route(name: 'app_customer_index', methods: ['GET'])]
     public function index(CustomerRepository $customerRepository): Response
     {
-        return $this->render('customer/index.html.twig', [
+        return $this->render('Customer/index.html.twig', [
             'customers' => $customerRepository->findAll(),
         ]);
     }
@@ -68,7 +68,7 @@ final class CustomerController extends AbstractController
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('customer/new.html.twig', [
+        return $this->render('Customer/new.html.twig', [
             'customer' => $customer,
             'form' => $form,
         ]);
@@ -77,7 +77,7 @@ final class CustomerController extends AbstractController
     #[Route('/{id}', name: 'app_customer_show', methods: ['GET'])]
     public function show(Customer $customer): Response
     {
-        return $this->render('customer/show.html.twig', [
+        return $this->render('Customer/show.html.twig', [
             'customer' => $customer,
         ]);
     }
@@ -114,7 +114,7 @@ final class CustomerController extends AbstractController
             return $this->redirectToRoute('app_customer_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('customer/edit.html.twig', [
+        return $this->render('Customer/edit.html.twig', [
             'customer' => $customer,
             'form' => $form,
         ]);
@@ -223,7 +223,7 @@ final class CustomerController extends AbstractController
             return $this->redirectToRoute('app_customer_orders', ['id' => $customer->getId()]);
         }
 
-        return $this->render('customer/orders.html.twig', [
+        return $this->render('Customer/orders.html.twig', [
             'customer' => $customer,
             'orders'   => $customer->getOrders(),
         ]);

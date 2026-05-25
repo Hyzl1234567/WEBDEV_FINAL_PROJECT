@@ -17,7 +17,7 @@ final class LoginController extends AbstractController
 
         return $this->render('landingPage/login.html.twig', [
             'last_username' => $lastUsername,
-            'error'         => $error?->getMessageKey(),
+            'error'         => $error,
         ]);
     }
 
