@@ -33,6 +33,82 @@ class OrderController extends AbstractController
     ) {}
 
     // =========================================================================
+    // GET /api/orders/all  — Staff/Admin only: see ALL customer orders
+    // =========================================================================
+    #[Route('/orders/all', name: 'list_all', methods: ['GET'])]
+    #[IsGranted('ROLE_STAFF')]
+    public function listAll(Request $request): JsonResponse
+    {
+        try {
+            $status = $request->query->get('status'); // optional ?status=Pending
+
+            $criteria = [];
+            if ($status) $criteria['status'] = $status;
+
+            $orders = $this->orderRepository->findBy(
+                $criteria,
+                ['createdAt' => 'DESC']
+            );
+
+            return $this->json([
+                'status' => 'success',
+                'orders' => array_map(fn(Order $o) => $this->formatOrder($o), $orders),
+                'total'  => count($orders),
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json(['status' => 'error', 'message' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // =========================================================================
+    // PATCH /api/orders/{id}/status  — Staff/Admin: update order status
+    // =========================================================================
+    #[Route('/orders/{id}/status', name: 'update_status', methods: ['PATCH'])]
+    #[IsGranted('ROLE_STAFF')]
+    public function updateStatus(int $id, Request $request): JsonResponse
+    {
+        $allowed = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled'];
+
+        try {
+            $order = $this->orderRepository->find($id);
+            if (!$order) {
+                return $this->json(['status' => 'error', 'message' => 'Order not found.'], JsonResponse::HTTP_NOT_FOUND);
+            }
+
+            $data   = json_decode($request->getContent(), true);
+            $status = $data['status'] ?? null;
+
+            if (!$status || !in_array($status, $allowed)) {
+                return $this->json([
+                    'status'  => 'error',
+                    'message' => 'Invalid status. Allowed: ' . implode(', ', $allowed),
+                ], JsonResponse::HTTP_BAD_REQUEST);
+            }
+
+            $order->setStatus($status);
+            $this->entityManager->flush();
+
+            $formattedOrder = $this->formatOrder($order);
+
+            try {
+                $this->pusher->orderStatusUpdated($formattedOrder);
+            } catch (\Exception $e) {
+                $this->logger->warning('Pusher notification failed', ['error' => $e->getMessage()]);
+            }
+
+            return $this->json([
+                'status'  => 'success',
+                'message' => "Order #{$id} status updated to {$status}.",
+                'order'   => $formattedOrder,
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json(['status' => 'error', 'message' => $e->getMessage()], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // =========================================================================
     // POST /api/orders
     // =========================================================================
     #[Route('/orders', name: 'create', methods: ['POST'])]
@@ -105,47 +181,29 @@ class OrderController extends AbstractController
             $order->setStatus('Pending');
             $order->setCreatedBy($user);
 
-            // ── Deduct from product.quantity ──────────────────────────────────
             $product->setQuantity($product->getQuantity() - $quantity);
-
-            // ── Deduct from Stock records (web panel inventory) ───────────────
             $this->deductStock($product, $quantity, $user);
 
             $this->entityManager->persist($order);
 
-            // ✅ SALES RECORDING ───────────────────────────────────────────────
-            // Create a Sales record every time an order is placed.
-            // totalAmount = product price × quantity ordered.
+            // ✅ Sales recording
             $sale = new Sales();
             $sale->setProduct($product);
             $sale->setQuantity($quantity);
             $sale->setTotalAmount($product->getPrice() * $quantity);
             $sale->setSaleDate(new \DateTimeImmutable());
             $this->entityManager->persist($sale);
-            // ─────────────────────────────────────────────────────────────────
 
             $this->entityManager->flush();
 
             $formattedOrder = $this->formatOrder($order);
 
-            // ── 🔔 Notify via Pusher (non-fatal) ─────────────────────────────
             try {
                 $this->pusher->orderPlaced($formattedOrder);
-                $this->pusher->stockUpdated(
-                    $product->getId(),
-                    $product->getName(),
-                    $product->getQuantity()
-                );
+                $this->pusher->stockUpdated($product->getId(), $product->getName(), $product->getQuantity());
             } catch (\Exception $pusherEx) {
                 $this->logger->warning('Pusher notification failed', ['error' => $pusherEx->getMessage()]);
             }
-
-            $this->logger->info('Order placed', [
-                'orderId'  => $order->getId(),
-                'product'  => $product->getName(),
-                'quantity' => $quantity,
-                'customer' => $customer->getEmail(),
-            ]);
 
             return $this->json([
                 'status'  => 'success',
@@ -172,7 +230,7 @@ class OrderController extends AbstractController
             $customer  = $this->customerRepository->findOneBy(['email' => $userEmail]);
 
             if (!$customer) {
-                return $this->json(['status' => 'success', 'orders' => [], 'total' => 0, 'message' => 'No orders found for this account.']);
+                return $this->json(['status' => 'success', 'orders' => [], 'total' => 0]);
             }
 
             $orders = $this->orderRepository->findBy(['customer' => $customer], ['createdAt' => 'DESC']);
@@ -202,7 +260,6 @@ class OrderController extends AbstractController
 
         try {
             $order = $this->orderRepository->find($id);
-
             if (!$order) {
                 return $this->json(['status' => 'error', 'message' => 'Order not found.'], JsonResponse::HTTP_NOT_FOUND);
             }
@@ -210,8 +267,12 @@ class OrderController extends AbstractController
             $user      = $this->getUser();
             $userEmail = method_exists($user, 'getEmail') ? $user->getEmail() : $user->getUserIdentifier();
 
-            if ($order->getCustomer()?->getEmail() !== $userEmail) {
-                return $this->json(['status' => 'error', 'message' => 'Access denied.'], JsonResponse::HTTP_FORBIDDEN);
+            // Staff can see any order; customers only their own
+            $roles = $user->getRoles();
+            if (!in_array('ROLE_STAFF', $roles) && !in_array('ROLE_ADMIN', $roles)) {
+                if ($order->getCustomer()?->getEmail() !== $userEmail) {
+                    return $this->json(['status' => 'error', 'message' => 'Access denied.'], JsonResponse::HTTP_FORBIDDEN);
+                }
             }
 
             return $this->json(['status' => 'success', 'order' => $this->formatOrder($order)]);
@@ -234,7 +295,6 @@ class OrderController extends AbstractController
 
         try {
             $order = $this->orderRepository->find($id);
-
             if (!$order) {
                 return $this->json(['status' => 'error', 'message' => 'Order not found.'], JsonResponse::HTTP_NOT_FOUND);
             }
@@ -262,18 +322,13 @@ class OrderController extends AbstractController
             $quantity = $order->getQuantity();
 
             if ($product) {
-                // ── Restore product.quantity ──────────────────────────────────
                 $product->setQuantity($product->getQuantity() + $quantity);
-
-                // ── Restore Stock records ─────────────────────────────────────
                 $this->restoreStock($product, $quantity);
             }
 
             $order->setStatus('Cancelled');
 
-            // ✅ REVERSE SALES RECORD on cancellation ─────────────────────────
-            // Create a negative sales entry to offset the original sale.
-            // This keeps a full audit trail instead of deleting the original record.
+            // Reverse sales record
             if ($product) {
                 $reverseSale = new Sales();
                 $reverseSale->setProduct($product);
@@ -282,30 +337,19 @@ class OrderController extends AbstractController
                 $reverseSale->setSaleDate(new \DateTimeImmutable());
                 $this->entityManager->persist($reverseSale);
             }
-            // ─────────────────────────────────────────────────────────────────
 
             $this->entityManager->flush();
 
             $formattedOrder = $this->formatOrder($order);
 
-            // ── 🔔 Notify via Pusher (non-fatal) ─────────────────────────────
             try {
                 $this->pusher->orderStatusUpdated($formattedOrder);
                 if ($product) {
-                    $this->pusher->stockUpdated(
-                        $product->getId(),
-                        $product->getName(),
-                        $product->getQuantity()
-                    );
+                    $this->pusher->stockUpdated($product->getId(), $product->getName(), $product->getQuantity());
                 }
             } catch (\Exception $pusherEx) {
                 $this->logger->warning('Pusher notification failed', ['error' => $pusherEx->getMessage()]);
             }
-
-            $this->logger->info('Order cancelled', [
-                'orderId'  => $order->getId(),
-                'customer' => $order->getCustomer()?->getEmail(),
-            ]);
 
             return $this->json([
                 'status'  => 'success',
@@ -331,7 +375,6 @@ class OrderController extends AbstractController
         );
 
         $remaining = $quantity;
-
         foreach ($stockRecords as $stock) {
             if ($remaining <= 0) break;
             $stockQty = $stock->getQuantity();
@@ -354,13 +397,6 @@ class OrderController extends AbstractController
         $historyEntry->setLastUpdated(new \DateTimeImmutable());
         $historyEntry->setCreatedBy(null);
         $this->entityManager->persist($historyEntry);
-
-        if ($remaining > 0) {
-            $this->logger->warning('Stock records could not fully cover order quantity', [
-                'product'   => $product->getName(),
-                'shortfall' => $remaining,
-            ]);
-        }
     }
 
     private function restoreStock(object $product, int $quantity): void
@@ -371,8 +407,7 @@ class OrderController extends AbstractController
         );
 
         if (!empty($stockRecords)) {
-            $latest = $stockRecords[0];
-            $latest->setQuantity($latest->getQuantity() + $quantity);
+            $stockRecords[0]->setQuantity($stockRecords[0]->getQuantity() + $quantity);
         } else {
             $newStock = new Stock();
             $newStock->setProduct($product);
