@@ -1,10 +1,4 @@
-# Stateless CSRF for Symfony Form components (UX Turbo compatible)
+# Use session-based CSRF for forms (most reliable in distributed environments)
 framework:
-    form:
-        csrf_protection:
-            token_id: submit
+    csrf_protection: true
 
-    csrf_protection:
-        stateless_token_ids:
-            - submit
-            # 'authenticate' and 'logout' use session-based CSRF (no client JS required)
