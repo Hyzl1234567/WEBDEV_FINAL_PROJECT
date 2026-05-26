@@ -1,6 +1,9 @@
- {{ form_start(form) }}
+{{ form_start(form) }}
     {{ form_widget(form) }}
-     <div class="form-buttons">
+
+    {{ form_row(form._token) }}
+
+    <div class="form-buttons">
         <a href="{{ path('app_product_index') }}" class="back-btn">Back</a>
         <button type="submit" class="save-btn">Save</button>
     </div>
