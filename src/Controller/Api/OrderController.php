@@ -435,9 +435,8 @@ class OrderController extends AbstractController
     {
         $product  = $order->getProduct();
         $imageUrl = $product?->getImage()
-            ? 'http://192.168.101.21:8000/uploads/images/' . $product->getImage()
-            : null;
-
+    ? 'https://webdevfinalproject-production-a2ea.up.railway.app/uploads/images/' . $product->getImage()
+    : null;
         return [
             'id'          => $order->getId(),
             'status'      => $order->getStatus(),
