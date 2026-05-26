@@ -14,6 +14,7 @@ services:
     Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
         arguments:
             - '%env(DATABASE_URL)%'
+            - { db_table: 'sessions', lock_mode: 1 }
 
     # Activity Log Doctrine Listener
     App\EventListener\ActivityLogDoctrineListener:
