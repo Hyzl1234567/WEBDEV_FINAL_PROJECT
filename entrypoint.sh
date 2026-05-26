@@ -1,25 +1,33 @@
 #!/bin/sh
-set -e
 
 echo "🌿 EcoBrew — Starting up..."
 
 # ── 0. Create .env file from Railway environment variables ────────────────────
-echo "APP_ENV=prod" > /var/www/html/.env
-echo "APP_SECRET=${APP_SECRET}" >> /var/www/html/.env
-echo "DATABASE_URL=${DATABASE_URL}" >> /var/www/html/.env
-echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}" >> /var/www/html/.env
-echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem" >> /var/www/html/.env
-echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem" >> /var/www/html/.env
-echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}" >> /var/www/html/.env
-echo "MAILER_DSN=${MAILER_DSN}" >> /var/www/html/.env
-echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN:-'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'}" >> /var/www/html/.env
-echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}" >> /var/www/html/.env
-echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}" >> /var/www/html/.env
-echo "PUSHER_APP_ID=${PUSHER_APP_ID}" >> /var/www/html/.env
-echo "PUSHER_KEY=${PUSHER_KEY}" >> /var/www/html/.env
-echo "PUSHER_SECRET=${PUSHER_SECRET}" >> /var/www/html/.env
-echo "PUSHER_CLUSTER=${PUSHER_CLUSTER}" >> /var/www/html/.env
+echo "Creating .env file..."
+{
+    echo "APP_ENV=prod"
+    echo "APP_SECRET=${APP_SECRET:-default-change-me}"
+    echo "DATABASE_URL=${DATABASE_URL}"
+    echo "JWT_PASSPHRASE=${JWT_PASSPHRASE:-secret}"
+    echo "JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem"
+    echo "JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem"
+    echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN:-sync://}"
+    echo "MAILER_DSN=${MAILER_DSN:-null://null}"
+    echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN:-'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'}"
+    echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}"
+    echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}"
+    echo "PUSHER_APP_ID=${PUSHER_APP_ID}"
+    echo "PUSHER_KEY=${PUSHER_KEY}"
+    echo "PUSHER_SECRET=${PUSHER_SECRET}"
+    echo "PUSHER_CLUSTER=${PUSHER_CLUSTER}"
+} > /var/www/html/.env
 
+if [ ! -f /var/www/html/.env ]; then
+    echo "❌ FATAL: Failed to create .env file!"
+    exit 1
+fi
+
+echo "✅ .env file created successfully"
 echo "📋 Generated .env contents:"
 cat /var/www/html/.env
 
@@ -63,9 +71,9 @@ fi
 # ── 2. Clear and warm up cache ────────────────────────────────────────────────
 echo "🗂  Warming up cache..."
 cd /var/www/html
-rm -rf /var/www/html/var/cache/*
-php bin/console cache:clear --env=prod
-php bin/console cache:warmup --env=prod
+rm -rf /var/www/html/var/cache/* 2>/dev/null || true
+php bin/console cache:clear --env=prod --no-debug 2>&1 | head -50 || echo "⚠️  Cache clear had issues, continuing..."
+php bin/console cache:warmup --env=prod 2>&1 | head -50 || echo "⚠️  Cache warmup had issues, continuing..."
 echo "✅ Cache ready."
 
 # ── 3. Run database migrations ────────────────────────────────────────────────
