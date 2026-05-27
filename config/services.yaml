@@ -30,3 +30,8 @@ services:
     App\Service\FirebaseAuthService:
         arguments:
             $credentialsPath: '%kernel.project_dir%/config/firebase/serviceAccountKey.json'
+
+    # Firebase Cloud Messaging Service for push notifications
+    App\Service\NotificationService:
+        arguments:
+            $credentialsPath: '%kernel.project_dir%/config/firebase/serviceAccountKey.json'
