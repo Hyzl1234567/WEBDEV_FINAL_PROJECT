@@ -43,7 +43,7 @@ class ProductController extends AbstractController
             $imageUrl = null;
             if ($product->getImage()) {
                 // Build full image URL — adjust the base URL to match your server
-                $imageUrl = 'https://webdevfinalproject-production-a2ea.up.railway.app/uploads/images/' . $product->getImage();
+                $imageUrl = 'https://webdevfinalproject-production-ed79.up.railway.app/uploads/images/' . $product->getImage();
             }
 
             return [
