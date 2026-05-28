@@ -10,6 +10,7 @@ use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StockRepository;
+use App\Service\NotificationService;
 use App\Service\PusherService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -30,6 +31,7 @@ class OrderController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface        $logger,
         private readonly PusherService          $pusher,
+        private readonly NotificationService    $notifications,
     ) {}
 
     // =========================================================================
@@ -68,7 +70,7 @@ class OrderController extends AbstractController
     #[IsGranted('ROLE_STAFF')]
     public function updateStatus(int $id, Request $request): JsonResponse
     {
-        $allowed = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled'];
+        $allowed = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled', 'Processing', 'Completed'];
 
         try {
             $order = $this->orderRepository->find($id);
@@ -95,6 +97,21 @@ class OrderController extends AbstractController
                 $this->pusher->orderStatusUpdated($formattedOrder);
             } catch (\Exception $e) {
                 $this->logger->warning('Pusher notification failed', ['error' => $e->getMessage()]);
+            }
+
+            // FCM push notification → notify the customer their order status changed
+            try {
+                $orderUser = $order->getCreatedBy();
+                if ($orderUser) {
+                    $this->notifications->sendToUser(
+                        $orderUser,
+                        'Order Status Updated',
+                        "Your order #{$id} is now: {$status}",
+                        ['type' => 'order_status', 'orderId' => (string) $id, 'status' => $status]
+                    );
+                }
+            } catch (\Exception $e) {
+                $this->logger->warning('FCM notification failed', ['error' => $e->getMessage()]);
             }
 
             return $this->json([
@@ -203,6 +220,18 @@ class OrderController extends AbstractController
                 $this->pusher->stockUpdated($product->getId(), $product->getName(), $product->getQuantity());
             } catch (\Exception $pusherEx) {
                 $this->logger->warning('Pusher notification failed', ['error' => $pusherEx->getMessage()]);
+            }
+
+            // FCM push notification → confirm order to the customer
+            try {
+                $this->notifications->sendToUser(
+                    $user,
+                    'Order Placed!',
+                    "Your order for {$product->getName()} (×{$quantity}) has been received.",
+                    ['type' => 'order_status', 'orderId' => (string) $order->getId(), 'status' => 'Pending']
+                );
+            } catch (\Exception $e) {
+                $this->logger->warning('FCM notification failed', ['error' => $e->getMessage()]);
             }
 
             return $this->json([
