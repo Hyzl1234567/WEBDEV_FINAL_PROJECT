@@ -35,3 +35,9 @@ services:
     App\Service\NotificationService:
         arguments:
             $credentialsPath: '%kernel.project_dir%/config/firebase/serviceAccountKey.json'
+
+    # Inject user data (id, email, roles, etc.) into the JWT login response
+    # so the mobile app can read the role without decoding the token.
+    App\EventListener\AuthenticationSuccessListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success, method: onAuthenticationSuccess }
