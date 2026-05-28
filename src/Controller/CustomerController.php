@@ -180,7 +180,7 @@ final class CustomerController extends AbstractController
             $newStatus = $request->request->get('status');
             $token     = $request->request->get('_token');
 
-            $allowed = ['Pending', 'Processing', 'Completed', 'Cancelled'];
+            $allowed = ['Pending', 'Confirmed', 'Preparing', 'Ready', 'Processing', 'Completed', 'Delivered', 'Cancelled'];
 
             if (
                 $this->isCsrfTokenValid('order_status_' . $orderId, $token)

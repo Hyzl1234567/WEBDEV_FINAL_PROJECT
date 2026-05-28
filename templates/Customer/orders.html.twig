@@ -371,10 +371,18 @@
                 <td>
                   {% if order.status == 'Pending' %}
                     <span class="badge badge-pending">⏳ Pending</span>
+                  {% elseif order.status == 'Confirmed' %}
+                    <span class="badge" style="background:#1565C0;color:#fff;">✅ Confirmed</span>
+                  {% elseif order.status == 'Preparing' %}
+                    <span class="badge" style="background:#6A1B9A;color:#fff;">👨‍🍳 Preparing</span>
+                  {% elseif order.status == 'Ready' %}
+                    <span class="badge" style="background:#00838F;color:#fff;">🎉 Ready</span>
                   {% elseif order.status == 'Processing' %}
                     <span class="badge badge-processing">🔄 Processing</span>
                   {% elseif order.status == 'Completed' %}
                     <span class="badge badge-completed">✅ Completed</span>
+                  {% elseif order.status == 'Delivered' %}
+                    <span class="badge" style="background:#1B5E20;color:#fff;">📦 Delivered</span>
                   {% elseif order.status == 'Cancelled' %}
                     <span class="badge badge-cancelled">❌ Cancelled</span>
                   {% else %}
@@ -383,7 +391,7 @@
                 </td>
                 <td>
                   {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-                    {% if order.status != 'Completed' and order.status != 'Cancelled' %}
+                    {% if order.status != 'Completed' and order.status != 'Delivered' and order.status != 'Cancelled' %}
                       <form method="post"
                             action="{{ path('app_customer_orders', {'id': customer.id}) }}"
                             class="status-form">
@@ -391,8 +399,12 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('order_status_' ~ order.id) }}">
                         <select name="status" class="status-select">
                           <option value="Pending"    {{ order.status == 'Pending'    ? 'selected' : '' }}>⏳ Pending</option>
+                          <option value="Confirmed"  {{ order.status == 'Confirmed'  ? 'selected' : '' }}>✅ Confirmed</option>
+                          <option value="Preparing"  {{ order.status == 'Preparing'  ? 'selected' : '' }}>👨‍🍳 Preparing</option>
+                          <option value="Ready"      {{ order.status == 'Ready'      ? 'selected' : '' }}>🎉 Ready</option>
                           <option value="Processing" {{ order.status == 'Processing' ? 'selected' : '' }}>🔄 Processing</option>
                           <option value="Completed"  {{ order.status == 'Completed'  ? 'selected' : '' }}>✅ Completed</option>
+                          <option value="Delivered"  {{ order.status == 'Delivered'  ? 'selected' : '' }}>📦 Delivered</option>
                           <option value="Cancelled"  {{ order.status == 'Cancelled'  ? 'selected' : '' }}>❌ Cancelled</option>
                         </select>
                         <button type="submit" class="btn-update">Update</button>

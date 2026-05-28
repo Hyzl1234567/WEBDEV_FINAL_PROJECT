@@ -438,15 +438,23 @@
                   <td><strong>₱{{ order.totalPrice|number_format(2, '.', ',') }}</strong></td>
                   <td>
                     {% if order.status == 'Pending' %}
-                      <span class="badge bg-warning">Pending</span>
+                      <span class="badge bg-warning text-dark">⏳ Pending</span>
+                    {% elseif order.status == 'Confirmed' %}
+                      <span class="badge bg-primary">✅ Confirmed</span>
+                    {% elseif order.status == 'Preparing' %}
+                      <span class="badge" style="background:#8E24AA;color:#fff;">👨‍🍳 Preparing</span>
+                    {% elseif order.status == 'Ready' %}
+                      <span class="badge" style="background:#00ACC1;color:#fff;">🎉 Ready</span>
                     {% elseif order.status == 'Processing' %}
-                      <span class="badge bg-info">Processing</span>
+                      <span class="badge bg-info text-dark">🔄 Processing</span>
                     {% elseif order.status == 'Completed' %}
-                      <span class="badge bg-success">Completed</span>
+                      <span class="badge bg-success">✅ Completed</span>
+                    {% elseif order.status == 'Delivered' %}
+                      <span class="badge" style="background:#2E7D32;color:#fff;">📦 Delivered</span>
                     {% elseif order.status == 'Cancelled' %}
-                      <span class="badge bg-danger">Cancelled</span>
+                      <span class="badge bg-danger">❌ Cancelled</span>
                     {% else %}
-                      <span class="badge bg-secondary">Unknown</span>
+                      <span class="badge bg-secondary">{{ order.status }}</span>
                     {% endif %}
                   </td>
                   <td style="font-size:0.83rem; color:rgba(29,74,35,0.6);">
