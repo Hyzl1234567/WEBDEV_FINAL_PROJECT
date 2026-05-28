@@ -146,8 +146,16 @@ final class AuthController extends AbstractController
         // Generate JWT token
         $jwt = $jwtTokenManager->create($user);
 
-        // Look up customer by email
+        // Find or create a Customer record so the app's Pusher channel customer-{id} is always populated
         $customer = $customerRepository->findOneBy(['email' => $user->getEmail()]);
+        if (!$customer) {
+            $customer = new Customer();
+            $customer->setName($user->getFullName() ?? $user->getUsername());
+            $customer->setEmail($user->getEmail());
+            $customer->setCreatedBy($user);
+            $entityManager->persist($customer);
+            $entityManager->flush();
+        }
 
         return new JsonResponse([
             'token' => $jwt,

@@ -115,8 +115,17 @@ class AuthController extends AbstractController
             $this->em->flush();
 
             $jwt      = $this->jwtTokenManager->create($user);
-            $customer = $this->em->getRepository(Customer::class)
-                ->findOneBy(['email' => $email]);
+
+            // Find or create a Customer record so the app's Pusher channel customer-{id} is always populated
+            $customer = $this->em->getRepository(Customer::class)->findOneBy(['email' => $email]);
+            if (!$customer) {
+                $customer = new Customer();
+                $customer->setName($user->getFullName() ?? $user->getUsername());
+                $customer->setEmail($email);
+                $customer->setCreatedBy($user);
+                $this->em->persist($customer);
+                $this->em->flush();
+            }
 
             return new JsonResponse([
                 'token' => $jwt,
