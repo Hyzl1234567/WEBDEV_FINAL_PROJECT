@@ -497,7 +497,45 @@
 {% endblock %}
 
 {% block javascripts %}
+<style>
+.rt-toast {
+    position: fixed; top: 24px; right: 24px; z-index: 9999;
+    background: #1D4A23; color: #fff;
+    padding: 14px 20px; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+    box-shadow: 0 8px 32px rgba(29,74,35,0.28);
+    transform: translateY(-16px); opacity: 0;
+    transition: all 0.35s cubic-bezier(.4,0,.2,1);
+    max-width: 360px; border-left: 4px solid #99CC67;
+}
+.rt-toast--show { transform: translateY(0); opacity: 1; }
+</style>
 <script>
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'rt-toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.classList.add('rt-toast--show'), 10);
+    setTimeout(() => { t.classList.remove('rt-toast--show'); setTimeout(() => t.remove(), 400); }, 5000);
+}
+
+// Pusher real-time updates for orders page
+const pusher = new Pusher('c8a224ddf8b35a48d77a', { cluster: 'ap1' });
+const staffChannel = pusher.subscribe('staff-orders');
+
+staffChannel.bind('order.placed', function(data) {
+    const o = data.order;
+    showToast('🛎️ New order #' + o.id + ' from ' + (o.customer?.name || 'a customer') + ' — refreshing…');
+    setTimeout(() => location.reload(), 2000);
+});
+
+staffChannel.bind('order.status_updated', function(data) {
+    const o = data.order;
+    showToast('🔄 Order #' + o.id + ' → ' + o.status + ' — refreshing…');
+    setTimeout(() => location.reload(), 2000);
+});
+
 $(document).ready(function() {
     $('#ordersTable').DataTable({
         "order": [[0, "desc"]],
