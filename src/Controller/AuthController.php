@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Customer;
 use App\Entity\User;
+use App\Repository\CustomerRepository;
 use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -114,7 +117,9 @@ final class AuthController extends AbstractController
     public function login(
         Request $request,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        JWTTokenManagerInterface $jwtTokenManager,
+        CustomerRepository $customerRepository
     ): JsonResponse {
 
         $data = json_decode($request->getContent(), true);
@@ -138,9 +143,24 @@ final class AuthController extends AbstractController
             return new JsonResponse(['message' => 'Invalid password'], 401);
         }
 
+        // Generate JWT token
+        $jwt = $jwtTokenManager->create($user);
+
+        // Look up customer by email
+        $customer = $customerRepository->findOneBy(['email' => $user->getEmail()]);
+
         return new JsonResponse([
-            'message'  => 'Login successful',
-            'username' => $user->getUsername()
-        ]);
+            'token' => $jwt,
+            'user'  => [
+                'id'          => $user->getId(),
+                'email'       => $user->getEmail(),
+                'username'    => $user->getUsername(),
+                'fullName'    => $user->getFullName(),
+                'displayName' => $user->getDisplayName(),
+                'roles'       => $user->getRoles(),
+                'photo'       => $user->getProfilePictureUrl(),
+                'customer_id' => $customer?->getId(),
+            ],
+        ], JsonResponse::HTTP_OK);
     }
 }
