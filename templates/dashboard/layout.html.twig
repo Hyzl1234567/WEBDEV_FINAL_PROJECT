@@ -379,6 +379,12 @@ body {
                 </div>
 
                 <div class="search-logout">
+                    <!-- Notification bell -->
+                    <div id="ecb-notif-bell" title="Notifications">
+                        <span style="font-size:20px;">🔔</span>
+                        <span id="ecb-notif-badge"></span>
+                    </div>
+
                     <a href="{{ path('app_profile') }}" class="user-info" title="Go to My Profile">
                         <i class="fas fa-user-circle"></i>
                         <div class="user-details">
@@ -409,6 +415,107 @@ body {
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
+    <!-- ── Global notification styles ─────────────────────────────────────── -->
+    <style>
+    .ecb-toast {
+        position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+        background: #1D4A23; color: #fff;
+        padding: 13px 18px; border-radius: 12px;
+        font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+        box-shadow: 0 8px 28px rgba(29,74,35,0.25);
+        opacity: 0; transform: translateY(14px);
+        transition: opacity 0.3s, transform 0.3s;
+        max-width: 340px; border-left: 4px solid #99CC67;
+        pointer-events: none;
+    }
+    .ecb-toast.ecb-toast--show  { opacity: 1; transform: translateY(0); }
+    .ecb-toast.ecb-toast--new   { border-left-color: #66BB6A; background: #2E7D32; }
+    .ecb-toast.ecb-toast--update{ border-left-color: #42A5F5; background: #1565C0; }
+
+    #ecb-notif-bell { position: relative; cursor: pointer; padding: 6px; border-radius: 50%;
+                      transition: background 0.2s; }
+    #ecb-notif-bell:hover { background: rgba(29,74,35,0.10); }
+    #ecb-notif-badge {
+        display: none; position: absolute; top: -2px; right: -2px;
+        background: #E53935; color: #fff;
+        border-radius: 50%; width: 18px; height: 18px;
+        font-size: 10px; font-weight: 800;
+        align-items: center; justify-content: center;
+        border: 2px solid #F0F7EC;
+    }
+    </style>
+
+    <!-- ── Global notification scripts ────────────────────────────────────── -->
+    <script>
+    // ── Browser permission ───────────────────────────────────────────────────
+    if ('Notification' in window && Notification.permission === 'default') {
+        // Defer until first user interaction so browsers don't block the prompt
+        document.addEventListener('click', function ask() {
+            Notification.requestPermission();
+            document.removeEventListener('click', ask);
+        }, { once: true });
+    }
+
+    function _showBrowserNotif(title, body, href) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        const n = new Notification(title, { body, icon: '/favicon.ico', tag: href });
+        n.onclick = function () { window.focus(); if (href) window.location = href; n.close(); };
+        setTimeout(() => n.close(), 6000);
+    }
+
+    // ── In-page toast ────────────────────────────────────────────────────────
+    window.ecbToast = function (msg, type) {
+        const t = document.createElement('div');
+        t.className = 'ecb-toast' + (type ? ' ecb-toast--' + type : '');
+        t.innerHTML = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.classList.add('ecb-toast--show'), 10);
+        setTimeout(() => { t.classList.remove('ecb-toast--show'); setTimeout(() => t.remove(), 350); }, 5500);
+    };
+
+    // ── Notification bell counter ────────────────────────────────────────────
+    let _ecbCount = 0;
+    function _bumpBell() {
+        _ecbCount++;
+        const badge = document.getElementById('ecb-notif-badge');
+        if (badge) { badge.textContent = _ecbCount > 9 ? '9+' : _ecbCount; badge.style.display = 'flex'; }
+    }
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#ecb-notif-bell')) {
+            _ecbCount = 0;
+            const badge = document.getElementById('ecb-notif-badge');
+            if (badge) badge.style.display = 'none';
+        }
+    });
+
+    // ── Global Pusher connection ─────────────────────────────────────────────
+    Pusher.logToConsole = false;
+    window.ecbPusher    = new Pusher('c8a224ddf8b35a48d77a', { cluster: 'ap1' });
+    const _staffCh      = window.ecbPusher.subscribe('staff-orders');
+
+    _staffCh.bind('order.placed', function (data) {
+        const o        = data.order;
+        const product  = o?.product?.name  ?? 'a product';
+        const customer = o?.customer?.name ?? 'A customer';
+        const title    = '🛎 New Order!';
+        const body     = customer + ' ordered ' + product;
+        _showBrowserNotif(title, body, '/order');
+        window.ecbToast('<strong>' + title + '</strong><br>' + body, 'new');
+        _bumpBell();
+    });
+
+    _staffCh.bind('order.status_updated', function (data) {
+        const o       = data.order;
+        const product = o?.product?.name ?? ('Order #' + o?.id);
+        const title   = '🔄 Order Updated';
+        const body    = product + ' is now: ' + o?.status;
+        _showBrowserNotif(title, body, '/order');
+        window.ecbToast('<strong>' + title + '</strong><br>' + body, 'update');
+        _bumpBell();
+    });
+    </script>
+
     {% block javascripts %}{% endblock %}
 </body>
 </html>
