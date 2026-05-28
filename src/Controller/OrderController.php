@@ -6,6 +6,8 @@ use App\Entity\Order;
 use App\Form\Order1Type;
 use App\Repository\OrderRepository;
 use App\Service\ActivityLogger;
+use App\Service\NotificationService;
+use App\Service\PusherService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,12 +19,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_USER')]
 final class OrderController extends AbstractController
 {
-    private ActivityLogger $activityLogger;
-
-    public function __construct(ActivityLogger $activityLogger)
-    {
-        $this->activityLogger = $activityLogger;
-    }
+    public function __construct(
+        private readonly ActivityLogger      $activityLogger,
+        private readonly PusherService       $pusher,
+        private readonly NotificationService $notifications,
+    ) {}
 
     #[Route(name: 'app_order_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository): Response
@@ -96,7 +97,6 @@ final class OrderController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Snapshot captured BEFORE flush to record old values
             $snapshot = [
                 'customer'    => $order->getCustomer()?->getName(),
                 'product'     => $order->getProduct()?->getName(),
@@ -117,6 +117,53 @@ final class OrderController extends AbstractController
                 ),
                 $snapshot
             );
+
+            // Notify the customer app via Pusher (real-time) and FCM (push notification)
+            $formattedOrder = [
+                'id'          => $order->getId(),
+                'status'      => $order->getStatus(),
+                'quantity'    => $order->getQuantity(),
+                'total_price' => $order->getTotalPrice(),
+                'created_at'  => $order->getCreatedAt()?->format('Y-m-d H:i:s'),
+                'product'     => $order->getProduct() ? [
+                    'id'       => $order->getProduct()->getId(),
+                    'name'     => $order->getProduct()->getName(),
+                    'price'    => $order->getProduct()->getPrice(),
+                    'image'    => null,
+                    'quantity' => $order->getProduct()->getQuantity(),
+                ] : null,
+                'customer'    => [
+                    'id'      => $order->getCustomer()?->getId(),
+                    'name'    => $order->getCustomer()?->getName(),
+                    'email'   => $order->getCustomer()?->getEmail(),
+                    'phone'   => $order->getCustomer()?->getPhone(),
+                    'address' => $order->getCustomer()?->getAddress(),
+                ],
+            ];
+
+            try {
+                $this->pusher->orderStatusUpdated($formattedOrder);
+            } catch (\Throwable $e) {
+                // Non-fatal — log but don't break the web response
+            }
+
+            try {
+                $orderUser = $order->getCreatedBy();
+                if ($orderUser) {
+                    $this->notifications->sendToUser(
+                        $orderUser,
+                        'Order Status Updated',
+                        sprintf('Your order #%d is now: %s', $order->getId(), $order->getStatus()),
+                        [
+                            'type'    => 'order_status',
+                            'orderId' => (string) $order->getId(),
+                            'status'  => $order->getStatus(),
+                        ]
+                    );
+                }
+            } catch (\Throwable $e) {
+                // Non-fatal
+            }
 
             $this->addFlash('success', 'Order updated successfully!');
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
