@@ -7,6 +7,7 @@ use App\Entity\Order;
 use App\Form\CustomerType;
 use App\Repository\CustomerRepository;
 use App\Service\ActivityLogger;
+use App\Service\NotificationService;
 use App\Service\PusherService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,11 +22,13 @@ final class CustomerController extends AbstractController
 {
     private ActivityLogger $activityLogger;
     private PusherService $pusher;
+    private NotificationService $notifications;
 
-    public function __construct(ActivityLogger $activityLogger, PusherService $pusher)
+    public function __construct(ActivityLogger $activityLogger, PusherService $pusher, NotificationService $notifications)
     {
         $this->activityLogger = $activityLogger;
         $this->pusher = $pusher;
+        $this->notifications = $notifications;
     }
 
     #[Route(name: 'app_customer_index', methods: ['GET'])]
@@ -207,6 +210,21 @@ final class CustomerController extends AbstractController
                             'email' => $order->getCustomer()?->getEmail(),
                         ],
                     ]);
+
+                    // 🆕 Send FCM notification to customer
+                    try {
+                        $orderUser = $order->getCreatedBy();
+                        if ($orderUser) {
+                            $this->notifications->sendToUser(
+                                $orderUser,
+                                'Order Status Updated',
+                                "Your order #{$order->getId()} is now: {$newStatus}",
+                                ['type' => 'order_status', 'orderId' => (string) $order->getId(), 'status' => $newStatus]
+                            );
+                        }
+                    } catch (\Exception $e) {
+                        // Log but don't fail the request
+                    }
 
                     $this->activityLogger->logUpdate(
                         $this->getUser(),
