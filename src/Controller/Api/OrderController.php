@@ -10,6 +10,7 @@ use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StockRepository;
+use App\Service\ActivityLogger;
 use App\Service\NotificationService;
 use App\Service\PusherService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +33,7 @@ class OrderController extends AbstractController
         private readonly LoggerInterface        $logger,
         private readonly PusherService          $pusher,
         private readonly NotificationService    $notifications,
+        private readonly ActivityLogger         $activityLogger,
     ) {}
 
     // =========================================================================
@@ -213,6 +215,17 @@ class OrderController extends AbstractController
 
             $this->entityManager->flush();
 
+            // Log the order to the activity log
+            /** @var \App\Entity\User $user */
+            $this->activityLogger->logOrderPlaced(
+                $user,
+                $order->getId(),
+                $customer->getName() ?? 'Unknown Customer',
+                $product->getName() ?? 'Unknown Product',
+                $quantity,
+                (float) ($product->getPrice() * $quantity)
+            );
+
             $formattedOrder = $this->formatOrder($order);
 
             try {
@@ -368,6 +381,23 @@ class OrderController extends AbstractController
             }
 
             $this->entityManager->flush();
+
+            // Log the cancellation
+            /** @var \App\Entity\User $cancelUser */
+            $cancelUser = $this->getUser();
+            $this->activityLogger->log(
+                $cancelUser,
+                'ORDER_CANCELLED',
+                'Order',
+                $id,
+                sprintf(
+                    'Customer "%s" cancelled Order #%d — Product: "%s" ×%d.',
+                    $order->getCustomer()?->getName() ?? 'Unknown',
+                    $id,
+                    $order->getProduct()?->getName() ?? 'Unknown',
+                    $quantity
+                )
+            );
 
             $formattedOrder = $this->formatOrder($order);
 
