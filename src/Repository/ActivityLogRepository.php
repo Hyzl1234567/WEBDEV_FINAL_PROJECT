@@ -165,6 +165,24 @@ class ActivityLogRepository extends ServiceEntityRepository
     }
 
     /**
+     * Returns the most recent LOGIN entry for a user within the last $seconds seconds, or null.
+     */
+    public function findRecentLoginForUser(User $user, int $seconds = 30): ?ActivityLog
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.user = :user')
+            ->andWhere('a.action = :action')
+            ->andWhere('a.createdAt > :since')
+            ->setParameter('user', $user)
+            ->setParameter('action', 'LOGIN')
+            ->setParameter('since', new \DateTimeImmutable('-' . $seconds . ' seconds'))
+            ->orderBy('a.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
      * Count logs by user
      */
     public function countByUser(User $user): int
