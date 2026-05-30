@@ -337,6 +337,23 @@
     letter-spacing: 0.05em;
     border: 1px solid var(--limelight);
 }
+.role-chip-admin    { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+.role-chip-staff    { background: #cfe2ff; color: #084298; border-color: #b6d4fe; }
+.role-chip-customer { background: #fff3cd; color: #856404; border-color: #ffecb5; }
+.role-chip-user     { background: #e2e3e5; color: #383d41; border-color: #d6d8db; }
+
+.live-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #28a745;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse-dot 1.5s infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+}
 
 .activity-badge {
     display: inline-flex;
@@ -484,7 +501,7 @@
         <div class="section-header">
             <div class="section-header-left">
                 <div class="section-header-icon">📋</div>
-                <h2>Recent Activity</h2>
+                <h2>Recent Activity <span class="live-dot" title="Live updates every 5s"></span></h2>
             </div>
             <a href="{{ path('app_activity_log_index') }}" class="view-all-btn">
                 View All Logs →
@@ -503,9 +520,9 @@
                     <th>Time</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="activity-tbody">
             {% for log in recentActivities %}
-                <tr>
+                <tr data-id="{{ log.id }}">
                     <td class="user-cell">
                         {% if log.username %}
                             <strong>{{ log.username }}</strong>
@@ -519,7 +536,7 @@
                     </td>
                     <td>
                         {% if log.role %}
-                            <span class="role-chip">{{ log.role|replace({'ROLE_': ''}) }}</span>
+                            <span class="role-chip role-chip-{{ log.role|replace({'ROLE_': ''})|lower }}">{{ log.role|replace({'ROLE_': ''}) }}</span>
                         {% else %}—{% endif %}
                     </td>
                     <td>
@@ -550,4 +567,83 @@
 
 </div>
 </div>
+
+<script>
+(function () {
+    const POLL_URL = '{{ path('app_dashboard_recent_activities') }}';
+    let latestId = null;
+
+    function esc(str) {
+        if (!str) return '';
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
+
+    function roleChipClass(role) {
+        if (!role) return 'role-chip';
+        const label = role.replace('ROLE_', '').toLowerCase();
+        return 'role-chip role-chip-' + label;
+    }
+
+    function buildRow(log) {
+        const userCell = log.username
+            ? `<strong>${esc(log.username)}</strong>${log.userId ? `<br><small>#${log.userId}</small>` : ''}`
+            : `<span style="color:#ccc;">System</span>`;
+
+        const roleCell = log.role
+            ? `<span class="${esc(roleChipClass(log.role))}">${esc(log.role.replace('ROLE_', ''))}</span>`
+            : '—';
+
+        const actionBadge = `<span class="activity-badge badge-${esc((log.action || '').toLowerCase())}">${esc(log.action)}</span>`;
+
+        const desc = log.description || '';
+        const targetCell = desc
+            ? `<span class="target-cell" title="${esc(desc)}">${esc(desc.substring(0, 35))}${desc.length > 35 ? '…' : ''}</span>`
+            : '—';
+
+        return `<tr>
+            <td class="user-cell">${userCell}</td>
+            <td>${roleCell}</td>
+            <td>${actionBadge}</td>
+            <td>${targetCell}</td>
+            <td class="description-cell" title="${esc(desc)}">${esc(desc.substring(0, 40))}${desc.length > 40 ? '…' : ''}</td>
+            <td class="timestamp-cell">${esc(log.createdAt)}</td>
+        </tr>`;
+    }
+
+    function poll() {
+        fetch(POLL_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.length) return;
+
+                const newestId = data[0].id;
+
+                if (latestId === null) {
+                    latestId = newestId;
+                    return;
+                }
+
+                if (newestId === latestId) return;
+
+                latestId = newestId;
+
+                const tbody = document.getElementById('activity-tbody');
+                if (!tbody) return;
+
+                tbody.innerHTML = data.map(buildRow).join('');
+            })
+            .catch(() => {});
+    }
+
+    // Seed the initial ID from the server-rendered page
+    const firstRow = document.querySelector('#activity-tbody tr');
+    if (firstRow) {
+        latestId = parseInt(firstRow.dataset.id) || null;
+    }
+
+    setInterval(poll, 5000);
+})();
+</script>
 {% endblock %}

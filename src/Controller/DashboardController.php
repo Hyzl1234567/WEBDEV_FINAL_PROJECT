@@ -6,6 +6,7 @@ use App\Repository\ActivityLogRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -75,6 +76,15 @@ class DashboardController extends AbstractController
             ['name' => 'Combo',    'image' => 'combo.png',    'description' => 'Perfect drink and snack combos.'],
         ];
 
+        // Count total orders
+        $totalOrders = 0;
+        try {
+            $result = $entityManager->getConnection()->executeQuery('SELECT COUNT(*) FROM `order`');
+            $totalOrders = (int) $result->fetchOne();
+        } catch (\Exception $e) {
+            $totalOrders = 0;
+        }
+
         return $this->render('dashboard/index.html.twig', [
             'categories'       => $categories,
             'totalUsers'       => $totalUsers,
@@ -84,7 +94,28 @@ class DashboardController extends AbstractController
             'totalProducts'    => $totalProducts,
             'totalCategories'  => $totalCategories,
             'totalStocks'      => $totalStocks,
+            'totalOrders'      => $totalOrders,
             'recentActivities' => $recentActivities,
         ]);
+    }
+
+    #[Route('/dashboard/recent-activities', name: 'app_dashboard_recent_activities', methods: ['GET'])]
+    public function recentActivitiesJson(ActivityLogRepository $activityLogRepository): JsonResponse
+    {
+        $activities = $activityLogRepository->findRecentActivities(10);
+
+        $data = array_map(function ($log) {
+            return [
+                'id'          => $log->getId(),
+                'username'    => $log->getUsername() ?? $log->getUser()?->getUsername(),
+                'userId'      => $log->getUser()?->getId(),
+                'role'        => $log->getRole(),
+                'action'      => $log->getAction(),
+                'description' => $log->getDescription(),
+                'createdAt'   => $log->getCreatedAt()?->format('M d, H:i'),
+            ];
+        }, $activities);
+
+        return $this->json($data);
     }
 }

@@ -228,16 +228,18 @@ class ActivityLogger
     private function getUserRole(User $user): string
     {
         $roles = $user->getRoles();
-        if (in_array('ROLE_ADMIN', $roles)) return 'ROLE_ADMIN';
-        if (in_array('ROLE_STAFF', $roles)) return 'ROLE_STAFF';
+        if (in_array('ROLE_ADMIN',    $roles)) return 'ROLE_ADMIN';
+        if (in_array('ROLE_STAFF',    $roles)) return 'ROLE_STAFF';
+        if (in_array('ROLE_CUSTOMER', $roles)) return 'ROLE_CUSTOMER';
         return 'ROLE_USER';
     }
 
     private function getUserRoleLabel(User $user): string
     {
         $roles = $user->getRoles();
-        if (in_array('ROLE_ADMIN', $roles)) return 'Admin';
-        if (in_array('ROLE_STAFF', $roles)) return 'Staff';
+        if (in_array('ROLE_ADMIN',    $roles)) return 'Admin';
+        if (in_array('ROLE_STAFF',    $roles)) return 'Staff';
+        if (in_array('ROLE_CUSTOMER', $roles)) return 'Customer';
         return 'User';
     }
 }
