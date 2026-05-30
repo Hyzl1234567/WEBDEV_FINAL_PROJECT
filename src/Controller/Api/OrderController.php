@@ -217,17 +217,39 @@ class OrderController extends AbstractController
 
             // Log the order to the activity log (non-fatal)
             try {
-                /** @var \App\Entity\User $user */
-                $this->activityLogger->logOrderPlaced(
-                    $user,
-                    $order->getId(),
-                    $customer->getName() ?? 'Unknown Customer',
-                    $product->getName() ?? 'Unknown Product',
-                    $quantity,
-                    (float) ($product->getPrice() * $quantity)
-                );
+                $appUser = $this->getUser();
+                if ($appUser instanceof \App\Entity\User) {
+                    $this->activityLogger->logOrderPlaced(
+                        $appUser,
+                        (int) $order->getId(),
+                        $customer->getName() ?? 'Unknown Customer',
+                        $product->getName() ?? 'Unknown Product',
+                        $quantity,
+                        (float) ($product->getPrice() * $quantity)
+                    );
+                } else {
+                    // Fallback: log without User entity (e.g. JWT proxy edge case)
+                    $this->activityLogger->log(
+                        null,
+                        'ORDER_PLACED',
+                        'Order',
+                        (int) $order->getId(),
+                        sprintf(
+                            'Customer "%s" placed Order #%d — Product: "%s" ×%d (Total: ₱%.2f).',
+                            $customer->getName() ?? 'Unknown',
+                            (int) $order->getId(),
+                            $product->getName() ?? 'Unknown',
+                            $quantity,
+                            (float) ($product->getPrice() * $quantity)
+                        )
+                    );
+                }
             } catch (\Throwable $e) {
-                $this->logger->warning('Activity log failed for order', ['error' => $e->getMessage()]);
+                $this->logger->error('Activity log failed for order', [
+                    'error'    => $e->getMessage(),
+                    'order_id' => $order->getId(),
+                    'user_type' => get_class($this->getUser() ?? new \stdClass()),
+                ]);
             }
 
             $formattedOrder = $this->formatOrder($order);
@@ -388,10 +410,10 @@ class OrderController extends AbstractController
 
             // Log the cancellation (non-fatal)
             try {
-                /** @var \App\Entity\User $cancelUser */
                 $cancelUser = $this->getUser();
+                $logUser = ($cancelUser instanceof \App\Entity\User) ? $cancelUser : null;
                 $this->activityLogger->log(
-                    $cancelUser,
+                    $logUser,
                     'ORDER_CANCELLED',
                     'Order',
                     $id,
@@ -404,7 +426,7 @@ class OrderController extends AbstractController
                     )
                 );
             } catch (\Throwable $e) {
-                $this->logger->warning('Activity log failed for cancellation', ['error' => $e->getMessage()]);
+                $this->logger->error('Activity log failed for cancellation', ['error' => $e->getMessage()]);
             }
 
             $formattedOrder = $this->formatOrder($order);
