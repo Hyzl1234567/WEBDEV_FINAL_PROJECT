@@ -111,6 +111,8 @@ class DashboardController extends AbstractController
                 'userId'      => $log->getUser()?->getId(),
                 'role'        => $log->getRole(),
                 'action'      => $log->getAction(),
+                'entity'      => $log->getEntity(),
+                'entityId'    => $log->getEntityId(),
                 'description' => $log->getDescription(),
                 'createdAt'   => $log->getCreatedAt()?->format('M d, H:i'),
             ];
