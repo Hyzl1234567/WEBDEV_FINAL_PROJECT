@@ -50,11 +50,13 @@ class DashboardController extends AbstractController
             $totalCategories = 0;
         }
 
-        // Count stocks
+        // Sum total stock quantity (main entries only, excluding history)
         $totalStocks = 0;
         try {
-            $result = $entityManager->getConnection()->executeQuery('SELECT COUNT(*) as count FROM stock');
-            $totalStocks = $result->fetchOne();
+            $result = $entityManager->getConnection()->executeQuery(
+                'SELECT COALESCE(SUM(quantity), 0) FROM stock WHERE is_history_entry = 0'
+            );
+            $totalStocks = (int) $result->fetchOne();
         } catch (\Exception $e) {
             $totalStocks = 0;
         }

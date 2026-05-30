@@ -118,6 +118,26 @@ class ActivityLogger
         );
     }
 
+    public function logOrderPlaced(User $user, int $orderId, string $customerName, string $productName, int $quantity, float $totalPrice): void
+    {
+        $this->log(
+            $user,
+            'ORDER_PLACED',
+            'Order',
+            $orderId,
+            sprintf(
+                '%s "%s" placed Order #%d — Customer: "%s", Product: "%s" ×%d (Total: ₱%.2f).',
+                $this->getUserRoleLabel($user),
+                $user->getUsername(),
+                $orderId,
+                $customerName,
+                $productName,
+                $quantity,
+                $totalPrice
+            )
+        );
+    }
+
     public function logDelete(User $user, string $entity, int $entityId, string $entityName, array $snapshot = []): void
     {
         $this->log(

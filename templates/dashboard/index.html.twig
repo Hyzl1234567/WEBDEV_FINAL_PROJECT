@@ -349,11 +349,12 @@
     letter-spacing: 0.06em;
 }
 
-.badge-create { background: #d4edda; color: #155724; }
-.badge-update { background: #fff3cd; color: #856404; }
-.badge-delete { background: #f8d7da; color: #721c24; }
-.badge-login  { background: #cfe2ff; color: #084298; }
-.badge-logout { background: #e2e3e5; color: #383d41; }
+.badge-create        { background: #d4edda; color: #155724; }
+.badge-update        { background: #fff3cd; color: #856404; }
+.badge-delete        { background: #f8d7da; color: #721c24; }
+.badge-login         { background: #cfe2ff; color: #084298; }
+.badge-logout        { background: #e2e3e5; color: #383d41; }
+.badge-order_placed  { background: #e8f4fd; color: #0c5460; }
 
 .target-cell {
     font-size: 0.76rem;
@@ -521,7 +522,7 @@
                         {% else %}—{% endif %}
                     </td>
                     <td>
-                        <span class="activity-badge badge-{{ log.action }}">{{ log.action }}</span>
+                        <span class="activity-badge badge-{{ log.action|lower }}">{{ log.action }}</span>
                     </td>
                     <td>
                         {% if log.description %}

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Form\Order1Type;
 use App\Repository\OrderRepository;
+use App\Repository\StockRepository;
 use App\Service\ActivityLogger;
 use App\Service\NotificationService;
 use App\Service\PusherService;
@@ -34,7 +35,7 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, StockRepository $stockRepository): Response
     {
         $order = new Order();
         $form = $this->createForm(Order1Type::class, $order);
@@ -42,29 +43,28 @@ final class OrderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $order->setCreatedBy($this->getUser());
-
             $entityManager->persist($order);
+
+            // Deduct ordered quantity from the product's main stock
+            $product = $order->getProduct();
+            if ($product) {
+                $stock = $stockRepository->findMainStockByProduct($product->getId());
+                if ($stock && $stock->getQuantity() >= $order->getQuantity()) {
+                    $newQty = $stock->getQuantity() - $order->getQuantity();
+                    $stock->setQuantity($newQty);
+                    $product->setQuantity($newQty);
+                }
+            }
+
             $entityManager->flush();
 
-            $snapshot = [
-                'customer'    => $order->getCustomer()?->getName(),
-                'product'     => $order->getProduct()?->getName(),
-                'quantity'    => $order->getQuantity(),
-                'total_price' => $order->getTotalPrice(),
-                'created_by'  => $order->getCreatedBy()?->getUsername(),
-            ];
-
-            $this->activityLogger->logCreate(
+            $this->activityLogger->logOrderPlaced(
                 $this->getUser(),
-                'Order',
                 $order->getId(),
-                sprintf('Order #%d - Customer: %s, Product: %s (ID: %d)',
-                    $order->getId(),
-                    $order->getCustomer()?->getName() ?? 'Deleted Customer',
-                    $order->getProduct()?->getName() ?? 'Deleted Product',
-                    $order->getId()
-                ),
-                $snapshot
+                $order->getCustomer()?->getName() ?? 'Unknown Customer',
+                $order->getProduct()?->getName() ?? 'Unknown Product',
+                $order->getQuantity(),
+                $order->getTotalPrice()
             );
 
             $this->addFlash('success', 'Order created successfully!');
