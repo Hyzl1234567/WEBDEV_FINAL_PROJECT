@@ -31,6 +31,11 @@ class ActivityLogger
         ?int    $entityId    = null,
         ?string $description = null
     ): void {
+        // Skip logging for plain ROLE_USER accounts (no admin/staff/customer role)
+        if ($user && $this->getUserRole($user) === 'ROLE_USER') {
+            return;
+        }
+
         $log = new ActivityLog();
         $log->setUser($user);
         $log->setAction($action);
