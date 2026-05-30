@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\ActivityLog;
 use App\Entity\User;
+use App\Repository\ActivityLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -11,11 +12,16 @@ class ActivityLogger
 {
     private EntityManagerInterface $entityManager;
     private RequestStack $requestStack;
+    private ActivityLogRepository $activityLogRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
-    {
-        $this->entityManager = $entityManager;
-        $this->requestStack  = $requestStack;
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        RequestStack           $requestStack,
+        ActivityLogRepository  $activityLogRepository
+    ) {
+        $this->entityManager         = $entityManager;
+        $this->requestStack          = $requestStack;
+        $this->activityLogRepository = $activityLogRepository;
     }
 
     public function log(
@@ -53,6 +59,11 @@ class ActivityLogger
 
     public function logLogin(User $user): void
     {
+        // Deduplicate: skip if this user already has a LOGIN within the last 5 minutes
+        if ($this->activityLogRepository->findRecentLoginForUser($user, 300)) {
+            return;
+        }
+
         $this->log(
             $user,
             'LOGIN',
