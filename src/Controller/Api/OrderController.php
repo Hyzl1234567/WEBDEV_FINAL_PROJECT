@@ -215,16 +215,20 @@ class OrderController extends AbstractController
 
             $this->entityManager->flush();
 
-            // Log the order to the activity log
-            /** @var \App\Entity\User $user */
-            $this->activityLogger->logOrderPlaced(
-                $user,
-                $order->getId(),
-                $customer->getName() ?? 'Unknown Customer',
-                $product->getName() ?? 'Unknown Product',
-                $quantity,
-                (float) ($product->getPrice() * $quantity)
-            );
+            // Log the order to the activity log (non-fatal)
+            try {
+                /** @var \App\Entity\User $user */
+                $this->activityLogger->logOrderPlaced(
+                    $user,
+                    $order->getId(),
+                    $customer->getName() ?? 'Unknown Customer',
+                    $product->getName() ?? 'Unknown Product',
+                    $quantity,
+                    (float) ($product->getPrice() * $quantity)
+                );
+            } catch (\Throwable $e) {
+                $this->logger->warning('Activity log failed for order', ['error' => $e->getMessage()]);
+            }
 
             $formattedOrder = $this->formatOrder($order);
 
@@ -382,22 +386,26 @@ class OrderController extends AbstractController
 
             $this->entityManager->flush();
 
-            // Log the cancellation
-            /** @var \App\Entity\User $cancelUser */
-            $cancelUser = $this->getUser();
-            $this->activityLogger->log(
-                $cancelUser,
-                'ORDER_CANCELLED',
-                'Order',
-                $id,
-                sprintf(
-                    'Customer "%s" cancelled Order #%d — Product: "%s" ×%d.',
-                    $order->getCustomer()?->getName() ?? 'Unknown',
+            // Log the cancellation (non-fatal)
+            try {
+                /** @var \App\Entity\User $cancelUser */
+                $cancelUser = $this->getUser();
+                $this->activityLogger->log(
+                    $cancelUser,
+                    'ORDER_CANCELLED',
+                    'Order',
                     $id,
-                    $order->getProduct()?->getName() ?? 'Unknown',
-                    $quantity
-                )
-            );
+                    sprintf(
+                        'Customer "%s" cancelled Order #%d — Product: "%s" ×%d.',
+                        $order->getCustomer()?->getName() ?? 'Unknown',
+                        $id,
+                        $order->getProduct()?->getName() ?? 'Unknown',
+                        $quantity
+                    )
+                );
+            } catch (\Throwable $e) {
+                $this->logger->warning('Activity log failed for cancellation', ['error' => $e->getMessage()]);
+            }
 
             $formattedOrder = $this->formatOrder($order);
 
