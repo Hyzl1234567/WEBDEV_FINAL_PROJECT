@@ -73,7 +73,12 @@ class ActivityLogger
 
     public function logLogin(User $user): void
     {
-        // Deduplicate: skip if this user already has a LOGIN within the last 5 minutes
+        // Only record logins for admin and staff — not customers or plain users
+        if (!in_array($this->getUserRole($user), ['ROLE_ADMIN', 'ROLE_STAFF'])) {
+            return;
+        }
+
+        // Deduplicate: skip if already logged within the last 5 minutes
         if ($this->activityLogRepository->findRecentLoginForUser($user, 300)) {
             return;
         }
@@ -93,6 +98,11 @@ class ActivityLogger
 
     public function logLogout(User $user): void
     {
+        // Only record logouts for admin and staff
+        if (!in_array($this->getUserRole($user), ['ROLE_ADMIN', 'ROLE_STAFF'])) {
+            return;
+        }
+
         $this->log(
             $user,
             'LOGOUT',
